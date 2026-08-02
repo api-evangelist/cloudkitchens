@@ -1,0 +1,62 @@
+generated: '2026-08-01'
+method: searched
+source: https://developer-guides.cloudkitchens.com/api-reference/
+versioning:
+  scheme: uri-path
+  current: v1
+  per_api: true
+  docs: https://developer-guides.cloudkitchens.com/api-reference/
+  policy_text: >-
+    Each API is versioned individually. Non-breaking changes (e.g. adding new fields) are added to
+    the current version without previous communication. Breaking changes (field removal, semantic
+    change, schema update) have the version incremented.
+deprecation:
+  policy_url: https://developer-guides.cloudkitchens.com/api-reference/
+  policy_text: >-
+    Users are notified about new versions and given time to migrate, with the window set on a case by
+    case basis. Once users migrate to the new version, old versions are deprecated. Once a new
+    version exists for an API, new integrations targeting old versions are not accepted.
+  sunset_header: false
+  deprecation_header: false
+  rfc8594: false
+  notification_channel: >-
+    Direct notification to integration partners via their Account Representative; no public
+    deprecation feed or changelog is published.
+sla:
+  url: null
+  uptime_target: null
+  note: No public SLA or uptime commitment is published on the developer surface.
+status_page: null
+status_page_note: >-
+  No status page was found. status.cloudkitchens.com does not resolve, and no status link appears on
+  the developer portal, the developer guides, or the API reference.
+changelog: null
+changelog_note: >-
+  No dated public changelog was found on developer.cloudkitchens.com or
+  developer-guides.cloudkitchens.com. Version changes are communicated to partners directly.
+deprecated_operations: []
+deprecated_operations_note: >-
+  No operation in openapi/cloudkitchens-public-api-openapi.yml carries deprecated: true.
+onboarding_lifecycle:
+  - stage: onboard application
+    docs: https://developer-guides.cloudkitchens.com/docs/onboard-application/
+    description: >-
+      One-time manual registration by a CloudKitchens Account Representative. The application
+      receives an Application ID (formerly Partner ID) and Client Secret for each environment
+      (production and staging).
+  - stage: onboard webhook
+    docs: https://developer-guides.cloudkitchens.com/docs/onboard-webhook/
+    description: Webhook endpoints, secrets, and authorization type are registered by the Account Representative.
+  - stage: onboard store
+    docs: https://developer-guides.cloudkitchens.com/docs/onboard-store/
+    description: Stores are paired to the application so X-Store-Id resolves to a CloudKitchens store.
+x-evidence:
+  fetched: '2026-08-01'
+  urls:
+    - url: https://developer-guides.cloudkitchens.com/api-reference/
+      http_status: 200
+    - url: https://developer-guides.cloudkitchens.com/docs/
+      http_status: 200
+    - url: https://status.cloudkitchens.com/
+      http_status: null
+      note: hostname does not resolve

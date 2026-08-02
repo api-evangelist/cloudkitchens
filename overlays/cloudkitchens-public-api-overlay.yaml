@@ -1,0 +1,60 @@
+overlay: 1.0.0
+info:
+  title: API Evangelist enhancements for the CloudKitchens Public API
+  version: 1.0.0
+extends: openapi/cloudkitchens-public-api-openapi.yml
+x-generated: '2026-08-01'
+x-method: generated
+x-source: >-
+  API Evangelist enrichment pipeline. Captures our annotations over the spec harvested verbatim from
+  https://developer-guides.cloudkitchens.com/api-reference/ — the original is never mutated.
+actions:
+  - target: $.info
+    update:
+      x-apievangelist-provider: cloudkitchens
+      x-apievangelist-source: https://developer-guides.cloudkitchens.com/api-reference/
+      x-apievangelist-harvested: '2026-08-01'
+      x-apievangelist-artifacts:
+        authentication: authentication/cloudkitchens-authentication.yml
+        scopes: scopes/cloudkitchens-scopes.yml
+        conventions: conventions/cloudkitchens-conventions.yml
+        errors: errors/cloudkitchens-problem-types.yml
+        lifecycle: lifecycle/cloudkitchens-lifecycle.yml
+        rate_limits: rate-limits/cloudkitchens-rate-limits.yml
+        webhooks: asyncapi/cloudkitchens-webhooks.yml
+        data_model: data-model/cloudkitchens-data-model.yml
+        conformance: conformance/cloudkitchens-conformance.yml
+        sandbox: sandbox/cloudkitchens-sandbox.yml
+        skills: skills/_index.yml
+  - target: $.servers
+    update:
+      - url: https://api.cloudkitchens.com
+        description: >-
+          Production API host. The spec ships a templated {{public-api-url}} server because the base
+          URL is provisioned per integration partner during onboarding; api.cloudkitchens.com is the
+          host CloudKitchens' own developer-portal build names as the production counterpart of
+          api-staging.cloudkitchens.com, and it serves a CloudKitchens-owned wildcard certificate.
+  - target: $.info
+    update:
+      x-apievangelist-gaps:
+        idempotency: >-
+          No Idempotency-Key header or idempotency parameter is declared across the 80 operations.
+        problem_details: >-
+          No application/problem+json responses; errors are plain status codes plus a message.
+        rate_limit_headers: >-
+          Rate limits are enforced and documented, but no RateLimit/Retry-After response headers are
+          declared in the spec.
+        sunset_headers: >-
+          A deprecation policy is published in prose, but RFC 8594 Sunset/Deprecation headers are not
+          declared or documented.
+        asyncapi: >-
+          27 webhook events are documented via the x-webhooks extension, but no AsyncAPI document is
+          published.
+  - target: $.info
+    update:
+      x-apievangelist-scored-surface:
+        operations: 80
+        webhook_events: 27
+        schemas: 320
+        oauth2_scopes: 29
+        tag_groups: 2

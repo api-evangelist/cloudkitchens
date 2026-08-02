@@ -1,0 +1,71 @@
+generated: '2026-08-01'
+method: derived
+source: openapi/cloudkitchens-public-api-openapi.yml
+docs: https://developer-guides.cloudkitchens.com/api-reference/
+summary: >-
+  Cross-cutting standards conformance for the CloudKitchens Public API, derived from the published
+  OpenAPI, the live OpenID Connect discovery document at iam.cloudkitchens.com, and the developer
+  guides. No compliance certifications (SOC 2, ISO 27001, PCI DSS, HIPAA, FedRAMP) are published on
+  any CloudKitchens developer or trust surface, so no Compliance pointer is wired.
+standards:
+  - id: openapi-3.0
+    conforms: true
+    evidence: openapi 3.0.1 document published at developer-guides.cloudkitchens.com/api-reference/
+  - id: oauth2
+    conforms: true
+    evidence: >-
+      components.securitySchemes.OAuth2.0 declares clientCredentials (27 scopes) and authorizationCode
+      (2 scopes) flows; RFC 6749 is cited directly in the scheme description.
+  - id: oauth2-client-credentials
+    conforms: true
+    evidence: tokenUrl /v1/auth/token, client credentials accepted in request body or HTTP Basic Auth
+  - id: oauth2-authorization-code
+    conforms: true
+    evidence: authorizationUrl /v1/auth/oauth2/authorize with redirect_uri, response_type=code, state
+  - id: oidc-discovery
+    conforms: true
+    evidence: >-
+      https://iam.cloudkitchens.com/.well-known/openid-configuration returns 200 with issuer,
+      authorization_endpoint, token_endpoint, userinfo_endpoint, jwks_uri and RS256 id_token signing.
+  - id: rfc8414-oauth-authorization-server-metadata
+    conforms: false
+    evidence: /.well-known/oauth-authorization-server returns 404 on iam.cloudkitchens.com
+  - id: rfc9457-problem-details
+    conforms: false
+    evidence: no application/problem+json response content type appears anywhere in the OpenAPI
+  - id: rfc9116-security-txt
+    conforms: false
+    evidence: no /.well-known/security.txt served on any probed CloudKitchens host
+  - id: rfc8594-sunset-header
+    conforms: false
+    evidence: >-
+      A deprecation policy is published in prose, but no Sunset or Deprecation response header is
+      documented or declared in the spec.
+  - id: idempotency-key
+    conforms: false
+    evidence: no Idempotency-Key header or idempotency parameter in 80 operations
+  - id: webhook-hmac-signing
+    conforms: true
+    evidence: >-
+      Every webhook carries an X-HMAC-SHA256 header containing a base64 HMAC-SHA256 of the raw body
+      keyed on the endpoint secret; reference implementations published in five languages.
+  - id: asyncapi
+    conforms: false
+    evidence: >-
+      No AsyncAPI document is published. The event surface is documented as OpenAPI x-webhooks
+      (27 events) — captured in asyncapi/cloudkitchens-webhooks.yml.
+  - id: json-schema
+    conforms: true
+    evidence: 320 components.schemas defined and reused across request/response bodies
+  - id: graphql
+    conforms: false
+    evidence: no /graphql surface found on any CloudKitchens host
+  - id: mcp
+    conforms: false
+    evidence: no hosted Model Context Protocol server found for CloudKitchens
+  - id: a2a-agent-card
+    conforms: false
+    evidence: >-
+      /.well-known/agent-card.json and /.well-known/agent.json 404 on every real host; the 200
+      responses from developer.cloudkitchens.com and tools.cloudkitchens.com are SPA HTML catch-alls
+      and were rejected.

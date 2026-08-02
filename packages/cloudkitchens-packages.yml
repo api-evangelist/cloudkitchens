@@ -1,0 +1,47 @@
+generated: '2026-08-01'
+method: searched
+source: registry searches + https://developer-guides.cloudkitchens.com/docs/
+summary: >-
+  No first-party CloudKitchens client library, SDK, or CLI was found in any public package registry
+  or on the CloudKitchens developer surface. Integration is documented as raw HTTPS calls with curl
+  examples; the developer guides publish HMAC webhook-verification reference snippets in Python,
+  Java, JavaScript, C# and PHP but ship them as inline code, not as installable packages.
+packages: []
+registries_searched:
+  - registry: npm
+    queries: [cloudkitchens, tryotter, otter-api]
+    result: no first-party package
+  - registry: pypi
+    queries: [cloudkitchens, tryotter, otter-api]
+    result: 404 for each
+  - registry: pkg.go.dev
+    result: no first-party module found
+  - registry: rubygems
+    result: no first-party gem found
+  - registry: packagist
+    result: no first-party package found
+  - registry: nuget
+    result: no first-party package found
+  - registry: crates.io
+    result: no first-party crate found
+  - registry: maven central
+    result: no first-party artifact found
+docs_reference_code:
+  - language: python
+    kind: webhook HMAC-SHA256 verification snippet
+    url: https://developer-guides.cloudkitchens.com/docs/guides-webhook-authentication/
+  - language: java
+    kind: webhook HMAC signer/validator class
+    url: https://developer-guides.cloudkitchens.com/docs/guides-webhook-authentication/
+  - language: javascript
+    kind: webhook HMAC-SHA256 verification snippet
+    url: https://developer-guides.cloudkitchens.com/docs/guides-webhook-authentication/
+  - language: csharp
+    kind: webhook HMAC signer/validator class
+    url: https://developer-guides.cloudkitchens.com/docs/guides-webhook-authentication/
+  - language: php
+    kind: webhook HMAC-SHA256 verification snippet
+    url: https://developer-guides.cloudkitchens.com/docs/guides-webhook-authentication/
+note: >-
+  Because there is no official SDK, no SDKs pointer is wired in apis.yml. An empty list here is a
+  recorded negative, not a gap in the search.

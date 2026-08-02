@@ -1,0 +1,419 @@
+generated: '2026-08-01'
+method: derived
+source: openapi/cloudkitchens-public-api-openapi.yml
+status: candidate
+summary: No official hosted or remote Model Context Protocol (MCP) server was found for CloudKitchens
+  — not on developer.cloudkitchens.com, not in the developer guides, not in the public MCP registries,
+  and no /.well-known/oauth-protected-resource is served on api.cloudkitchens.com. The candidate tool
+  set below is DERIVED from the 80 operations of the CloudKitchens Public API as a proposal for an agent-facing
+  surface. It is NOT published by CloudKitchens, and no MCPServer pointer is wired in apis.yml.
+server: null
+transport: null
+auth:
+  type: oauth2
+  flows:
+  - client_credentials
+  - authorization_code
+  token_url: /v1/auth/token
+  required_header: X-Store-Id on store-scoped tools
+candidate_tools:
+- name: create_order
+  maps_to: POST /v1/orders
+  source_operation: openapi/cloudkitchens-public-api-openapi.yml#createOrder
+  description: Create order
+  group: orders_endpoints
+- name: update_order
+  maps_to: PUT /v1/orders/{orderId}
+  source_operation: openapi/cloudkitchens-public-api-openapi.yml#updateOrder
+  description: Update order
+  group: orders_endpoints
+- name: update_order_status
+  maps_to: POST /v1/orders/{orderId}/status
+  source_operation: openapi/cloudkitchens-public-api-openapi.yml#updateOrderStatus
+  description: Update order status
+  group: orders_endpoints
+- name: update_order_customer_payment
+  maps_to: PUT /v1/orders/{orderId}/payments
+  source_operation: openapi/cloudkitchens-public-api-openapi.yml#updateOrderCustomerPayment
+  description: Update order customer payment
+  group: orders_endpoints
+- name: update_order_delivery_info
+  maps_to: PUT /v1/orders/{orderId}/delivery
+  source_operation: openapi/cloudkitchens-public-api-openapi.yml#updateOrderDeliveryInfo
+  description: Update order delivery information
+  group: orders_endpoints
+- name: upload_past_orders
+  maps_to: POST /v1/orders/past-orders
+  source_operation: openapi/cloudkitchens-public-api-openapi.yml#uploadPastOrders
+  description: Upload past orders
+  group: orders_endpoints
+- name: order_created
+  maps_to: POST /manager/order/v1/orders/order-created
+  source_operation: openapi/cloudkitchens-public-api-openapi.yml#orderCreated
+  description: Notify the result of a Create Order event
+  group: manager_order_endpoints
+- name: manager_get_order_feed
+  maps_to: GET /manager/order/v1/orders
+  source_operation: openapi/cloudkitchens-public-api-openapi.yml#managerGetOrderFeed
+  description: Fetch order feed for a store
+  group: manager_order_endpoints
+- name: get_manager_order
+  maps_to: GET /manager/order/v1/sources/{source}/orders/{orderId}
+  source_operation: openapi/cloudkitchens-public-api-openapi.yml#getManagerOrder
+  description: Fetch order with Manager Info
+  group: manager_order_endpoints
+- name: request_order_confirmation
+  maps_to: POST /manager/order/v1/sources/{source}/orders/{orderId}/confirm
+  source_operation: openapi/cloudkitchens-public-api-openapi.yml#requestOrderConfirmation
+  description: Request order confirmation
+  group: manager_order_endpoints
+- name: request_order_cancelation
+  maps_to: POST /manager/order/v1/sources/{source}/orders/{orderId}/cancel
+  source_operation: openapi/cloudkitchens-public-api-openapi.yml#requestOrderCancelation
+  description: Request order cancelation
+  group: manager_order_endpoints
+- name: mark_as_ready_to_pickup
+  maps_to: POST /manager/order/v1/sources/{source}/orders/{orderId}/ready-to-pickup
+  source_operation: openapi/cloudkitchens-public-api-openapi.yml#markAsReadyToPickup
+  description: Mark an order as ready to pickup
+  group: manager_order_endpoints
+- name: create_packaging_order_component
+  maps_to: POST /manager/order/v1/sources/{source}/orders/{orderId}/create-packaging-component
+  source_operation: openapi/cloudkitchens-public-api-openapi.yml#createPackagingOrderComponent
+  description: Create a packaging component
+  group: manager_order_endpoints
+- name: mark_as_fulfilled
+  maps_to: POST /manager/order/v1/sources/{source}/orders/{orderId}/fulfill
+  source_operation: openapi/cloudkitchens-public-api-openapi.yml#markAsFulfilled
+  description: Mark an order as fulfilled
+  group: manager_order_endpoints
+- name: mark_dine_in_order_closed
+  maps_to: POST /manager/order/v1/sources/{source}/orders/{orderId}/close
+  source_operation: openapi/cloudkitchens-public-api-openapi.yml#markDineInOrderClosed
+  description: Mark a dine-in (open-tab) order as closed
+  group: manager_order_endpoints
+- name: manager_update_order_customer_items
+  maps_to: PUT /manager/order/v1/sources/{source}/orders/{orderId}/items
+  source_operation: openapi/cloudkitchens-public-api-openapi.yml#managerUpdateOrderCustomerItems
+  description: Update order customer items
+  group: manager_order_endpoints
+- name: update_order_prep_time
+  maps_to: POST /manager/order/v1/sources/{source}/orders/{orderId}/prep-time
+  source_operation: openapi/cloudkitchens-public-api-openapi.yml#updateOrderPrepTime
+  description: Update order prep time
+  group: manager_order_endpoints
+- name: pause_storefronts
+  maps_to: POST /manager/storefront/v1/storefront/pause
+  source_operation: openapi/cloudkitchens-public-api-openapi.yml#pauseStorefronts
+  description: Request pausing storefronts of a store
+  group: manager_storefront_endpoints
+- name: unpause_storefronts
+  maps_to: POST /manager/storefront/v1/storefront/unpause
+  source_operation: openapi/cloudkitchens-public-api-openapi.yml#unpauseStorefronts
+  description: Request unpausing storefronts of a store
+  group: manager_storefront_endpoints
+- name: get_pause_request_status
+  maps_to: GET /manager/storefront/v1/storefront/pause/request/{requestId}/status
+  source_operation: openapi/cloudkitchens-public-api-openapi.yml#getPauseRequestStatus
+  description: Get the process status details of a pause request
+  group: manager_storefront_endpoints
+- name: get_unpause_request_status
+  maps_to: GET /manager/storefront/v1/storefront/unpause/request/{requestId}/status
+  source_operation: openapi/cloudkitchens-public-api-openapi.yml#getUnpauseRequestStatus
+  description: Get the process status details of an unpause request
+  group: manager_storefront_endpoints
+- name: get_menu
+  maps_to: GET /v1/menus
+  source_operation: openapi/cloudkitchens-public-api-openapi.yml#getMenu
+  description: Get the menus for a store
+  group: manager_menu_endpoints
+- name: upsert_menu
+  maps_to: POST /v1/menus
+  source_operation: openapi/cloudkitchens-public-api-openapi.yml#upsertMenu
+  description: Upsert menus for a store
+  group: menus_endpoints
+- name: get_async_job_status
+  maps_to: GET /v1/menus/jobs/{jobId}
+  source_operation: openapi/cloudkitchens-public-api-openapi.yml#getAsyncJobStatus
+  description: Get the async menu job status
+  group: manager_menu_endpoints
+- name: menu_publish_callback
+  maps_to: POST /v1/menus/publish
+  source_operation: openapi/cloudkitchens-public-api-openapi.yml#menuPublishCallback
+  description: Notify the result of a Publish Menu event
+  group: menus_endpoints
+- name: menu_send_callback
+  maps_to: POST /v1/menus/current
+  source_operation: openapi/cloudkitchens-public-api-openapi.yml#menuSendCallback
+  description: Notify the result of a Send Menu event
+  group: menus_endpoints
+- name: menu_upsert_hours
+  maps_to: POST /v1/menus/hours
+  source_operation: openapi/cloudkitchens-public-api-openapi.yml#menuUpsertHours
+  description: Notify the receival of a Upsert Hours Menu event
+  group: menus_endpoints
+- name: pos_menu_sync
+  maps_to: POST /v1/menus/menu-sync
+  source_operation: openapi/cloudkitchens-public-api-openapi.yml#posMenuSync
+  description: Synchronize store menu with POS menu
+  group: menus_endpoints
+- name: update_menu_entities_availabilities_callback
+  maps_to: POST /v1/menus/entity/availability/bulk
+  source_operation: openapi/cloudkitchens-public-api-openapi.yml#updateMenuEntitiesAvailabilitiesCallback
+  description: Notify the result of an Update Menu Entities Availabilities event
+  group: menus_endpoints
+- name: manager_get_menu_publish_targets
+  maps_to: GET /manager/menu/v1/menus/publish-targets
+  source_operation: openapi/cloudkitchens-public-api-openapi.yml#managerGetMenuPublishTargets
+  description: Get the publish-targets for a store
+  group: manager_menu_endpoints
+- name: manager_publish_menu
+  maps_to: POST /manager/menu/v1/menus/publish
+  source_operation: openapi/cloudkitchens-public-api-openapi.yml#managerPublishMenu
+  description: Publish menus to targets for a store
+  group: manager_menu_endpoints
+- name: menu_sync
+  maps_to: POST /manager/menu/v1/menus/menu-sync
+  source_operation: openapi/cloudkitchens-public-api-openapi.yml#menuSync
+  description: Synchronize store menu with POS menu
+  group: manager_menu_endpoints
+- name: manager_suspend_menu_entities
+  maps_to: POST /manager/menu/v1/menus/entities/availability/suspend
+  source_operation: openapi/cloudkitchens-public-api-openapi.yml#managerSuspendMenuEntities
+  description: Suspend menu entities targets for a store
+  group: manager_menu_endpoints
+- name: manager_unsuspend_menu_entities
+  maps_to: POST /manager/menu/v1/menus/entities/availability/unsuspend
+  source_operation: openapi/cloudkitchens-public-api-openapi.yml#managerUnsuspendMenuEntities
+  description: Unsuspend menu entities targets for a store
+  group: manager_menu_endpoints
+- name: manager_bootstrap
+  maps_to: POST /manager/menu/v1/bootstrap
+  source_operation: openapi/cloudkitchens-public-api-openapi.yml#managerBootstrap
+  description: Bootstrap menus for a store
+  group: manager_menu_endpoints
+- name: post_store_availability_change
+  maps_to: POST /v1/storefront/availability
+  source_operation: openapi/cloudkitchens-public-api-openapi.yml#postStoreAvailabilityChange
+  description: Notify about store availability change
+  group: storefront_endpoints
+- name: post_store_hours_configuration_change
+  maps_to: POST /v1/storefront/hours
+  source_operation: openapi/cloudkitchens-public-api-openapi.yml#postStoreHoursConfigurationChange
+  description: Notify about store hours configuration change
+  group: storefront_endpoints
+- name: post_pause_store_event_result
+  maps_to: POST /v1/storefront/pause
+  source_operation: openapi/cloudkitchens-public-api-openapi.yml#postPauseStoreEventResult
+  description: Notify the result of a pause request event
+  group: storefront_endpoints
+- name: post_unpause_store_event_result
+  maps_to: POST /v1/storefront/unpause
+  source_operation: openapi/cloudkitchens-public-api-openapi.yml#postUnpauseStoreEventResult
+  description: Notify the result of an unpause request event
+  group: storefront_endpoints
+- name: post_eater_side_store_availability_change
+  maps_to: POST /v1/storefront/eater-side/status
+  source_operation: openapi/cloudkitchens-public-api-openapi.yml#postEaterSideStoreAvailabilityChange
+  description: Notify about store availability change from the eater side
+  group: storefront_endpoints
+- name: post_eater_side_store_hours_configuration_change
+  maps_to: POST /v1/storefront/eater-side/hours
+  source_operation: openapi/cloudkitchens-public-api-openapi.yml#postEaterSideStoreHoursConfigurationChange
+  description: Notify about store hours configuration change on eater side
+  group: storefront_endpoints
+- name: update_delivery_status
+  maps_to: PUT /v1/delivery/{deliveryReferenceId}/status
+  source_operation: openapi/cloudkitchens-public-api-openapi.yml#updateDeliveryStatus
+  description: Update delivery status
+  group: delivery_endpoints
+- name: request_delivery_quote_callback
+  maps_to: POST /v1/delivery/{deliveryReferenceId}/quotes
+  source_operation: openapi/cloudkitchens-public-api-openapi.yml#requestDeliveryQuoteCallback
+  description: Notify the result of a request delivery quote event
+  group: delivery_endpoints
+- name: accept_delivery_callback
+  maps_to: POST /v1/delivery/{deliveryReferenceId}/accept
+  source_operation: openapi/cloudkitchens-public-api-openapi.yml#acceptDeliveryCallback
+  description: Notify the result of an accept delivery event
+  group: delivery_endpoints
+- name: cancel_delivery_callback
+  maps_to: POST /v1/delivery/{deliveryReferenceId}/cancel
+  source_operation: openapi/cloudkitchens-public-api-openapi.yml#cancelDeliveryCallback
+  description: Notify the result of a cancel delivery event
+  group: delivery_endpoints
+- name: delivery_callback_error
+  maps_to: POST /v1/delivery/callback/error
+  source_operation: openapi/cloudkitchens-public-api-openapi.yml#deliveryCallbackError
+  description: Publish delivery callback error
+  group: delivery_endpoints
+- name: update_delivery_request_callback
+  maps_to: POST /v1/delivery/{deliveryReferenceId}/update
+  source_operation: openapi/cloudkitchens-public-api-openapi.yml#updateDeliveryRequestCallback
+  description: Notify the result of an update delivery request event
+  group: delivery_endpoints
+- name: publish_error
+  maps_to: POST /v1/callback/error
+  source_operation: openapi/cloudkitchens-public-api-openapi.yml#publishError
+  description: Publish callback error
+  group: callback_endpoints
+- name: ping
+  maps_to: GET /v1/ping
+  source_operation: openapi/cloudkitchens-public-api-openapi.yml#ping
+  description: Ping the system
+  group: ping_endpoints
+- name: get_report_status
+  maps_to: GET /v1/reports/{jobId}
+  source_operation: openapi/cloudkitchens-public-api-openapi.yml#getReportStatus
+  description: Request status of the report using jobId
+  group: reports_endpoints
+- name: generate_report_multi
+  maps_to: POST /v1/reports/generate
+  source_operation: openapi/cloudkitchens-public-api-openapi.yml#generateReportMulti
+  description: Request a business report for multiple stores
+  group: reports_endpoints
+- name: review_reply
+  maps_to: POST /v1/reviews/reply
+  source_operation: openapi/cloudkitchens-public-api-openapi.yml#reviewReply
+  description: Reply or schedule a reply to a review
+  group: reviews_endpoints
+- name: request_token
+  maps_to: POST /v1/auth/token
+  source_operation: openapi/cloudkitchens-public-api-openapi.yml#requestToken
+  description: Generate token
+  group: auth_endpoints
+- name: oauth2_authorize
+  maps_to: GET /v1/auth/oauth2/authorize
+  source_operation: openapi/cloudkitchens-public-api-openapi.yml#oauth2Authorize
+  description: OAuth 2.0 Authorize Endpoint
+  group: auth_endpoints
+- name: upsert_storelink_event_result_endpoint
+  maps_to: POST /v1/stores
+  source_operation: openapi/cloudkitchens-public-api-openapi.yml#upsertStorelinkEventResultEndpoint
+  description: Complete Store Onboarding
+  group: account_pairing_endpoints
+- name: update_store_status_endpoint
+  maps_to: PUT /v1/stores/status
+  source_operation: openapi/cloudkitchens-public-api-openapi.yml#updateStoreStatusEndpoint
+  description: Update Store Status
+  group: account_pairing_endpoints
+- name: post_financial_transactions
+  maps_to: POST /finance/v1/financial-transactions
+  source_operation: openapi/cloudkitchens-public-api-openapi.yml#postFinancialTransactions
+  description: Post financial transactions
+  group: finance_endpoints
+- name: post_financial_invoice
+  maps_to: POST /finance/v1/financial-invoices
+  source_operation: openapi/cloudkitchens-public-api-openapi.yml#postFinancialInvoice
+  description: Post a financial invoice
+  group: finance_endpoints
+- name: list_inventory_summaries
+  maps_to: GET /inventories/v1/summaries
+  source_operation: openapi/cloudkitchens-public-api-openapi.yml#listInventorySummaries
+  description: List inventory summaries
+  group: inventory_endpoints
+- name: list_inventory_shipments
+  maps_to: GET /inventories/v1/shipments
+  source_operation: openapi/cloudkitchens-public-api-openapi.yml#listInventoryShipments
+  description: List shipments
+  group: inventory_endpoints
+- name: create_shipment
+  maps_to: POST /inventories/v1/shipments
+  source_operation: openapi/cloudkitchens-public-api-openapi.yml#createShipment
+  description: Create shipment
+  group: inventory_endpoints
+- name: organization_get_organization
+  maps_to: GET /organization/v1/organization
+  source_operation: openapi/cloudkitchens-public-api-openapi.yml#organizationGetOrganization
+  description: Get the organization managed by the user.
+  group: organization_endpoints
+- name: organization_get_brand
+  maps_to: GET /organization/v1/organization/brands/{brandId}
+  source_operation: openapi/cloudkitchens-public-api-openapi.yml#organizationGetBrand
+  description: Get a brand of the organization managed by the user.
+  group: organization_endpoints
+- name: organization_list_brands
+  maps_to: GET /organization/v1/organization/brands
+  source_operation: openapi/cloudkitchens-public-api-openapi.yml#organizationListBrands
+  description: Get the list of brands of the organization managed by the user.
+  group: organization_endpoints
+- name: organization_get_store
+  maps_to: GET /organization/v1/organization/brands/{brandId}/stores/{storeId}
+  source_operation: openapi/cloudkitchens-public-api-openapi.yml#organizationGetStore
+  description: Get a store of the organization managed by the user.
+  group: organization_endpoints
+- name: organization_list_stores
+  maps_to: GET /organization/v1/organization/brands/{brandId}/stores
+  source_operation: openapi/cloudkitchens-public-api-openapi.yml#organizationListStores
+  description: Get the list of stores of a given brand.
+  group: organization_endpoints
+- name: organization_get_connection
+  maps_to: GET /organization/v1/organization/brands/{brandId}/stores/{storeId}/connection
+  source_operation: openapi/cloudkitchens-public-api-openapi.yml#organizationGetConnection
+  description: Get the partner application connection with the selected store.
+  group: organization_endpoints
+- name: organization_create_connection
+  maps_to: POST /organization/v1/organization/brands/{brandId}/stores/{storeId}/connection
+  source_operation: openapi/cloudkitchens-public-api-openapi.yml#organizationCreateConnection
+  description: Create a connection for the partner application with the selected store.
+  group: organization_endpoints
+- name: organization_delete_connection
+  maps_to: DELETE /organization/v1/organization/brands/{brandId}/stores/{storeId}/connection
+  source_operation: openapi/cloudkitchens-public-api-openapi.yml#organizationDeleteConnection
+  description: Delete the connection between the partner application and the selected store.
+  group: organization_endpoints
+- name: post_discover_stores_result
+  maps_to: POST /v1/market-intel/discovered-stores
+  source_operation: openapi/cloudkitchens-public-api-openapi.yml#postDiscoverStoresResult
+  description: Notify stores discovered at the geolocations
+  group: marketintel_endpoints
+- name: post_get_store_details_result
+  maps_to: POST /v1/market-intel/store-details
+  source_operation: openapi/cloudkitchens-public-api-openapi.yml#postGetStoreDetailsResult
+  description: Notify about store details update
+  group: storefront_endpoints
+- name: get_enrollment_config
+  maps_to: GET /manager/loyalty/v1/{source}/user/enrollment-config
+  source_operation: openapi/cloudkitchens-public-api-openapi.yml#getEnrollmentConfig
+  description: Get enrollment config for a loyalty provider
+  group: manager_loyalty_endpoints
+- name: get_user
+  maps_to: GET /manager/loyalty/v1/{source}/user
+  source_operation: openapi/cloudkitchens-public-api-openapi.yml#getUser
+  description: Get user by id
+  group: manager_loyalty_endpoints
+- name: create_user
+  maps_to: POST /manager/loyalty/v1/{source}/user
+  source_operation: openapi/cloudkitchens-public-api-openapi.yml#createUser
+  description: Create a loyalty user
+  group: manager_loyalty_endpoints
+- name: search_users
+  maps_to: GET /manager/loyalty/v1/{source}/user/search
+  source_operation: openapi/cloudkitchens-public-api-openapi.yml#searchUsers
+  description: Search loyalty users
+  group: manager_loyalty_endpoints
+- name: compute_applicable_rewards
+  maps_to: POST /manager/loyalty/v1/{source}/rewards/evaluate
+  source_operation: openapi/cloudkitchens-public-api-openapi.yml#computeApplicableRewards
+  description: Compute applicable rewards
+  group: manager_loyalty_endpoints
+- name: simulate_rewards
+  maps_to: POST /manager/loyalty/v1/{source}/rewards/simulate
+  source_operation: openapi/cloudkitchens-public-api-openapi.yml#simulateRewards
+  description: Simulate rewards
+  group: manager_loyalty_endpoints
+- name: redeem_and_accumulate_rewards
+  maps_to: POST /manager/loyalty/v1/{source}/rewards/redeem-and-accumulate
+  source_operation: openapi/cloudkitchens-public-api-openapi.yml#redeemAndAccumulateRewards
+  description: Redeem and accumulate rewards
+  group: manager_loyalty_endpoints
+- name: refund_rewards
+  maps_to: POST /manager/loyalty/v1/{source}/rewards/refund
+  source_operation: openapi/cloudkitchens-public-api-openapi.yml#refundRewards
+  description: Refund rewards
+  group: manager_loyalty_endpoints
+- name: eater_order_history
+  maps_to: POST /v1/eater/order-history
+  source_operation: openapi/cloudkitchens-public-api-openapi.yml#eaterOrderHistory
+  description: query eater's related history orders
+  group: direct_orders_endpoints

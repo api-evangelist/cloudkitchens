@@ -1,0 +1,33 @@
+generated: '2026-08-01'
+method: generated
+source: openapi/cloudkitchens-public-api-openapi.yml + https://developer-guides.cloudkitchens.com/docs/
+note: >-
+  CloudKitchens publishes no AGENTS.md or provider-authored agent skills. These six skills are
+  generated from the CloudKitchens Public API OpenAPI harvested from the provider's own API
+  reference; every operationId referenced was verified to exist verbatim in that spec, and every
+  scope named is the scope the spec declares on that operation.
+skills:
+  - file: cloudkitchens-authenticate-and-pair-stores.md
+    name: Authenticate with CloudKitchens and pair stores
+    api: openapi/cloudkitchens-public-api-openapi.yml
+    operations: [requestToken, ping, organizationGetOrganization, organizationListBrands, organizationListStores, organizationGetStore, organizationCreateConnection, organizationDeleteConnection, upsertStorelinkEventResultEndpoint, updateStoreStatusEndpoint]
+  - file: cloudkitchens-inject-and-fulfill-orders.md
+    name: Inject orders into CloudKitchens and drive them to fulfillment
+    api: openapi/cloudkitchens-public-api-openapi.yml
+    operations: [createOrder, updateOrder, updateOrderStatus, updateOrderCustomerPayment, updateOrderDeliveryInfo, orderCreated, managerGetOrderFeed, getManagerOrder, requestOrderConfirmation, updateOrderPrepTime, markAsReadyToPickup, markAsFulfilled, requestOrderCancelation, publishError]
+  - file: cloudkitchens-publish-and-suspend-menus.md
+    name: Publish menus to CloudKitchens and suspend unavailable items
+    api: openapi/cloudkitchens-public-api-openapi.yml
+    operations: [getMenu, upsertMenu, getAsyncJobStatus, managerGetMenuPublishTargets, managerPublishMenu, menuSync, managerSuspendMenuEntities, managerUnsuspendMenuEntities]
+  - file: cloudkitchens-pause-and-resume-storefronts.md
+    name: Pause and resume CloudKitchens storefronts
+    api: openapi/cloudkitchens-public-api-openapi.yml
+    operations: [pauseStorefronts, getPauseRequestStatus, unpauseStorefronts, getUnpauseRequestStatus, postStoreAvailabilityChange]
+  - file: cloudkitchens-fulfill-delivery-requests.md
+    name: Serve CloudKitchens delivery requests as a delivery provider
+    api: openapi/cloudkitchens-public-api-openapi.yml
+    operations: [requestDeliveryQuoteCallback, acceptDeliveryCallback, updateDeliveryRequestCallback, updateDeliveryStatus, cancelDeliveryCallback, deliveryCallbackError]
+  - file: cloudkitchens-generate-reports-and-reply-to-reviews.md
+    name: Generate CloudKitchens reports and reply to reviews
+    api: openapi/cloudkitchens-public-api-openapi.yml
+    operations: [generateReportMulti, getReportStatus, reviewReply]

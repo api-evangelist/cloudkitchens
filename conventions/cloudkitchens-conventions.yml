@@ -1,0 +1,127 @@
+generated: '2026-08-01'
+method: searched
+source: https://developer-guides.cloudkitchens.com/api-reference/
+docs:
+  - https://developer-guides.cloudkitchens.com/api-reference/
+  - https://developer-guides.cloudkitchens.com/docs/
+  - https://developer-guides.cloudkitchens.com/docs/guides-rate-limiting/
+  - https://developer-guides.cloudkitchens.com/docs/guides-webhook-authentication/
+summary: >-
+  Cross-cutting request/response semantics of the CloudKitchens Public API, captured from the
+  provider's own API reference and developer guides. The API is resource-oriented REST over JSON,
+  secured with OAuth 2.0, scoped per application, and always executed on behalf of a single store
+  identified by the X-Store-Id header.
+
+style:
+  protocol: REST over HTTPS
+  media_type: application/json
+  token_media_type: application/x-www-form-urlencoded (token endpoint only)
+  url_shape: resource-oriented, /v{n}/{resource}/{id}
+
+authentication:
+  model: OAuth 2.0 bearer tokens
+  flows: [client_credentials, authorization_code]
+  token_endpoint: /v1/auth/token
+  authorization_endpoint: /v1/auth/oauth2/authorize
+  credential_delivery: client credentials in request body or HTTP Basic Auth
+  token_lifetime: 30 days (expires_in returned in seconds)
+  token_reuse: tokens should be stored and re-used while still valid
+  header: 'Authorization: Bearer <access_token>'
+  artifact: authentication/cloudkitchens-authentication.yml
+  scopes_artifact: scopes/cloudkitchens-scopes.yml
+  identity_provider:
+    issuer: https://iam.cloudkitchens.com/
+    discovery: well-known/cloudkitchens-openid-configuration.json
+
+required_headers:
+  - name: Authorization
+    required: all resource endpoints
+    description: Bearer token generated from the application's client credentials.
+  - name: X-Store-Id
+    required: store-scoped endpoints
+    description: >-
+      The partner's own ID of the store this call acts on behalf of. CloudKitchens translates it to
+      the internal store ID and validates that the application is associated with that store.
+
+multi_tenancy:
+  unit: store
+  mechanism: X-Store-Id header maps a partner store identifier to a CloudKitchens store
+  application_scoping: >-
+    Scopes are configured per application by the CloudKitchens internal team, then enabled on the
+    Application Settings page in the Developer Portal. Each endpoint requires a specific scope.
+
+idempotency:
+  supported: false
+  evidence: >-
+    No Idempotency-Key header, idempotency parameter, or idempotency section appears anywhere in the
+    published OpenAPI (80 operations, 320 schemas) or in the developer guides. Retry guidance is
+    limited to 5XX responses ("retry the same request with the exact same parameters"), which is a
+    retry policy rather than an idempotency contract.
+  note: >-
+    Recorded as a genuine gap, not an omission. No Idempotency pointer is wired in apis.yml.
+
+pagination:
+  documented: partial
+  evidence: >-
+    The API reference does not publish a single cross-cutting pagination convention. Collection
+    endpoints declare their own paging parameters in the OpenAPI (see the organization and manager
+    order feed operations); there is no provider-wide cursor/offset contract statement.
+
+versioning:
+  scheme: uri-path
+  current: v1
+  per_api: true
+  policy:
+    - Non-breaking changes (e.g. adding new fields) ship in the current version without prior notice.
+    - Breaking changes (field removal, semantic change, schema update) increment the version.
+    - Users are notified of new versions and given a migration window agreed case by case.
+    - Once users migrate, old versions are deprecated.
+    - Once a new version exists, new integrations are not accepted against old versions.
+  docs: https://developer-guides.cloudkitchens.com/api-reference/
+  artifact: lifecycle/cloudkitchens-lifecycle.yml
+
+errors:
+  envelope: plain HTTP status codes plus a human-readable message
+  problem_json: false
+  classes:
+    - '4XX: client-side — the response message identifies the missing or incorrect parameters'
+    - '5XX: server-side — typically transient; retry the same request with identical parameters'
+  auth_error_policy: >-
+    The Public API deliberately does not disclose the specific reason an authentication attempt
+    failed, to avoid exposing vulnerabilities. A 401 can occasionally be returned for a valid,
+    unexpired token; retry with backoff or request a new token.
+  artifact: errors/cloudkitchens-problem-types.yml
+
+rate_limiting:
+  signalled_by: HTTP 429
+  headers_published: false
+  per_ip_authenticated: 20 requests per second
+  per_ip_unauthenticated: 3 requests per minute
+  per_endpoint: individually limited at the store level, per application
+  docs: https://developer-guides.cloudkitchens.com/docs/guides-rate-limiting/
+  artifact: rate-limits/cloudkitchens-rate-limits.yml
+
+events:
+  mechanism: HTTP webhooks
+  signature_header: X-HMAC-SHA256
+  envelope_fields: [eventId, eventTime, eventType, metadata]
+  ack: HTTP 200 with an empty body
+  artifact: asyncapi/cloudkitchens-webhooks.yml
+
+request_tracing:
+  request_id_header: null
+  evidence: No request-id / correlation-id header is documented in the API reference or guides.
+
+environments:
+  - name: production
+    api_reference: https://developer-guides.cloudkitchens.com/api-reference/
+  - name: staging
+    description: >-
+      A staging environment is offered for testing. Applications receive a distinct Application ID
+      and Client Secret per environment (production and staging).
+environments_artifact: sandbox/cloudkitchens-sandbox.yml
+
+support:
+  model: named Account Representative / TAM per integration partner
+  portal: https://developer.cloudkitchens.com/
+  help: https://support.cloudkitchens.com/

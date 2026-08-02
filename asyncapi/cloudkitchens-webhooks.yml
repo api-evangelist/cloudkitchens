@@ -1,0 +1,171 @@
+generated: '2026-08-01'
+method: derived
+source: openapi/cloudkitchens-public-api-openapi.yml (x-webhooks)
+docs: https://developer-guides.cloudkitchens.com/api-reference/
+spec_type: Webhooks
+note: CloudKitchens publishes no AsyncAPI document. Its event surface is documented as HTTP webhooks inside
+  the Public API OpenAPI under the x-webhooks extension (27 events across 8 groups), plus the webhook
+  authentication guide. This artifact catalogues that surface verbatim from the provider's own spec —
+  no AsyncAPI has been fabricated.
+transport:
+  protocol: https
+  method: POST
+  target: partner-supplied endpoint, configured per application by the CloudKitchens Account Representative
+  expected_response: HTTP 200 with an empty body acknowledges receipt
+authentication:
+  signature_header: X-HMAC-SHA256
+  signature_algorithm: HMAC-SHA256 over the raw request body using the webhook endpoint secret, base64-encoded
+  sent_on: every request, regardless of the selected Authorization type
+  authorization_types:
+  - HMAC SHA1 (legacy)
+  - Basic Auth
+  - Bearer Token
+  - None
+  secret_source: CloudKitchens Developer Portal, per webhook endpoint
+  docs: https://developer-guides.cloudkitchens.com/docs/guides-webhook-authentication/
+  reference_implementations:
+  - Python
+  - Java
+  - JavaScript
+  - C#
+  - PHP
+envelope:
+  fields:
+  - name: eventId
+    type: string
+    description: Unique id of the event.
+  - name: eventTime
+    type: string
+    description: The time the event occurred.
+  - name: eventType
+    type: string
+    description: The type of event (e.g. create_order).
+  - name: metadata.storeId
+    type: string
+    description: Id of the store for which the event is being published.
+  - name: metadata.applicationId
+    type: string
+    description: Id of the application for which the event is being published.
+  - name: metadata.resourceId
+    type: string
+    description: The external identifier of the resource that this event refers to.
+  - name: metadata.resourceHref
+    type: string
+    description: The endpoint to fetch the details of the resource.
+  - name: metadata.payload
+    type: object
+    description: The event object, detailed in each webhook description.
+summary:
+  events: 27
+  groups: 8
+groups:
+- group: manager_orders_webhooks
+  count: 6
+  events:
+  - event: orderCreate
+    operationId: orderCreateWebhook
+    summary: Order creation webhook
+  - event: orderUpdate
+    operationId: orderUpdateWebhook
+    summary: Order update webhook
+  - event: orderConfirm
+    operationId: orderConfirmWebhook
+    summary: Order confirm notification webhook
+  - event: orderReady
+    operationId: orderReady
+    summary: Order Ready status notification webhook
+  - event: orderHandedOff
+    operationId: orderHandedOff
+    summary: Order Handed Off status notification webhook
+  - event: orderFulfilled
+    operationId: orderFulfilled
+    summary: Order Fulfilled status notification webhook
+- group: orders_webhooks
+  count: 3
+  events:
+  - event: intentToCancelOrder
+    operationId: intentToCancelOrderWebhook
+    summary: Intent to cancel order webhook
+  - event: orderStatusUpdate
+    operationId: orderStatusUpdateWebhook
+    summary: Order status update webhook
+  - event: posInjectionStateUpdate
+    operationId: posInjectionStateUpdateWebhook
+    summary: Pos injection state update webhook
+- group: menus_webhooks
+  count: 4
+  events:
+  - event: menuPublish
+    operationId: menuPublishWebhook
+    summary: Menu publish webhook
+  - event: sendMenu
+    operationId: sendMenuWebhook
+    summary: Send menu webhook
+  - event: updateMenuEntitiesAvailabilities
+    operationId: updateMenuEntitiesAvailabilitiesWebhook
+    summary: Update menu entities availabilities webhook
+  - event: upsertMenuHours
+    operationId: upsertMenuHoursWebhook
+    summary: Upsert menu hours webhook
+- group: storefront_webhooks
+  count: 4
+  events:
+  - event: pauseStore
+    operationId: pauseStoreWebhook
+    summary: Pause store webhook
+  - event: unpauseStore
+    operationId: unpauseStoreWebhook
+    summary: Unpause store webhook
+  - event: getStoreAvailability
+    operationId: getStoreAvailabilityWebhook
+    summary: Get store availability webhook
+  - event: getStoreHoursConfiguration
+    operationId: getStoreHoursConfigurationWebhook
+    summary: Get store hours configuration webhook
+- group: delivery_webhooks
+  count: 5
+  events:
+  - event: deliveryStatusUpdate
+    operationId: deliveryStatusUpdateWebhook
+    summary: Update delivery status webhook
+  - event: requestDeliveryQuotes
+    operationId: requestDeliveryQuotesWebhook
+    summary: Request delivery quotes webhook
+  - event: acceptDelivery
+    operationId: acceptDeliveryWebhook
+    summary: Accept delivery webhook
+  - event: cancelDelivery
+    operationId: cancelDeliveryWebhook
+    summary: Cancel delivery webhook
+  - event: updateDeliveryRequest
+    operationId: updateDeliveryRequestWebhook
+    summary: Update delivery request webhook
+- group: reports_webhooks
+  count: 1
+  events:
+  - event: reportGenerated
+    operationId: reportGeneratedWebhook
+    summary: Report generated webhook
+- group: ping_webhooks
+  count: 1
+  events:
+  - event: ping
+    operationId: pingWebhook
+    summary: Ping webhook
+- group: account_pairing_webhooks
+  count: 3
+  events:
+  - event: upsertStore
+    operationId: upsertStorelinkWebhook
+    summary: Upsert Store
+  - event: removeStore
+    operationId: removeStoreWebhook
+    summary: Remove Store
+  - event: fetchCredentials
+    operationId: fetchCredentialsWebhook
+    summary: Fetch Credentials (synchronously)
+failure_handling:
+  callback_endpoint: publishError
+  scope: callback.error.write
+  description: Partners report failed webhook event processing back to CloudKitchens via the callback
+    endpoint.

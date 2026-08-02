@@ -1,0 +1,45 @@
+generated: '2026-08-01'
+method: searched
+source: https://developer-guides.cloudkitchens.com/docs/guides-rate-limiting/
+docs: https://developer-guides.cloudkitchens.com/docs/guides-rate-limiting/
+summary: >-
+  The CloudKitchens Public API enforces two kinds of rate limit — by IP address and by endpoint.
+  Endpoint limits are applied individually at the store level per application; the exact per-endpoint
+  quota table is published in the Rate Limiting section of the API reference and is not restated
+  here beyond the example the guide itself gives.
+error_response:
+  status: 429
+  behaviour: >-
+    HTTP 429 is returned until the request rate has dropped below the required threshold. Partners
+    who are rate limited frequently are directed to their TAM.
+headers_published: false
+rate_limits:
+  - name: Authenticated requests per IP address
+    scope: ip
+    authenticated: true
+    limit_count: 20
+    limit_period: second
+    description: 20 authenticated requests per second, counting all requests made by the IP address.
+  - name: Unauthenticated requests per IP address
+    scope: ip
+    authenticated: false
+    limit_count: 3
+    limit_period: minute
+    description: 3 requests per minute for requests that are not authenticated.
+  - name: Ping endpoint per store per application
+    scope: endpoint
+    endpoint: /v1/ping
+    operationId: ping
+    authenticated: true
+    limit_count: 8
+    limit_period: minute
+    description: >-
+      Worked example published in the rate limiting guide — a single store of a single application
+      may ping the system eight times per minute.
+per_endpoint_policy:
+  applies_to: all authenticated endpoints
+  dimension: store + application
+  note: >-
+    "The limits are defined according to the context of the endpoints. You can check the usage quotas
+    of all endpoints in the Rate Limiting API Reference." Only the ping example is given inline in
+    the guide; the full quota table lives in the API reference.

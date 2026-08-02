@@ -1,23 +1,153 @@
 aid: cloudkitchens
 name: CloudKitchens
-description: 'CloudKitchens is a company surfaced via the API Evangelist harvest backlog (source: secondary-market)
-  and added to the network as a stub for full-pipeline profiling.'
+type: Index
+description: 'CloudKitchens, operated by City Storage Systems, builds and runs delivery-only "ghost kitchen" facilities
+  and the restaurant technology stack that runs them, with sites across roughly 30 countries. For integration partners
+  it publishes the CloudKitchens Public API — an OpenAPI 3.0.1 contract of 80 operations and 27 webhook events,
+  secured with OAuth 2.0 across 29 scopes and two flows (client credentials and authorization code), backed by an
+  OpenID Connect identity provider at iam.cloudkitchens.com. The API spans order injection and fulfillment, menu
+  upsert and publishing, storefront pause/resume, delivery dispatch callbacks, finance and payout reporting, inventory,
+  reviews, loyalty, and organization/brand/store pairing. Access is partner-gated rather than self-serve: applications,
+  webhook endpoints, and stores are onboarded manually by a CloudKitchens Account Representative, who issues the
+  Application ID and Client Secret for the production and staging environments and provisions the partner-specific
+  API base URL.'
+image: https://developer.cloudkitchens.com/favicon.ico
 url: https://raw.githubusercontent.com/api-evangelist/cloudkitchens/refs/heads/main/apis.yml
 x-type: company
 x-source: harvest:secondary-market
-x-tier: stub
-x-tier-reason: harvest
-specificationVersion: '0.20'
+tags:
+- Restaurant
+- Ghost Kitchens
+- Food Delivery
+- Order Management
+- Menu Management
+- Storefront
+- Delivery
+- Reporting
+- Loyalty
+- Real Estate
 created: '2026-08-01'
 modified: '2026-08-01'
-tags:
-- Company
-apis: []
+specificationVersion: '0.20'
 maintainers:
 - FN: Kin Lane
   email: kin@apievangelist.com
 - FN: APIs.json
   email: info@apis.io
+apis:
+- aid: cloudkitchens:cloudkitchens-public-api
+  name: CloudKitchens Public API
+  description: The CloudKitchens Public API is a resource-oriented REST API over JSON secured with OAuth 2.0, used
+    by integration partners — ordering channels, POS and kitchen systems, delivery networks and reporting tools
+    — to work with CloudKitchens stores. It publishes 80 operations across 19 endpoint groups (orders, manager orders,
+    direct orders, menus, manager menus, storefront, manager storefront, delivery, finance, inventory, reports,
+    reviews, loyalty, organization, account pairing, store, auth, callback and ping) plus 27 webhook events, and
+    defines 320 reusable component schemas. Every store-scoped call carries an X-Store-Id header naming the partner's
+    own identifier for the store, which CloudKitchens translates to its internal store id.
+  humanURL: https://developer-guides.cloudkitchens.com/docs/
+  baseURL: https://api.cloudkitchens.com
+  x-baseURL-note: 'The published OpenAPI ships a templated server, https://{{public-api-url}}, because the concrete
+    base URL is provisioned per integration partner at onboarding. api.cloudkitchens.com is the production host:
+    it resolves, answers HTTPS, and presents a CloudKitchens-owned wildcard certificate (CN=cloudkitchens.com, SAN
+    *.cloudkitchens.com), and CloudKitchens'' own developer portal build names api-staging.cloudkitchens.com as
+    its staging counterpart.'
+  tags:
+  - Orders
+  - Menus
+  - Storefront
+  - Delivery
+  - Finance
+  - Inventory
+  - Reports
+  - Reviews
+  - Loyalty
+  - Organization
+  properties:
+  - type: OpenAPI
+    url: openapi/cloudkitchens-public-api-openapi.yml
+  - type: Overlay
+    url: overlays/cloudkitchens-public-api-overlay.yaml
+  - type: Documentation
+    url: https://developer-guides.cloudkitchens.com/docs/
+  - type: APIReference
+    url: https://developer-guides.cloudkitchens.com/api-reference/
+  - type: GettingStarted
+    url: https://developer-guides.cloudkitchens.com/docs/onboard-application/
+  - type: Authentication
+    url: authentication/cloudkitchens-authentication.yml
+  - type: OAuthScopes
+    url: scopes/cloudkitchens-scopes.yml
+  - type: Webhooks
+    url: asyncapi/cloudkitchens-webhooks.yml
+  - type: RateLimits
+    url: rate-limits/cloudkitchens-rate-limits.yml
+  - type: ErrorCatalog
+    url: errors/cloudkitchens-problem-types.yml
+  - type: DataModel
+    url: data-model/cloudkitchens-data-model.yml
+  - type: Sandbox
+    url: sandbox/cloudkitchens-sandbox.yml
 common:
 - type: Website
-  url: https://forgeglobal.com/cloudkitchens_stock/
+  url: https://www.cloudkitchens.com/
+- type: DeveloperPortal
+  url: https://developer.cloudkitchens.com/
+- type: Documentation
+  url: https://developer-guides.cloudkitchens.com/docs/
+- type: APIReference
+  url: https://developer-guides.cloudkitchens.com/api-reference/
+- type: GettingStarted
+  url: https://developer-guides.cloudkitchens.com/docs/onboard-application/
+- type: Support
+  url: https://support.cloudkitchens.com/
+- type: HelpCenter
+  url: https://cloudkitchens.com/faq
+- type: Blog
+  url: https://cloudkitchens.com/blog
+- type: TermsOfService
+  url: https://cloudkitchens.com/terms-of-service/
+- type: PrivacyPolicy
+  url: https://cloudkitchens.com/privacy-policy
+- type: Authentication
+  url: authentication/cloudkitchens-authentication.yml
+- type: OpenIDConnect
+  url: well-known/cloudkitchens-openid-configuration.json
+- type: OAuthScopes
+  url: scopes/cloudkitchens-scopes.yml
+- type: WellKnown
+  url: well-known/cloudkitchens-well-known.yml
+- type: Conventions
+  url: conventions/cloudkitchens-conventions.yml
+- type: ErrorCatalog
+  url: errors/cloudkitchens-problem-types.yml
+- type: RateLimits
+  url: rate-limits/cloudkitchens-rate-limits.yml
+- type: Lifecycle
+  url: lifecycle/cloudkitchens-lifecycle.yml
+- type: Deprecation
+  url: https://developer-guides.cloudkitchens.com/api-reference/
+- type: Conformance
+  url: conformance/cloudkitchens-conformance.yml
+- type: Webhooks
+  url: asyncapi/cloudkitchens-webhooks.yml
+- type: DataModel
+  url: data-model/cloudkitchens-data-model.yml
+- type: Sandbox
+  url: sandbox/cloudkitchens-sandbox.yml
+- type: Packages
+  url: packages/cloudkitchens-packages.yml
+- type: Overlay
+  url: overlays/cloudkitchens-public-api-overlay.yaml
+- type: LLMsTxt
+  url: llms/cloudkitchens-llms.txt
+- type: AgentSkill
+  url: skills/_index.yml
+- type: AgenticAccess
+  url: agentic-access/cloudkitchens-agentic-access.yml
+- type: DomainSecurity
+  url: security/cloudkitchens-domain-security.yml
+x-enrichment:
+  date: '2026-08-01'
+  status: enriched
+  artifacts_added: 26
+  pass: local-v1

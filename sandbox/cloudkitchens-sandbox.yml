@@ -1,0 +1,51 @@
+generated: '2026-08-01'
+method: searched
+source: https://developer-guides.cloudkitchens.com/docs/onboard-application/
+docs:
+  - https://developer-guides.cloudkitchens.com/docs/onboard-application/
+  - https://developer-guides.cloudkitchens.com/api-reference/
+summary: >-
+  CloudKitchens offers a staging environment for integration testing. It is not a self-serve sandbox:
+  there is no public test key, no hosted console, and no published test fixtures. Credentials for
+  both environments are issued manually by a CloudKitchens Account Representative when the partner
+  application is onboarded.
+self_serve: false
+environments:
+  - name: production
+    credentials: Application ID + Client Secret issued per application
+    base_url: per-partner, provisioned during onboarding (the spec calls it {{public-api-url}})
+  - name: staging
+    credentials: separate Application ID + Client Secret issued per application
+    base_url: per-partner, provisioned during onboarding
+    quote: >-
+      "For testing purposes, we offer a staging environment." — Public API overview
+    note: >-
+      The CloudKitchens developer portal build references https://api-staging.cloudkitchens.com and
+      https://developer-guides-staging.cloudkitchens.com as the staging counterparts of the
+      production API and documentation hosts.
+credential_issuance:
+  channel: CloudKitchens Account Representative
+  process: >-
+    "External developers are required to have a registered Application representing their
+    integration. This is a one-time, manual registration needed to setup authentication and
+    authorization between your application and the Public API." Once onboarded, the application
+    receives its own Application ID and Client Secret for each environment. The Application ID was
+    formerly called the Partner ID.
+  docs: https://developer-guides.cloudkitchens.com/docs/onboard-application/
+test_values: []
+test_values_note: >-
+  No magic test identifiers, test cards, or fixture values are published. Nothing has been invented
+  here — an empty list is the honest result.
+testing_aids:
+  - name: ping endpoint
+    operationId: ping
+    scope: ping
+    description: >-
+      Dedicated endpoint for testing that authentication and system connectivity work end to end.
+  - name: ping webhook
+    operationId: pingWebhook
+    description: Corresponding webhook event partners can use to verify their receiving endpoint.
+  - name: X-Echo-Error header
+    description: >-
+      The only test-affordance header declared in the OpenAPI — used to exercise error handling
+      paths. Its accepted values are not published in the public reference.

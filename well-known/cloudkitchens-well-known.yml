@@ -1,0 +1,107 @@
+generated: '2026-08-01'
+method: searched
+source: https://iam.cloudkitchens.com/.well-known/openid-configuration
+summary: >-
+  Probed the /.well-known/ discovery surface on every CloudKitchens host found during contract
+  discovery. One real document was returned: the OpenID Connect discovery document served by the
+  CloudKitchens identity provider at iam.cloudkitchens.com. No security.txt, api-catalog,
+  ai-plugin.json, oauth-authorization-server or agent card was published on any host.
+hosts:
+  - host: https://iam.cloudkitchens.com
+    role: identity provider (OAuth 2.0 / OIDC)
+    documents:
+      - path: /.well-known/openid-configuration
+        status: 200
+        content_type: application/json
+        file: cloudkitchens-openid-configuration.json
+      - path: /.well-known/oauth-authorization-server
+        status: 404
+      - path: /.well-known/security.txt
+        status: 404
+      - path: /.well-known/agent-card.json
+        status: 404
+      - path: /.well-known/agent.json
+        status: 404
+      - path: /.well-known/api-catalog
+        status: 404
+      - path: /.well-known/ai-plugin.json
+        status: 404
+  - host: https://api.cloudkitchens.com
+    role: API host (per-partner base URL is provisioned during onboarding)
+    documents:
+      - path: /.well-known/security.txt
+        status: 404
+      - path: /.well-known/openid-configuration
+        status: 404
+      - path: /.well-known/oauth-protected-resource
+        status: 404
+      - path: /.well-known/agent-card.json
+        status: 404
+      - path: /.well-known/agent.json
+        status: 404
+      - path: /.well-known/api-catalog
+        status: 404
+      - path: /.well-known/ai-plugin.json
+        status: 404
+  - host: https://developer-guides.cloudkitchens.com
+    role: developer guides + API reference
+    documents:
+      - path: /.well-known/security.txt
+        status: 404
+      - path: /.well-known/agent-card.json
+        status: 404
+      - path: /.well-known/agent.json
+        status: 404
+      - path: /.well-known/api-catalog
+        status: 404
+      - path: /.well-known/ai-plugin.json
+        status: 404
+      - path: /llms.txt
+        status: 404
+  - host: https://developer.cloudkitchens.com
+    role: developer portal (single-page application)
+    note: >-
+      This host answers HTTP 200 with the SPA HTML shell (1,139 bytes, identical for every path),
+      including for every /.well-known/* path probed. All such 200s were REJECTED as catch-all
+      false positives — no JSON document is actually served.
+    documents:
+      - path: /.well-known/agent-card.json
+        status: 200
+        rejected: true
+        reason: SPA catch-all returns text/html, not an AgentCard JSON object
+      - path: /.well-known/agent.json
+        status: 200
+        rejected: true
+        reason: SPA catch-all returns text/html, not an AgentCard JSON object
+      - path: /.well-known/security.txt
+        status: 200
+        rejected: true
+        reason: SPA catch-all returns text/html, not RFC 9116 text
+  - host: https://tools.cloudkitchens.com
+    role: internal/partner tools SPA
+    note: Same SPA catch-all behaviour — every probed path returned the same 27,445-byte HTML shell.
+    documents:
+      - path: /.well-known/agent-card.json
+        status: 200
+        rejected: true
+        reason: SPA catch-all returns text/html
+  - host: https://www.cloudkitchens.com
+    role: marketing website
+    note: >-
+      Every request from a non-browser client is answered with HTTP 403 and a Cloudflare
+      "Just a moment..." interstitial, including /robots.txt. Absence of a document could not be
+      established for this host — the WAF blocks the probe rather than the path 404ing.
+    documents:
+      - path: /.well-known/security.txt
+        status: 403
+      - path: /.well-known/agent-card.json
+        status: 403
+      - path: /.well-known/agent.json
+        status: 403
+      - path: /.well-known/api-catalog
+        status: 403
+      - path: /llms.txt
+        status: 403
+x-evidence:
+  fetched: '2026-08-01'
+  http_client: curl (desktop Chrome user-agent, follow redirects)

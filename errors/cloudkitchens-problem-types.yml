@@ -1,0 +1,110 @@
+generated: '2026-08-01'
+method: derived
+source: openapi/cloudkitchens-public-api-openapi.yml
+docs: https://developer-guides.cloudkitchens.com/api-reference/
+format: vendor
+note: 'The CloudKitchens Public API does not use RFC 9457 application/problem+json. The published error
+  contract is plain HTTP status semantics: 4XX = client-side error with a human-readable message identifying
+  the offending parameters, 5XX = transient server-side error the client should retry with identical parameters.
+  Problem entries below are derived from every 4xx/5xx response declared in the OpenAPI.'
+classes:
+- class: 4XX
+  name: Client-side errors
+  guidance: Response includes a message describing the cause (e.g. which parameters were missing or incorrect).
+    Fix the request before retrying.
+- class: 5XX
+  name: Server-side errors
+  guidance: Typically transient. Retry the same request with the exact same parameters after a short delay;
+    escalate to support if persistent.
+special_cases:
+- status: 401
+  note: A 401 can occasionally be returned for a valid, unexpired token due to an internal service issue.
+    The API deliberately does not disclose other authentication failure types. Retry with backoff, or
+    request a new token.
+- status: 429
+  note: Returned until the request rate drops below the rate-limit threshold. See conventions/cloudkitchens-conventions.yml
+    and rate-limits/cloudkitchens-rate-limits.yml.
+problems:
+- status: 400
+  title: null
+  media_types: []
+  occurrences: 78
+  example_operations:
+  - createOrder
+  - updateOrder
+  - updateOrderStatus
+  - updateOrderCustomerPayment
+  - updateOrderDeliveryInfo
+- status: 401
+  title: null
+  media_types: []
+  occurrences: 80
+  example_operations:
+  - createOrder
+  - updateOrder
+  - updateOrderStatus
+  - updateOrderCustomerPayment
+  - updateOrderDeliveryInfo
+- status: 403
+  title: null
+  media_types: []
+  occurrences: 78
+  example_operations:
+  - createOrder
+  - updateOrder
+  - updateOrderStatus
+  - updateOrderCustomerPayment
+  - updateOrderDeliveryInfo
+- status: 404
+  title: null
+  media_types: []
+  occurrences: 69
+  example_operations:
+  - createOrder
+  - updateOrder
+  - updateOrderStatus
+  - updateOrderCustomerPayment
+  - updateOrderDeliveryInfo
+- status: 409
+  title: null
+  media_types: []
+  occurrences: 1
+  example_operations:
+  - organizationCreateConnection
+- status: 409
+  title: Conflicting Menu targets.
+  media_types:
+  - application/json
+  occurrences: 1
+  example_operations:
+  - managerPublishMenu
+- status: 409
+  title: Customer items update is not allowed (e.g. slug is not d2c-eater-website, order is not dine-in,
+    or order tab is not open).
+  media_types: []
+  occurrences: 1
+  example_operations:
+  - managerUpdateOrderCustomerItems
+- status: 409
+  title: Order could not be closed (e.g. already closed or not an open-tab order).
+  media_types: []
+  occurrences: 1
+  example_operations:
+  - markDineInOrderClosed
+- status: 418
+  title: I am a teapot.
+  media_types:
+  - application/json
+  occurrences: 1
+  example_operations:
+  - ping
+- status: 422
+  title: null
+  media_types: []
+  occurrences: 79
+  example_operations:
+  - createOrder
+  - updateOrder
+  - updateOrderStatus
+  - updateOrderCustomerPayment
+  - updateOrderDeliveryInfo

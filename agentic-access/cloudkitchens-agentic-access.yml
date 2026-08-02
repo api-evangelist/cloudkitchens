@@ -1,0 +1,1369 @@
+generated: '2026-08-01'
+method: generated
+source: openapi/cloudkitchens-public-api-openapi.yml
+description: Recommended x-agentic-access execution contracts, classified heuristically from
+  the OpenAPI. A governance starting point for exposing this API to AI agents — review and bind
+  audience per deployment. See research/curity/agentic-governance/.
+summary:
+  operations: 80
+  by_action_class:
+    acting: 59
+    connected: 21
+  by_consequence:
+    physical: 21
+    read: 21
+    write: 38
+  human_in_the_loop_required: 0
+operations:
+- path: /v1/orders
+  method: post
+  operationId: createOrder
+  x-agentic-access:
+    action-class: acting
+    consequence: physical
+    subject: required
+    scope:
+    - orders.create
+    audience: null
+    token:
+      max-ttl: 300
+      exchange: true
+      purpose-required: true
+    escalation:
+      human-in-the-loop: conditional
+      triggers:
+      - abnormal
+      - high-value
+    audit: required
+- path: /v1/orders/{orderId}
+  method: put
+  operationId: updateOrder
+  x-agentic-access:
+    action-class: acting
+    consequence: physical
+    subject: required
+    scope:
+    - orders.update
+    audience: null
+    token:
+      max-ttl: 300
+      exchange: true
+      purpose-required: true
+    escalation:
+      human-in-the-loop: conditional
+      triggers:
+      - abnormal
+      - high-value
+    audit: required
+- path: /v1/orders/{orderId}/status
+  method: post
+  operationId: updateOrderStatus
+  x-agentic-access:
+    action-class: acting
+    consequence: physical
+    subject: required
+    scope:
+    - orders.update
+    audience: null
+    token:
+      max-ttl: 300
+      exchange: true
+      purpose-required: true
+    escalation:
+      human-in-the-loop: conditional
+      triggers:
+      - abnormal
+      - high-value
+    audit: required
+- path: /v1/orders/{orderId}/payments
+  method: put
+  operationId: updateOrderCustomerPayment
+  x-agentic-access:
+    action-class: acting
+    consequence: physical
+    subject: required
+    scope:
+    - orders.update
+    audience: null
+    token:
+      max-ttl: 300
+      exchange: true
+      purpose-required: true
+    escalation:
+      human-in-the-loop: conditional
+      triggers:
+      - abnormal
+      - high-value
+    audit: required
+- path: /v1/orders/{orderId}/delivery
+  method: put
+  operationId: updateOrderDeliveryInfo
+  x-agentic-access:
+    action-class: acting
+    consequence: physical
+    subject: required
+    scope:
+    - orders.update
+    audience: null
+    token:
+      max-ttl: 300
+      exchange: true
+      purpose-required: true
+    escalation:
+      human-in-the-loop: conditional
+      triggers:
+      - abnormal
+      - high-value
+    audit: required
+- path: /v1/orders/past-orders
+  method: post
+  operationId: uploadPastOrders
+  x-agentic-access:
+    action-class: acting
+    consequence: physical
+    subject: required
+    scope:
+    - orders.create
+    audience: null
+    token:
+      max-ttl: 300
+      exchange: true
+      purpose-required: true
+    escalation:
+      human-in-the-loop: conditional
+      triggers:
+      - abnormal
+      - high-value
+    audit: required
+- path: /manager/order/v1/orders/order-created
+  method: post
+  operationId: orderCreated
+  x-agentic-access:
+    action-class: acting
+    consequence: physical
+    subject: required
+    scope:
+    - manager.orders
+    audience: null
+    token:
+      max-ttl: 300
+      exchange: true
+      purpose-required: true
+    escalation:
+      human-in-the-loop: conditional
+      triggers:
+      - abnormal
+      - high-value
+    audit: required
+- path: /manager/order/v1/orders
+  method: get
+  operationId: managerGetOrderFeed
+  x-agentic-access:
+    action-class: connected
+    consequence: read
+    subject: optional
+    scope:
+    - manager.orders
+    token:
+      max-ttl: 3600
+    audit: none
+- path: /manager/order/v1/sources/{source}/orders/{orderId}
+  method: get
+  operationId: getManagerOrder
+  x-agentic-access:
+    action-class: connected
+    consequence: read
+    subject: optional
+    scope:
+    - manager.orders
+    token:
+      max-ttl: 3600
+    audit: none
+- path: /manager/order/v1/sources/{source}/orders/{orderId}/confirm
+  method: post
+  operationId: requestOrderConfirmation
+  x-agentic-access:
+    action-class: acting
+    consequence: physical
+    subject: required
+    scope:
+    - manager.orders
+    audience: null
+    token:
+      max-ttl: 300
+      exchange: true
+      purpose-required: true
+    escalation:
+      human-in-the-loop: conditional
+      triggers:
+      - abnormal
+      - high-value
+    audit: required
+- path: /manager/order/v1/sources/{source}/orders/{orderId}/cancel
+  method: post
+  operationId: requestOrderCancelation
+  x-agentic-access:
+    action-class: acting
+    consequence: physical
+    subject: required
+    scope:
+    - manager.orders
+    audience: null
+    token:
+      max-ttl: 300
+      exchange: true
+      purpose-required: true
+    escalation:
+      human-in-the-loop: conditional
+      triggers:
+      - abnormal
+      - high-value
+    audit: required
+- path: /manager/order/v1/sources/{source}/orders/{orderId}/ready-to-pickup
+  method: post
+  operationId: markAsReadyToPickup
+  x-agentic-access:
+    action-class: acting
+    consequence: physical
+    subject: required
+    scope:
+    - manager.orders
+    audience: null
+    token:
+      max-ttl: 300
+      exchange: true
+      purpose-required: true
+    escalation:
+      human-in-the-loop: conditional
+      triggers:
+      - abnormal
+      - high-value
+    audit: required
+- path: /manager/order/v1/sources/{source}/orders/{orderId}/create-packaging-component
+  method: post
+  operationId: createPackagingOrderComponent
+  x-agentic-access:
+    action-class: acting
+    consequence: physical
+    subject: required
+    scope:
+    - manager.orders
+    audience: null
+    token:
+      max-ttl: 300
+      exchange: true
+      purpose-required: true
+    escalation:
+      human-in-the-loop: conditional
+      triggers:
+      - abnormal
+      - high-value
+    audit: required
+- path: /manager/order/v1/sources/{source}/orders/{orderId}/fulfill
+  method: post
+  operationId: markAsFulfilled
+  x-agentic-access:
+    action-class: acting
+    consequence: physical
+    subject: required
+    scope:
+    - manager.orders
+    audience: null
+    token:
+      max-ttl: 300
+      exchange: true
+      purpose-required: true
+    escalation:
+      human-in-the-loop: conditional
+      triggers:
+      - abnormal
+      - high-value
+    audit: required
+- path: /manager/order/v1/sources/{source}/orders/{orderId}/close
+  method: post
+  operationId: markDineInOrderClosed
+  x-agentic-access:
+    action-class: acting
+    consequence: physical
+    subject: required
+    scope:
+    - manager.orders
+    audience: null
+    token:
+      max-ttl: 300
+      exchange: true
+      purpose-required: true
+    escalation:
+      human-in-the-loop: conditional
+      triggers:
+      - abnormal
+      - high-value
+    audit: required
+- path: /manager/order/v1/sources/{source}/orders/{orderId}/items
+  method: put
+  operationId: managerUpdateOrderCustomerItems
+  x-agentic-access:
+    action-class: acting
+    consequence: physical
+    subject: required
+    scope:
+    - manager.orders
+    audience: null
+    token:
+      max-ttl: 300
+      exchange: true
+      purpose-required: true
+    escalation:
+      human-in-the-loop: conditional
+      triggers:
+      - abnormal
+      - high-value
+    audit: required
+- path: /manager/order/v1/sources/{source}/orders/{orderId}/prep-time
+  method: post
+  operationId: updateOrderPrepTime
+  x-agentic-access:
+    action-class: acting
+    consequence: physical
+    subject: required
+    scope:
+    - orders.update
+    audience: null
+    token:
+      max-ttl: 300
+      exchange: true
+      purpose-required: true
+    escalation:
+      human-in-the-loop: conditional
+      triggers:
+      - abnormal
+      - high-value
+    audit: required
+- path: /manager/storefront/v1/storefront/pause
+  method: post
+  operationId: pauseStorefronts
+  x-agentic-access:
+    action-class: acting
+    consequence: write
+    subject: required
+    scope:
+    - manager.storefront
+    audience: null
+    token:
+      max-ttl: 900
+    escalation:
+      human-in-the-loop: conditional
+      triggers:
+      - abnormal
+      - high-value
+    audit: required
+- path: /manager/storefront/v1/storefront/unpause
+  method: post
+  operationId: unpauseStorefronts
+  x-agentic-access:
+    action-class: acting
+    consequence: write
+    subject: required
+    scope:
+    - manager.storefront
+    audience: null
+    token:
+      max-ttl: 900
+    escalation:
+      human-in-the-loop: conditional
+      triggers:
+      - abnormal
+      - high-value
+    audit: required
+- path: /manager/storefront/v1/storefront/pause/request/{requestId}/status
+  method: get
+  operationId: getPauseRequestStatus
+  x-agentic-access:
+    action-class: connected
+    consequence: read
+    subject: optional
+    scope:
+    - manager.storefront
+    token:
+      max-ttl: 3600
+    audit: none
+- path: /manager/storefront/v1/storefront/unpause/request/{requestId}/status
+  method: get
+  operationId: getUnpauseRequestStatus
+  x-agentic-access:
+    action-class: connected
+    consequence: read
+    subject: optional
+    scope:
+    - manager.storefront
+    token:
+      max-ttl: 3600
+    audit: none
+- path: /v1/menus
+  method: get
+  operationId: getMenu
+  x-agentic-access:
+    action-class: connected
+    consequence: read
+    subject: optional
+    scope:
+    - menus.read
+    token:
+      max-ttl: 3600
+    audit: none
+- path: /v1/menus
+  method: post
+  operationId: upsertMenu
+  x-agentic-access:
+    action-class: acting
+    consequence: write
+    subject: required
+    scope:
+    - menus.upsert
+    audience: null
+    token:
+      max-ttl: 900
+    escalation:
+      human-in-the-loop: conditional
+      triggers:
+      - abnormal
+      - high-value
+    audit: required
+- path: /v1/menus/jobs/{jobId}
+  method: get
+  operationId: getAsyncJobStatus
+  x-agentic-access:
+    action-class: connected
+    consequence: read
+    subject: optional
+    scope:
+    - menus.async_job.read
+    token:
+      max-ttl: 3600
+    audit: none
+- path: /v1/menus/publish
+  method: post
+  operationId: menuPublishCallback
+  x-agentic-access:
+    action-class: acting
+    consequence: write
+    subject: required
+    scope:
+    - menus.publish
+    audience: null
+    token:
+      max-ttl: 900
+    escalation:
+      human-in-the-loop: conditional
+      triggers:
+      - abnormal
+      - high-value
+    audit: required
+- path: /v1/menus/current
+  method: post
+  operationId: menuSendCallback
+  x-agentic-access:
+    action-class: acting
+    consequence: physical
+    subject: required
+    scope:
+    - menus.get_current
+    audience: null
+    token:
+      max-ttl: 300
+      exchange: true
+      purpose-required: true
+    escalation:
+      human-in-the-loop: conditional
+      triggers:
+      - abnormal
+      - high-value
+    audit: required
+- path: /v1/menus/hours
+  method: post
+  operationId: menuUpsertHours
+  x-agentic-access:
+    action-class: acting
+    consequence: write
+    subject: required
+    scope:
+    - menus.upsert_hours
+    audience: null
+    token:
+      max-ttl: 900
+    escalation:
+      human-in-the-loop: conditional
+      triggers:
+      - abnormal
+      - high-value
+    audit: required
+- path: /v1/menus/menu-sync
+  method: post
+  operationId: posMenuSync
+  x-agentic-access:
+    action-class: acting
+    consequence: write
+    subject: required
+    scope:
+    - menus.sync
+    audience: null
+    token:
+      max-ttl: 900
+    escalation:
+      human-in-the-loop: conditional
+      triggers:
+      - abnormal
+      - high-value
+    audit: required
+- path: /v1/menus/entity/availability/bulk
+  method: post
+  operationId: updateMenuEntitiesAvailabilitiesCallback
+  x-agentic-access:
+    action-class: acting
+    consequence: write
+    subject: required
+    scope:
+    - menus.entity_suspension
+    audience: null
+    token:
+      max-ttl: 900
+    escalation:
+      human-in-the-loop: conditional
+      triggers:
+      - abnormal
+      - high-value
+    audit: required
+- path: /manager/menu/v1/menus/publish-targets
+  method: get
+  operationId: managerGetMenuPublishTargets
+  x-agentic-access:
+    action-class: connected
+    consequence: read
+    subject: optional
+    scope:
+    - manager.menus
+    token:
+      max-ttl: 3600
+    audit: none
+- path: /manager/menu/v1/menus/publish
+  method: post
+  operationId: managerPublishMenu
+  x-agentic-access:
+    action-class: acting
+    consequence: write
+    subject: required
+    scope:
+    - manager.menus
+    audience: null
+    token:
+      max-ttl: 900
+    escalation:
+      human-in-the-loop: conditional
+      triggers:
+      - abnormal
+      - high-value
+    audit: required
+- path: /manager/menu/v1/menus/menu-sync
+  method: post
+  operationId: menuSync
+  x-agentic-access:
+    action-class: acting
+    consequence: write
+    subject: required
+    scope:
+    - manager.menus
+    audience: null
+    token:
+      max-ttl: 900
+    escalation:
+      human-in-the-loop: conditional
+      triggers:
+      - abnormal
+      - high-value
+    audit: required
+- path: /manager/menu/v1/menus/entities/availability/suspend
+  method: post
+  operationId: managerSuspendMenuEntities
+  x-agentic-access:
+    action-class: acting
+    consequence: write
+    subject: required
+    scope:
+    - manager.menus
+    audience: null
+    token:
+      max-ttl: 900
+    escalation:
+      human-in-the-loop: conditional
+      triggers:
+      - abnormal
+      - high-value
+    audit: required
+- path: /manager/menu/v1/menus/entities/availability/unsuspend
+  method: post
+  operationId: managerUnsuspendMenuEntities
+  x-agentic-access:
+    action-class: acting
+    consequence: write
+    subject: required
+    scope:
+    - manager.menus
+    audience: null
+    token:
+      max-ttl: 900
+    escalation:
+      human-in-the-loop: conditional
+      triggers:
+      - abnormal
+      - high-value
+    audit: required
+- path: /manager/menu/v1/bootstrap
+  method: post
+  operationId: managerBootstrap
+  x-agentic-access:
+    action-class: acting
+    consequence: write
+    subject: required
+    scope:
+    - manager.menus
+    audience: null
+    token:
+      max-ttl: 900
+    escalation:
+      human-in-the-loop: conditional
+      triggers:
+      - abnormal
+      - high-value
+    audit: required
+- path: /v1/storefront/availability
+  method: post
+  operationId: postStoreAvailabilityChange
+  x-agentic-access:
+    action-class: acting
+    consequence: write
+    subject: required
+    scope:
+    - storefront.store_availability
+    audience: null
+    token:
+      max-ttl: 900
+    escalation:
+      human-in-the-loop: conditional
+      triggers:
+      - abnormal
+      - high-value
+    audit: required
+- path: /v1/storefront/hours
+  method: post
+  operationId: postStoreHoursConfigurationChange
+  x-agentic-access:
+    action-class: acting
+    consequence: write
+    subject: required
+    scope:
+    - storefront.store_hours_configuration
+    audience: null
+    token:
+      max-ttl: 900
+    escalation:
+      human-in-the-loop: conditional
+      triggers:
+      - abnormal
+      - high-value
+    audit: required
+- path: /v1/storefront/pause
+  method: post
+  operationId: postPauseStoreEventResult
+  x-agentic-access:
+    action-class: acting
+    consequence: write
+    subject: required
+    scope:
+    - storefront.store_pause_unpause
+    audience: null
+    token:
+      max-ttl: 900
+    escalation:
+      human-in-the-loop: conditional
+      triggers:
+      - abnormal
+      - high-value
+    audit: required
+- path: /v1/storefront/unpause
+  method: post
+  operationId: postUnpauseStoreEventResult
+  x-agentic-access:
+    action-class: acting
+    consequence: write
+    subject: required
+    scope:
+    - storefront.store_pause_unpause
+    audience: null
+    token:
+      max-ttl: 900
+    escalation:
+      human-in-the-loop: conditional
+      triggers:
+      - abnormal
+      - high-value
+    audit: required
+- path: /v1/storefront/eater-side/status
+  method: post
+  operationId: postEaterSideStoreAvailabilityChange
+  x-agentic-access:
+    action-class: acting
+    consequence: write
+    subject: required
+    scope:
+    - storefront.store_availability
+    audience: null
+    token:
+      max-ttl: 900
+    escalation:
+      human-in-the-loop: conditional
+      triggers:
+      - abnormal
+      - high-value
+    audit: required
+- path: /v1/storefront/eater-side/hours
+  method: post
+  operationId: postEaterSideStoreHoursConfigurationChange
+  x-agentic-access:
+    action-class: acting
+    consequence: write
+    subject: required
+    scope:
+    - storefront.store_hours_configuration
+    audience: null
+    token:
+      max-ttl: 900
+    escalation:
+      human-in-the-loop: conditional
+      triggers:
+      - abnormal
+      - high-value
+    audit: required
+- path: /v1/delivery/{deliveryReferenceId}/status
+  method: put
+  operationId: updateDeliveryStatus
+  x-agentic-access:
+    action-class: acting
+    consequence: write
+    subject: required
+    scope:
+    - delivery.provider
+    audience: null
+    token:
+      max-ttl: 900
+    escalation:
+      human-in-the-loop: conditional
+      triggers:
+      - abnormal
+      - high-value
+    audit: required
+- path: /v1/delivery/{deliveryReferenceId}/quotes
+  method: post
+  operationId: requestDeliveryQuoteCallback
+  x-agentic-access:
+    action-class: acting
+    consequence: write
+    subject: required
+    scope:
+    - delivery.provider
+    audience: null
+    token:
+      max-ttl: 900
+    escalation:
+      human-in-the-loop: conditional
+      triggers:
+      - abnormal
+      - high-value
+    audit: required
+- path: /v1/delivery/{deliveryReferenceId}/accept
+  method: post
+  operationId: acceptDeliveryCallback
+  x-agentic-access:
+    action-class: acting
+    consequence: write
+    subject: required
+    scope:
+    - delivery.provider
+    audience: null
+    token:
+      max-ttl: 900
+    escalation:
+      human-in-the-loop: conditional
+      triggers:
+      - abnormal
+      - high-value
+    audit: required
+- path: /v1/delivery/{deliveryReferenceId}/cancel
+  method: post
+  operationId: cancelDeliveryCallback
+  x-agentic-access:
+    action-class: acting
+    consequence: write
+    subject: required
+    scope:
+    - delivery.provider
+    audience: null
+    token:
+      max-ttl: 900
+    escalation:
+      human-in-the-loop: conditional
+      triggers:
+      - abnormal
+      - high-value
+    audit: required
+- path: /v1/delivery/callback/error
+  method: post
+  operationId: deliveryCallbackError
+  x-agentic-access:
+    action-class: acting
+    consequence: write
+    subject: required
+    scope:
+    - callback.error.write
+    audience: null
+    token:
+      max-ttl: 900
+    escalation:
+      human-in-the-loop: conditional
+      triggers:
+      - abnormal
+      - high-value
+    audit: required
+- path: /v1/delivery/{deliveryReferenceId}/update
+  method: post
+  operationId: updateDeliveryRequestCallback
+  x-agentic-access:
+    action-class: acting
+    consequence: write
+    subject: required
+    scope:
+    - delivery.provider
+    audience: null
+    token:
+      max-ttl: 900
+    escalation:
+      human-in-the-loop: conditional
+      triggers:
+      - abnormal
+      - high-value
+    audit: required
+- path: /v1/callback/error
+  method: post
+  operationId: publishError
+  x-agentic-access:
+    action-class: acting
+    consequence: write
+    subject: required
+    scope:
+    - callback.error.write
+    audience: null
+    token:
+      max-ttl: 900
+    escalation:
+      human-in-the-loop: conditional
+      triggers:
+      - abnormal
+      - high-value
+    audit: required
+- path: /v1/ping
+  method: get
+  operationId: ping
+  x-agentic-access:
+    action-class: connected
+    consequence: read
+    subject: optional
+    scope:
+    - ping
+    token:
+      max-ttl: 3600
+    audit: none
+- path: /v1/reports/{jobId}
+  method: get
+  operationId: getReportStatus
+  x-agentic-access:
+    action-class: connected
+    consequence: read
+    subject: optional
+    scope:
+    - reports.generate_report
+    token:
+      max-ttl: 3600
+    audit: none
+- path: /v1/reports/generate
+  method: post
+  operationId: generateReportMulti
+  x-agentic-access:
+    action-class: acting
+    consequence: write
+    subject: required
+    scope:
+    - reports.generate_report
+    audience: null
+    token:
+      max-ttl: 900
+    escalation:
+      human-in-the-loop: conditional
+      triggers:
+      - abnormal
+      - high-value
+    audit: required
+- path: /v1/reviews/reply
+  method: post
+  operationId: reviewReply
+  x-agentic-access:
+    action-class: acting
+    consequence: write
+    subject: required
+    scope:
+    - reviews.reply
+    audience: null
+    token:
+      max-ttl: 900
+    escalation:
+      human-in-the-loop: conditional
+      triggers:
+      - abnormal
+      - high-value
+    audit: required
+- path: /v1/auth/token
+  method: post
+  operationId: requestToken
+  x-agentic-access:
+    action-class: acting
+    consequence: write
+    subject: required
+    audience: null
+    token:
+      max-ttl: 900
+    escalation:
+      human-in-the-loop: conditional
+      triggers:
+      - abnormal
+      - high-value
+    audit: required
+- path: /v1/auth/oauth2/authorize
+  method: get
+  operationId: oauth2Authorize
+  x-agentic-access:
+    action-class: connected
+    consequence: read
+    subject: optional
+    token:
+      max-ttl: 3600
+    audit: none
+- path: /v1/stores
+  method: post
+  operationId: upsertStorelinkEventResultEndpoint
+  x-agentic-access:
+    action-class: acting
+    consequence: write
+    subject: required
+    scope:
+    - stores.manage
+    audience: null
+    token:
+      max-ttl: 900
+    escalation:
+      human-in-the-loop: conditional
+      triggers:
+      - abnormal
+      - high-value
+    audit: required
+- path: /v1/stores/status
+  method: put
+  operationId: updateStoreStatusEndpoint
+  x-agentic-access:
+    action-class: acting
+    consequence: physical
+    subject: required
+    scope:
+    - stores.manage
+    audience: null
+    token:
+      max-ttl: 300
+      exchange: true
+      purpose-required: true
+    escalation:
+      human-in-the-loop: conditional
+      triggers:
+      - abnormal
+      - high-value
+    audit: required
+- path: /finance/v1/financial-transactions
+  method: post
+  operationId: postFinancialTransactions
+  x-agentic-access:
+    action-class: acting
+    consequence: write
+    subject: required
+    scope:
+    - finance
+    audience: null
+    token:
+      max-ttl: 900
+    escalation:
+      human-in-the-loop: conditional
+      triggers:
+      - abnormal
+      - high-value
+    audit: required
+- path: /finance/v1/financial-invoices
+  method: post
+  operationId: postFinancialInvoice
+  x-agentic-access:
+    action-class: acting
+    consequence: physical
+    subject: required
+    scope:
+    - finance
+    audience: null
+    token:
+      max-ttl: 300
+      exchange: true
+      purpose-required: true
+    escalation:
+      human-in-the-loop: conditional
+      triggers:
+      - abnormal
+      - high-value
+    audit: required
+- path: /inventories/v1/summaries
+  method: get
+  operationId: listInventorySummaries
+  x-agentic-access:
+    action-class: connected
+    consequence: read
+    subject: optional
+    scope:
+    - catalog
+    token:
+      max-ttl: 3600
+    audit: none
+- path: /inventories/v1/shipments
+  method: get
+  operationId: listInventoryShipments
+  x-agentic-access:
+    action-class: connected
+    consequence: read
+    subject: optional
+    scope:
+    - catalog
+    token:
+      max-ttl: 3600
+    audit: none
+- path: /inventories/v1/shipments
+  method: post
+  operationId: createShipment
+  x-agentic-access:
+    action-class: acting
+    consequence: physical
+    subject: required
+    scope:
+    - catalog
+    audience: null
+    token:
+      max-ttl: 300
+      exchange: true
+      purpose-required: true
+    escalation:
+      human-in-the-loop: conditional
+      triggers:
+      - abnormal
+      - high-value
+    audit: required
+- path: /organization/v1/organization
+  method: get
+  operationId: organizationGetOrganization
+  x-agentic-access:
+    action-class: connected
+    consequence: read
+    subject: optional
+    scope:
+    - organization.read
+    token:
+      max-ttl: 3600
+    audit: none
+- path: /organization/v1/organization/brands/{brandId}
+  method: get
+  operationId: organizationGetBrand
+  x-agentic-access:
+    action-class: connected
+    consequence: read
+    subject: optional
+    scope:
+    - organization.read
+    token:
+      max-ttl: 3600
+    audit: none
+- path: /organization/v1/organization/brands
+  method: get
+  operationId: organizationListBrands
+  x-agentic-access:
+    action-class: connected
+    consequence: read
+    subject: optional
+    scope:
+    - organization.read
+    token:
+      max-ttl: 3600
+    audit: none
+- path: /organization/v1/organization/brands/{brandId}/stores/{storeId}
+  method: get
+  operationId: organizationGetStore
+  x-agentic-access:
+    action-class: connected
+    consequence: read
+    subject: optional
+    scope:
+    - organization.read
+    token:
+      max-ttl: 3600
+    audit: none
+- path: /organization/v1/organization/brands/{brandId}/stores
+  method: get
+  operationId: organizationListStores
+  x-agentic-access:
+    action-class: connected
+    consequence: read
+    subject: optional
+    scope:
+    - organization.read
+    token:
+      max-ttl: 3600
+    audit: none
+- path: /organization/v1/organization/brands/{brandId}/stores/{storeId}/connection
+  method: get
+  operationId: organizationGetConnection
+  x-agentic-access:
+    action-class: connected
+    consequence: read
+    subject: optional
+    scope:
+    - organization.service_integration
+    token:
+      max-ttl: 3600
+    audit: none
+- path: /organization/v1/organization/brands/{brandId}/stores/{storeId}/connection
+  method: post
+  operationId: organizationCreateConnection
+  x-agentic-access:
+    action-class: acting
+    consequence: write
+    subject: required
+    scope:
+    - organization.service_integration
+    audience: null
+    token:
+      max-ttl: 900
+    escalation:
+      human-in-the-loop: conditional
+      triggers:
+      - abnormal
+      - high-value
+    audit: required
+- path: /organization/v1/organization/brands/{brandId}/stores/{storeId}/connection
+  method: delete
+  operationId: organizationDeleteConnection
+  x-agentic-access:
+    action-class: acting
+    consequence: write
+    subject: required
+    scope:
+    - organization.service_integration
+    audience: null
+    token:
+      max-ttl: 900
+    escalation:
+      human-in-the-loop: conditional
+      triggers:
+      - abnormal
+      - high-value
+    audit: required
+- path: /v1/market-intel/discovered-stores
+  method: post
+  operationId: postDiscoverStoresResult
+  x-agentic-access:
+    action-class: acting
+    consequence: write
+    subject: required
+    scope:
+    - marketintel.service_integration
+    audience: null
+    token:
+      max-ttl: 900
+    escalation:
+      human-in-the-loop: conditional
+      triggers:
+      - abnormal
+      - high-value
+    audit: required
+- path: /v1/market-intel/store-details
+  method: post
+  operationId: postGetStoreDetailsResult
+  x-agentic-access:
+    action-class: acting
+    consequence: write
+    subject: required
+    scope:
+    - marketintel.service_integration
+    audience: null
+    token:
+      max-ttl: 900
+    escalation:
+      human-in-the-loop: conditional
+      triggers:
+      - abnormal
+      - high-value
+    audit: required
+- path: /manager/loyalty/v1/{source}/user/enrollment-config
+  method: get
+  operationId: getEnrollmentConfig
+  x-agentic-access:
+    action-class: connected
+    consequence: read
+    subject: optional
+    scope:
+    - manager.loyalty
+    token:
+      max-ttl: 3600
+    audit: none
+- path: /manager/loyalty/v1/{source}/user
+  method: get
+  operationId: getUser
+  x-agentic-access:
+    action-class: connected
+    consequence: read
+    subject: optional
+    scope:
+    - manager.loyalty
+    token:
+      max-ttl: 3600
+    audit: none
+- path: /manager/loyalty/v1/{source}/user
+  method: post
+  operationId: createUser
+  x-agentic-access:
+    action-class: acting
+    consequence: write
+    subject: required
+    scope:
+    - manager.loyalty
+    audience: null
+    token:
+      max-ttl: 900
+    escalation:
+      human-in-the-loop: conditional
+      triggers:
+      - abnormal
+      - high-value
+    audit: required
+- path: /manager/loyalty/v1/{source}/user/search
+  method: get
+  operationId: searchUsers
+  x-agentic-access:
+    action-class: connected
+    consequence: read
+    subject: optional
+    scope:
+    - manager.loyalty
+    token:
+      max-ttl: 3600
+    audit: none
+- path: /manager/loyalty/v1/{source}/rewards/evaluate
+  method: post
+  operationId: computeApplicableRewards
+  x-agentic-access:
+    action-class: acting
+    consequence: write
+    subject: required
+    scope:
+    - manager.loyalty
+    audience: null
+    token:
+      max-ttl: 900
+    escalation:
+      human-in-the-loop: conditional
+      triggers:
+      - abnormal
+      - high-value
+    audit: required
+- path: /manager/loyalty/v1/{source}/rewards/simulate
+  method: post
+  operationId: simulateRewards
+  x-agentic-access:
+    action-class: acting
+    consequence: write
+    subject: required
+    scope:
+    - manager.loyalty
+    audience: null
+    token:
+      max-ttl: 900
+    escalation:
+      human-in-the-loop: conditional
+      triggers:
+      - abnormal
+      - high-value
+    audit: required
+- path: /manager/loyalty/v1/{source}/rewards/redeem-and-accumulate
+  method: post
+  operationId: redeemAndAccumulateRewards
+  x-agentic-access:
+    action-class: acting
+    consequence: write
+    subject: required
+    scope:
+    - manager.loyalty
+    audience: null
+    token:
+      max-ttl: 900
+    escalation:
+      human-in-the-loop: conditional
+      triggers:
+      - abnormal
+      - high-value
+    audit: required
+- path: /manager/loyalty/v1/{source}/rewards/refund
+  method: post
+  operationId: refundRewards
+  x-agentic-access:
+    action-class: acting
+    consequence: physical
+    subject: required
+    scope:
+    - manager.loyalty
+    audience: null
+    token:
+      max-ttl: 300
+      exchange: true
+      purpose-required: true
+    escalation:
+      human-in-the-loop: conditional
+      triggers:
+      - abnormal
+      - high-value
+    audit: required
+- path: /v1/eater/order-history
+  method: post
+  operationId: eaterOrderHistory
+  x-agentic-access:
+    action-class: acting
+    consequence: physical
+    subject: required
+    scope:
+    - direct.orders
+    audience: null
+    token:
+      max-ttl: 300
+      exchange: true
+      purpose-required: true
+    escalation:
+      human-in-the-loop: conditional
+      triggers:
+      - abnormal
+      - high-value
+    audit: required

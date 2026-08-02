@@ -1,0 +1,58 @@
+generated: '2026-08-01'
+method: searched
+source: https://developer-guides.cloudkitchens.com/api-reference/
+docs: https://developer-guides.cloudkitchens.com/api-reference/
+spec_source: openapi/cloudkitchens-public-api-openapi.yml
+identity_provider:
+  issuer: https://iam.cloudkitchens.com/
+  discovery_url: https://iam.cloudkitchens.com/.well-known/openid-configuration
+  discovery_file: well-known/cloudkitchens-openid-configuration.json
+  authorization_endpoint: https://iam.cloudkitchens.com/api/oauth2/v2/authorize
+  token_endpoint: https://iam.cloudkitchens.com/api/oauth2/v2/token
+  userinfo_endpoint: https://iam.cloudkitchens.com/api/oauth2/v2/userinfo
+  jwks_uri: https://iam.cloudkitchens.com/api/oauth2/v1/keys
+  id_token_signing_alg: RS256
+  response_types_supported:
+  - code
+  note: 'The OIDC provider fronts CloudKitchens user sign-in (including the Developer Portal). The Public API token
+    endpoints declared in the OpenAPI are relative to the partner API base URL: /v1/auth/token and /v1/auth/oauth2/authorize.'
+token:
+  header: 'Authorization: Bearer <access_token>'
+  lifetime: 30 days
+  reuse: Tokens should be stored and re-used while still valid.
+  credential_delivery: client credentials in the request body or HTTP Basic Auth
+  content_type: application/x-www-form-urlencoded
+store_context:
+  header: X-Store-Id
+  description: Partner-side identifier of the store the call acts on behalf of; CloudKitchens translates it to the
+    internal store id and validates the application is associated with that store.
+credential_issuance: Manual, one-time application registration performed by a CloudKitchens Account Representative.
+  Separate Application ID (formerly Partner ID) and Client Secret per environment (production and staging). No self-serve
+  signup.
+summary:
+  types:
+  - oauth2
+  oauth2_flows:
+  - authorizationCode
+  - clientCredentials
+schemes:
+- name: OAuth2.0
+  type: oauth2
+  flows:
+  - flow: clientCredentials
+    tokenUrl: /v1/auth/token
+    scopes: 27
+  - flow: authorizationCode
+    authorizationUrl: /v1/auth/oauth2/authorize
+    tokenUrl: /v1/auth/token
+    scopes: 2
+  description: 'The **Authorization API** is based on the [OAuth2.0 protocol](https://tools.ietf.org/html/rfc6749),
+    supporting the (Client Credentials)[https://datatracker.ietf.org/doc/html/rfc6749#section-4.4] and the (Authorization
+    Code)[https://datatracker.ietf.org/doc/html/rfc6749#section-4.1] flows. Resources expect a valid token sent
+    as a `Bearer` token in the HTTP `Authorization` header.
+
+    ### Scopes
+
+    Scopes '
+  sources:
+  - openapi/cloudkitchens-public-api-openapi.yml
