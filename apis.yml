@@ -88,6 +88,8 @@ apis:
   - type: Sandbox
     url: sandbox/cloudkitchens-sandbox.yml
 common:
+- type: MCPServer
+  url: mcp/cloudkitchens-mcp.yml
 - type: Website
   url: https://www.cloudkitchens.com/
 - type: DeveloperPortal
