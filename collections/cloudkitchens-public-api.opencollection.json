@@ -1,0 +1,2867 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "Public API",
+    "version": "v1"
+  },
+  "items": [
+    {
+      "info": {
+        "name": "orders_endpoints",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "Create order",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://{{public-api-url}}/v1/orders",
+            "headers": [
+              {
+                "name": "X-Store-Id",
+                "value": ""
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "oauth2",
+              "flow": "client_credentials",
+              "accessTokenUrl": "/v1/auth/token",
+              "credentials": {
+                "clientId": "{{clientId}}",
+                "clientSecret": "{{clientSecret}}"
+              }
+            }
+          },
+          "docs": "`RATE LIMIT: 32 per minute`\n\nPushes a new order into Otter for the store identified by the `X-Store-Id` header. Used by ordering marketplaces and other order sources when a customer places an order.\n\nProvide the order's line items, fulfillment information, customer payments, and exactly one financial breakdown — `orderTotal` (V1) or `orderTotalV2` (V2). New integrations should prefer `orderTotalV2`. All monetary values use the major unit of the order's `currencyCode`.\n\nThe response returns the o"
+        },
+        {
+          "info": {
+            "name": "Update order",
+            "type": "http"
+          },
+          "http": {
+            "method": "PUT",
+            "url": "https://{{public-api-url}}/v1/orders/:orderId",
+            "headers": [
+              {
+                "name": "X-Store-Id",
+                "value": ""
+              }
+            ],
+            "params": [
+              {
+                "name": "orderId",
+                "value": "",
+                "type": "path"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "oauth2",
+              "flow": "client_credentials",
+              "accessTokenUrl": "/v1/auth/token",
+              "credentials": {
+                "clientId": "{{clientId}}",
+                "clientSecret": "{{clientSecret}}"
+              }
+            }
+          },
+          "docs": "`RATE LIMIT: 32 per minute`\n\nReplaces the order identified by `orderId` with the full order payload provided in the request body. Send the complete order representation (the same shape used to create it), not a partial patch.\n\nTo change only the status, customer payment, or delivery information, prefer the dedicated `/status`, `/payments`, and `/delivery` endpoints. Returns 404 if no order matches the given `orderId` for this store.\n"
+        },
+        {
+          "info": {
+            "name": "Update order status",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://{{public-api-url}}/v1/orders/:orderId/status",
+            "headers": [
+              {
+                "name": "X-Store-Id",
+                "value": ""
+              },
+              {
+                "name": "X-Event-Id",
+                "value": ""
+              }
+            ],
+            "params": [
+              {
+                "name": "orderId",
+                "value": "",
+                "type": "path"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "oauth2",
+              "flow": "client_credentials",
+              "accessTokenUrl": "/v1/auth/token",
+              "credentials": {
+                "clientId": "{{clientId}}",
+                "clientSecret": "{{clientSecret}}"
+              }
+            }
+          },
+          "docs": "`RATE LIMIT: 32 per minute`\n\nTransitions the order identified by `orderId` to a new status. Only `PREPARED`, `CANCELED`, and `FULFILLED` are accepted by this endpoint.\n\nWhen transitioning to `CANCELED`, you may include the optional `X-Event-Id` header to acknowledge a cancellation that the platform requested via the intent-to-cancel webhook. The order lifecycle is asynchronous, so a successful call returns `202 Accepted`.\n"
+        },
+        {
+          "info": {
+            "name": "Update order customer payment",
+            "type": "http"
+          },
+          "http": {
+            "method": "PUT",
+            "url": "https://{{public-api-url}}/v1/orders/:orderId/payments",
+            "headers": [
+              {
+                "name": "X-Store-Id",
+                "value": ""
+              }
+            ],
+            "params": [
+              {
+                "name": "orderId",
+                "value": "",
+                "type": "path"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "oauth2",
+              "flow": "client_credentials",
+              "accessTokenUrl": "/v1/auth/token",
+              "credentials": {
+                "clientId": "{{clientId}}",
+                "clientSecret": "{{clientSecret}}"
+              }
+            }
+          },
+          "docs": "`RATE LIMIT: 8 per minute`\n\nUpdates the customer payment and financial breakdown for the order identified by `orderId`.\n\nThis is a **merge, not a full replace**: each field is overwritten only when the request supplies a non-null value for it. Fields sent as `null` (or omitted) keep their existing value. Provide the financial breakdown via `orderTotal` (V1) or `orderTotalsV2` (V2); when V2 is sent it is validated for consistency with the V1 aggregates. The update is processed asynchronously and "
+        },
+        {
+          "info": {
+            "name": "Update order delivery information",
+            "type": "http"
+          },
+          "http": {
+            "method": "PUT",
+            "url": "https://{{public-api-url}}/v1/orders/:orderId/delivery",
+            "headers": [
+              {
+                "name": "X-Store-Id",
+                "value": ""
+              }
+            ],
+            "params": [
+              {
+                "name": "orderId",
+                "value": "",
+                "type": "path"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "oauth2",
+              "flow": "client_credentials",
+              "accessTokenUrl": "/v1/auth/token",
+              "credentials": {
+                "clientId": "{{clientId}}",
+                "clientSecret": "{{clientSecret}}"
+              }
+            }
+          },
+          "docs": "`RATE LIMIT: 8 per minute`\n\nUpdates the delivery information for the order identified by `orderId` — courier details, destination address, vehicle, last known location, and dropoff instructions. Use it to keep delivery state current as the courier progresses. The update is processed asynchronously and returns `202 Accepted`.\n"
+        },
+        {
+          "info": {
+            "name": "Upload past orders",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://{{public-api-url}}/v1/orders/past-orders",
+            "headers": [
+              {
+                "name": "X-Store-Id",
+                "value": ""
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "oauth2",
+              "flow": "client_credentials",
+              "accessTokenUrl": "/v1/auth/token",
+              "credentials": {
+                "clientId": "{{clientId}}",
+                "clientSecret": "{{clientSecret}}"
+              }
+            }
+          },
+          "docs": "`RATE LIMIT: 32 per minute`; orders must have a status of FULFILLED, REJECTED, or CANCELED.\n\nBackfills already-completed orders for reporting and analytics. Uploaded orders are stored as **read-only** and are **not displayed** in operational views — they exist purely to make historical data available to BI and reporting tools. Up to 100 orders can be uploaded per request.\n"
+        }
+      ]
+    },
+    {
+      "info": {
+        "name": "manager_order_endpoints",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "Notify the result of a Create Order event",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://{{public-api-url}}/manager/order/v1/orders/order-created",
+            "headers": [
+              {
+                "name": "X-Store-Id",
+                "value": ""
+              },
+              {
+                "name": "X-Event-Id",
+                "value": ""
+              }
+            ],
+            "auth": {
+              "type": "oauth2",
+              "flow": "client_credentials",
+              "accessTokenUrl": "/v1/auth/token",
+              "credentials": {
+                "clientId": "{{clientId}}",
+                "clientSecret": "{{clientSecret}}"
+              }
+            }
+          },
+          "docs": "`RATE LIMIT: 32 per minute`\n\nCallback used by a merchant-side integration to acknowledge the result of an order-creation webhook it received. Send the `X-Event-Id` of the original webhook event so the platform can correlate the acknowledgement with the order it created.\n"
+        },
+        {
+          "info": {
+            "name": "Fetch order feed for a store",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://{{public-api-url}}/manager/order/v1/orders",
+            "headers": [
+              {
+                "name": "X-Store-Id",
+                "value": ""
+              }
+            ],
+            "params": [
+              {
+                "name": "limit",
+                "value": "",
+                "type": "query"
+              },
+              {
+                "name": "token",
+                "value": "",
+                "type": "query"
+              },
+              {
+                "name": "minDateTime",
+                "value": "",
+                "type": "query"
+              },
+              {
+                "name": "maxDateTime",
+                "value": "",
+                "type": "query"
+              }
+            ],
+            "auth": {
+              "type": "oauth2",
+              "flow": "client_credentials",
+              "accessTokenUrl": "/v1/auth/token",
+              "credentials": {
+                "clientId": "{{clientId}}",
+                "clientSecret": "{{clientSecret}}"
+              }
+            }
+          },
+          "docs": "`RATE LIMIT: 32 per minute`\n\nReturns a paginated feed of the store's orders, most useful for POS, BI, and reporting integrations that periodically poll for new and updated orders.\n\nUse `limit` to control page size and the opaque pagination token to page through results — when the response `offsetToken` is absent, no more orders are available. Narrow the window with `minDateTime` / `maxDateTime` (ISO 8601 with time zone). The lookback window is bounded by the platform's retention period (currentl"
+        },
+        {
+          "info": {
+            "name": "Fetch order with Manager Info",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://{{public-api-url}}/manager/order/v1/sources/:source/orders/:orderId",
+            "headers": [
+              {
+                "name": "X-Store-Id",
+                "value": ""
+              }
+            ],
+            "params": [
+              {
+                "name": "orderId",
+                "value": "",
+                "type": "path"
+              },
+              {
+                "name": "source",
+                "value": "",
+                "type": "path"
+              }
+            ],
+            "auth": {
+              "type": "oauth2",
+              "flow": "client_credentials",
+              "accessTokenUrl": "/v1/auth/token",
+              "credentials": {
+                "clientId": "{{clientId}}",
+                "clientSecret": "{{clientSecret}}"
+              }
+            }
+          },
+          "docs": "`RATE LIMIT: 32 per minute`\n\nReturns the full detail of a single order for the given `source` (the ordering marketplace the order came from, e.g. `ubereats`), enriched with merchant-side information: the current POS `injectionState`, the `injectionEvent` that triggered it, any `orderIssues`, and cancellation details when applicable.\n\nItem and modifier identifiers in the returned order are the store's external (POS) identifiers, so they line up with the merchant's own catalog.\n"
+        },
+        {
+          "info": {
+            "name": "Request order confirmation",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://{{public-api-url}}/manager/order/v1/sources/:source/orders/:orderId/confirm",
+            "headers": [
+              {
+                "name": "X-Store-Id",
+                "value": ""
+              }
+            ],
+            "params": [
+              {
+                "name": "source",
+                "value": "",
+                "type": "path"
+              },
+              {
+                "name": "orderId",
+                "value": "",
+                "type": "path"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "oauth2",
+              "flow": "client_credentials",
+              "accessTokenUrl": "/v1/auth/token",
+              "credentials": {
+                "clientId": "{{clientId}}",
+                "clientSecret": "{{clientSecret}}"
+              }
+            }
+          },
+          "docs": "`RATE LIMIT: 32 per minute`\n\nConfirms (accepts) the order for the given `source` on behalf of the store — the typical action a POS takes when the merchant accepts an incoming order. Optionally include `estimatedPrepTimeMinutes` to communicate how long the order will take to prepare. Processed asynchronously; returns `202 Accepted`.\n"
+        },
+        {
+          "info": {
+            "name": "Request order cancelation",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://{{public-api-url}}/manager/order/v1/sources/:source/orders/:orderId/cancel",
+            "headers": [
+              {
+                "name": "X-Store-Id",
+                "value": ""
+              }
+            ],
+            "params": [
+              {
+                "name": "source",
+                "value": "",
+                "type": "path"
+              },
+              {
+                "name": "orderId",
+                "value": "",
+                "type": "path"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "oauth2",
+              "flow": "client_credentials",
+              "accessTokenUrl": "/v1/auth/token",
+              "credentials": {
+                "clientId": "{{clientId}}",
+                "clientSecret": "{{clientSecret}}"
+              }
+            }
+          },
+          "docs": "`RATE LIMIT: 32 per minute`\n\nCancels (rejects) the order for the given `source` on behalf of the store. A `cancellationReason` is required; optionally include the `cancelingParty` to record who initiated the cancellation. Processed asynchronously; returns `202 Accepted`.\n"
+        },
+        {
+          "info": {
+            "name": "Mark an order as ready to pickup",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://{{public-api-url}}/manager/order/v1/sources/:source/orders/:orderId/ready-to-pickup",
+            "headers": [
+              {
+                "name": "X-Store-Id",
+                "value": ""
+              }
+            ],
+            "params": [
+              {
+                "name": "source",
+                "value": "",
+                "type": "path"
+              },
+              {
+                "name": "orderId",
+                "value": "",
+                "type": "path"
+              }
+            ],
+            "auth": {
+              "type": "oauth2",
+              "flow": "client_credentials",
+              "accessTokenUrl": "/v1/auth/token",
+              "credentials": {
+                "clientId": "{{clientId}}",
+                "clientSecret": "{{clientSecret}}"
+              }
+            }
+          },
+          "docs": "`RATE LIMIT: 32 per minute`\n\nSignals that the store has finished preparing the order for the given `source` and it is ready for the courier or customer to collect. Marks all of the order's station tickets as prepared. Processed asynchronously; returns `202 Accepted`.\n"
+        },
+        {
+          "info": {
+            "name": "Create a packaging component",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://{{public-api-url}}/manager/order/v1/sources/:source/orders/:orderId/create-packaging-component",
+            "headers": [
+              {
+                "name": "X-Store-Id",
+                "value": ""
+              }
+            ],
+            "params": [
+              {
+                "name": "source",
+                "value": "",
+                "type": "path"
+              },
+              {
+                "name": "orderId",
+                "value": "",
+                "type": "path"
+              }
+            ],
+            "auth": {
+              "type": "oauth2",
+              "flow": "client_credentials",
+              "accessTokenUrl": "/v1/auth/token",
+              "credentials": {
+                "clientId": "{{clientId}}",
+                "clientSecret": "{{clientSecret}}"
+              }
+            }
+          },
+          "docs": "`RATE LIMIT: 32 per minute`\n\nCreates a packaging component (a packaging ticket) for the order of the given `source`, used by kitchen/station workflows to print or track packaging for the order. Returns the identifiers of the created order component.\n"
+        },
+        {
+          "info": {
+            "name": "Mark an order as fulfilled",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://{{public-api-url}}/manager/order/v1/sources/:source/orders/:orderId/fulfill",
+            "headers": [
+              {
+                "name": "X-Store-Id",
+                "value": ""
+              }
+            ],
+            "params": [
+              {
+                "name": "source",
+                "value": "",
+                "type": "path"
+              },
+              {
+                "name": "orderId",
+                "value": "",
+                "type": "path"
+              }
+            ],
+            "auth": {
+              "type": "oauth2",
+              "flow": "client_credentials",
+              "accessTokenUrl": "/v1/auth/token",
+              "credentials": {
+                "clientId": "{{clientId}}",
+                "clientSecret": "{{clientSecret}}"
+              }
+            }
+          },
+          "docs": "`RATE LIMIT: 32 per minute`\n\nMarks the order for the given `source` as handed off / fulfilled — the final operational step, once the order has been given to the courier or customer. Processed asynchronously; returns `202 Accepted`.\n"
+        },
+        {
+          "info": {
+            "name": "Mark a dine-in (open-tab) order as closed",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://{{public-api-url}}/manager/order/v1/sources/:source/orders/:orderId/close",
+            "headers": [
+              {
+                "name": "X-Store-Id",
+                "value": ""
+              }
+            ],
+            "params": [
+              {
+                "name": "source",
+                "value": "",
+                "type": "path"
+              },
+              {
+                "name": "orderId",
+                "value": "",
+                "type": "path"
+              }
+            ],
+            "auth": {
+              "type": "oauth2",
+              "flow": "client_credentials",
+              "accessTokenUrl": "/v1/auth/token",
+              "credentials": {
+                "clientId": "{{clientId}}",
+                "clientSecret": "{{clientSecret}}"
+              }
+            }
+          },
+          "docs": "Marks an open-tab dine-in order as closed. The closing party is always the merchant/POS (system). `RATE LIMIT: 32 per minute`\n"
+        },
+        {
+          "info": {
+            "name": "Update order customer items",
+            "type": "http"
+          },
+          "http": {
+            "method": "PUT",
+            "url": "https://{{public-api-url}}/manager/order/v1/sources/:source/orders/:orderId/items",
+            "headers": [
+              {
+                "name": "X-Store-Id",
+                "value": ""
+              }
+            ],
+            "params": [
+              {
+                "name": "source",
+                "value": "",
+                "type": "path"
+              },
+              {
+                "name": "orderId",
+                "value": "",
+                "type": "path"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "oauth2",
+              "flow": "client_credentials",
+              "accessTokenUrl": "/v1/auth/token",
+              "credentials": {
+                "clientId": "{{clientId}}",
+                "clientSecret": "{{clientSecret}}"
+              }
+            }
+          },
+          "docs": "Updates customer items for a dine-in order (quantity change, price adjustment, or add item). Only supported when integration slug is d2c-eater-website, order fulfillment type is dine-in, and the order tab is open (order is modifiable). Modifying party and modification request ID are set by the endpoint. `RATE LIMIT: 8 per minute`\n"
+        },
+        {
+          "info": {
+            "name": "Update order prep time",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://{{public-api-url}}/manager/order/v1/sources/:source/orders/:orderId/prep-time",
+            "headers": [
+              {
+                "name": "X-Store-Id",
+                "value": ""
+              }
+            ],
+            "params": [
+              {
+                "name": "source",
+                "value": "",
+                "type": "path"
+              },
+              {
+                "name": "orderId",
+                "value": "",
+                "type": "path"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "oauth2",
+              "flow": "client_credentials",
+              "accessTokenUrl": "/v1/auth/token",
+              "credentials": {
+                "clientId": "{{clientId}}",
+                "clientSecret": "{{clientSecret}}"
+              }
+            }
+          },
+          "docs": "`RATE LIMIT: 32 per minute`\n\nUpdates the estimated preparation time (in minutes) for the order of the given `source`, e.g. when the kitchen revises its estimate after the order was confirmed. Unlike the other manager endpoints, this one uses the `orders.update` scope. Processed asynchronously; returns `202 Accepted`.\n"
+        }
+      ]
+    },
+    {
+      "info": {
+        "name": "manager_storefront_endpoints",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "Request pausing storefronts of a store",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://{{public-api-url}}/manager/storefront/v1/storefront/pause",
+            "headers": [
+              {
+                "name": "X-Store-Id",
+                "value": ""
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "oauth2",
+              "flow": "client_credentials",
+              "accessTokenUrl": "/v1/auth/token",
+              "credentials": {
+                "clientId": "{{clientId}}",
+                "clientSecret": "{{clientSecret}}"
+              }
+            }
+          },
+          "docs": "`RATE LIMIT: 8 per minute`\n"
+        },
+        {
+          "info": {
+            "name": "Request unpausing storefronts of a store",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://{{public-api-url}}/manager/storefront/v1/storefront/unpause",
+            "headers": [
+              {
+                "name": "X-Store-Id",
+                "value": ""
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "oauth2",
+              "flow": "client_credentials",
+              "accessTokenUrl": "/v1/auth/token",
+              "credentials": {
+                "clientId": "{{clientId}}",
+                "clientSecret": "{{clientSecret}}"
+              }
+            }
+          },
+          "docs": "`RATE LIMIT: 8 per minute`\n"
+        },
+        {
+          "info": {
+            "name": "Get the process status details of a pause request",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://{{public-api-url}}/manager/storefront/v1/storefront/pause/request/:requestId/status",
+            "headers": [
+              {
+                "name": "X-Store-Id",
+                "value": ""
+              }
+            ],
+            "params": [
+              {
+                "name": "requestId",
+                "value": "",
+                "type": "path"
+              }
+            ],
+            "auth": {
+              "type": "oauth2",
+              "flow": "client_credentials",
+              "accessTokenUrl": "/v1/auth/token",
+              "credentials": {
+                "clientId": "{{clientId}}",
+                "clientSecret": "{{clientSecret}}"
+              }
+            }
+          },
+          "docs": "`RATE LIMIT: 8 per minute`\n"
+        },
+        {
+          "info": {
+            "name": "Get the process status details of an unpause request",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://{{public-api-url}}/manager/storefront/v1/storefront/unpause/request/:requestId/status",
+            "headers": [
+              {
+                "name": "X-Store-Id",
+                "value": ""
+              }
+            ],
+            "params": [
+              {
+                "name": "requestId",
+                "value": "",
+                "type": "path"
+              }
+            ],
+            "auth": {
+              "type": "oauth2",
+              "flow": "client_credentials",
+              "accessTokenUrl": "/v1/auth/token",
+              "credentials": {
+                "clientId": "{{clientId}}",
+                "clientSecret": "{{clientSecret}}"
+              }
+            }
+          },
+          "docs": "`RATE LIMIT: 8 per minute`\n"
+        }
+      ]
+    },
+    {
+      "info": {
+        "name": "manager_menu_endpoints",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "Get the menus for a store",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://{{public-api-url}}/v1/menus",
+            "headers": [
+              {
+                "name": "X-Store-Id",
+                "value": ""
+              }
+            ],
+            "auth": {
+              "type": "oauth2",
+              "flow": "client_credentials",
+              "accessTokenUrl": "/v1/auth/token",
+              "credentials": {
+                "clientId": "{{clientId}}",
+                "clientSecret": "{{clientSecret}}"
+              }
+            }
+          },
+          "docs": "`RATE LIMIT: 8 per minute`\n"
+        },
+        {
+          "info": {
+            "name": "Get the async menu job status",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://{{public-api-url}}/v1/menus/jobs/:jobId",
+            "headers": [
+              {
+                "name": "X-Store-Id",
+                "value": ""
+              }
+            ],
+            "params": [
+              {
+                "name": "jobId",
+                "value": "",
+                "type": "path"
+              }
+            ],
+            "auth": {
+              "type": "oauth2",
+              "flow": "client_credentials",
+              "accessTokenUrl": "/v1/auth/token",
+              "credentials": {
+                "clientId": "{{clientId}}",
+                "clientSecret": "{{clientSecret}}"
+              }
+            }
+          },
+          "docs": "`RATE LIMIT: 8 per minute`\n"
+        },
+        {
+          "info": {
+            "name": "Get the publish-targets for a store",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://{{public-api-url}}/manager/menu/v1/menus/publish-targets",
+            "headers": [
+              {
+                "name": "X-Store-Id",
+                "value": ""
+              }
+            ],
+            "auth": {
+              "type": "oauth2",
+              "flow": "client_credentials",
+              "accessTokenUrl": "/v1/auth/token",
+              "credentials": {
+                "clientId": "{{clientId}}",
+                "clientSecret": "{{clientSecret}}"
+              }
+            }
+          },
+          "docs": "`RATE LIMIT: 2 per minute`\n"
+        },
+        {
+          "info": {
+            "name": "Publish menus to targets for a store",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://{{public-api-url}}/manager/menu/v1/menus/publish",
+            "headers": [
+              {
+                "name": "X-Store-Id",
+                "value": ""
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "oauth2",
+              "flow": "client_credentials",
+              "accessTokenUrl": "/v1/auth/token",
+              "credentials": {
+                "clientId": "{{clientId}}",
+                "clientSecret": "{{clientSecret}}"
+              }
+            }
+          },
+          "docs": "`RATE LIMIT: 2 per minute`\n"
+        },
+        {
+          "info": {
+            "name": "Synchronize store menu with POS menu",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://{{public-api-url}}/manager/menu/v1/menus/menu-sync",
+            "headers": [
+              {
+                "name": "X-Store-Id",
+                "value": ""
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "oauth2",
+              "flow": "client_credentials",
+              "accessTokenUrl": "/v1/auth/token",
+              "credentials": {
+                "clientId": "{{clientId}}",
+                "clientSecret": "{{clientSecret}}"
+              }
+            }
+          },
+          "docs": "`RATE LIMIT: 2 per minute`\n"
+        },
+        {
+          "info": {
+            "name": "Suspend menu entities targets for a store",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://{{public-api-url}}/manager/menu/v1/menus/entities/availability/suspend",
+            "headers": [
+              {
+                "name": "X-Store-Id",
+                "value": ""
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "oauth2",
+              "flow": "client_credentials",
+              "accessTokenUrl": "/v1/auth/token",
+              "credentials": {
+                "clientId": "{{clientId}}",
+                "clientSecret": "{{clientSecret}}"
+              }
+            }
+          },
+          "docs": "`RATE LIMIT: 16 per minute`\n"
+        },
+        {
+          "info": {
+            "name": "Unsuspend menu entities targets for a store",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://{{public-api-url}}/manager/menu/v1/menus/entities/availability/unsuspend",
+            "headers": [
+              {
+                "name": "X-Store-Id",
+                "value": ""
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "oauth2",
+              "flow": "client_credentials",
+              "accessTokenUrl": "/v1/auth/token",
+              "credentials": {
+                "clientId": "{{clientId}}",
+                "clientSecret": "{{clientSecret}}"
+              }
+            }
+          },
+          "docs": "`RATE LIMIT: 16 per minute`\n"
+        },
+        {
+          "info": {
+            "name": "Bootstrap menus for a store",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://{{public-api-url}}/manager/menu/v1/bootstrap",
+            "headers": [
+              {
+                "name": "X-Store-Id",
+                "value": ""
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "oauth2",
+              "flow": "client_credentials",
+              "accessTokenUrl": "/v1/auth/token",
+              "credentials": {
+                "clientId": "{{clientId}}",
+                "clientSecret": "{{clientSecret}}"
+              }
+            }
+          },
+          "docs": "`RATE LIMIT: 2 per minute`\n"
+        }
+      ]
+    },
+    {
+      "info": {
+        "name": "menus_endpoints",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "Upsert menus for a store",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://{{public-api-url}}/v1/menus",
+            "headers": [
+              {
+                "name": "X-Store-Id",
+                "value": ""
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "oauth2",
+              "flow": "client_credentials",
+              "accessTokenUrl": "/v1/auth/token",
+              "credentials": {
+                "clientId": "{{clientId}}",
+                "clientSecret": "{{clientSecret}}"
+              }
+            }
+          },
+          "docs": "`RATE LIMIT: 2 per minute`\n"
+        },
+        {
+          "info": {
+            "name": "Notify the result of a Publish Menu event",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://{{public-api-url}}/v1/menus/publish",
+            "headers": [
+              {
+                "name": "X-Store-Id",
+                "value": ""
+              },
+              {
+                "name": "X-Event-Id",
+                "value": ""
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "oauth2",
+              "flow": "client_credentials",
+              "accessTokenUrl": "/v1/auth/token",
+              "credentials": {
+                "clientId": "{{clientId}}",
+                "clientSecret": "{{clientSecret}}"
+              }
+            }
+          },
+          "docs": "`RATE LIMIT: 8 per minute`\n\nSuccessful callback response for the [**publish menu**](/api-reference/#operation/menuPublishWebhook) webhook. If an error occurred, please publish a [**callback error**](/api-reference/#operation/publishError) instead. See [**failed event flow**](/docs/menus-integrations-failed-event-flow/) for details.\n"
+        },
+        {
+          "info": {
+            "name": "Notify the result of a Send Menu event",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://{{public-api-url}}/v1/menus/current",
+            "headers": [
+              {
+                "name": "X-Store-Id",
+                "value": ""
+              },
+              {
+                "name": "X-Event-Id",
+                "value": ""
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "oauth2",
+              "flow": "client_credentials",
+              "accessTokenUrl": "/v1/auth/token",
+              "credentials": {
+                "clientId": "{{clientId}}",
+                "clientSecret": "{{clientSecret}}"
+              }
+            }
+          },
+          "docs": "`RATE LIMIT: 4 per minute`\n\nSuccessful callback response for the [**send menu**](/api-reference/#operation/menuSendCallback) webhook. If an error occurred, please publish a [**callback error**](/api-reference/#operation/publishError) instead. See [**failed event flow**](/docs/menus-integrations-failed-event-flow/) for details.\n"
+        },
+        {
+          "info": {
+            "name": "Notify the receival of a Upsert Hours Menu event",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://{{public-api-url}}/v1/menus/hours",
+            "headers": [
+              {
+                "name": "X-Store-Id",
+                "value": ""
+              },
+              {
+                "name": "X-Event-Id",
+                "value": ""
+              }
+            ],
+            "auth": {
+              "type": "oauth2",
+              "flow": "client_credentials",
+              "accessTokenUrl": "/v1/auth/token",
+              "credentials": {
+                "clientId": "{{clientId}}",
+                "clientSecret": "{{clientSecret}}"
+              }
+            }
+          },
+          "docs": "`RATE LIMIT: 8 per minute`\n\nSuccessful callback response for the [**upsert hours**](/api-reference/#operation/upsertMenuHoursWebhook) webhook. If an error occurred, please publish a [**callback error**](/api-reference/#operation/publishError) instead. See [**failed event flow**](/docs/menus-integrations-failed-event-flow/) for details.\n"
+        },
+        {
+          "info": {
+            "name": "Synchronize store menu with POS menu",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://{{public-api-url}}/v1/menus/menu-sync",
+            "headers": [
+              {
+                "name": "X-Store-Id",
+                "value": ""
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "oauth2",
+              "flow": "client_credentials",
+              "accessTokenUrl": "/v1/auth/token",
+              "credentials": {
+                "clientId": "{{clientId}}",
+                "clientSecret": "{{clientSecret}}"
+              }
+            }
+          },
+          "docs": "This endpoint is used to synchronize the store menu with the connected POS."
+        },
+        {
+          "info": {
+            "name": "Notify the result of an Update Menu Entities Availabilities event",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://{{public-api-url}}/v1/menus/entity/availability/bulk",
+            "headers": [
+              {
+                "name": "X-Store-Id",
+                "value": ""
+              },
+              {
+                "name": "X-Event-Id",
+                "value": ""
+              }
+            ],
+            "auth": {
+              "type": "oauth2",
+              "flow": "client_credentials",
+              "accessTokenUrl": "/v1/auth/token",
+              "credentials": {
+                "clientId": "{{clientId}}",
+                "clientSecret": "{{clientSecret}}"
+              }
+            }
+          },
+          "docs": "`RATE LIMIT: 32 per minute`\n\nSuccessful callback response for the [**update menu entities availabilities**](/api-reference/#operation/updateMenuEntitiesAvailabilitiesWebhook) webhook. If an error occurred, please publish a [**callback error**](/api-reference/#operation/publishError) instead. See [**failed event flow**](/docs/menus-integrations-failed-event-flow/) for details.\n"
+        }
+      ]
+    },
+    {
+      "info": {
+        "name": "storefront_endpoints",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "Notify about store availability change",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://{{public-api-url}}/v1/storefront/availability",
+            "headers": [
+              {
+                "name": "X-Store-Id",
+                "value": ""
+              },
+              {
+                "name": "X-Event-Id",
+                "value": ""
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "oauth2",
+              "flow": "client_credentials",
+              "accessTokenUrl": "/v1/auth/token",
+              "credentials": {
+                "clientId": "{{clientId}}",
+                "clientSecret": "{{clientSecret}}"
+              }
+            }
+          },
+          "docs": "`RATE LIMIT: 16 per minute`\n"
+        },
+        {
+          "info": {
+            "name": "Notify about store hours configuration change",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://{{public-api-url}}/v1/storefront/hours",
+            "headers": [
+              {
+                "name": "X-Store-Id",
+                "value": ""
+              },
+              {
+                "name": "X-Event-Id",
+                "value": ""
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "oauth2",
+              "flow": "client_credentials",
+              "accessTokenUrl": "/v1/auth/token",
+              "credentials": {
+                "clientId": "{{clientId}}",
+                "clientSecret": "{{clientSecret}}"
+              }
+            }
+          },
+          "docs": "`RATE LIMIT: 16 per minute`\n"
+        },
+        {
+          "info": {
+            "name": "Notify the result of a pause request event",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://{{public-api-url}}/v1/storefront/pause",
+            "headers": [
+              {
+                "name": "X-Store-Id",
+                "value": ""
+              },
+              {
+                "name": "X-Event-Id",
+                "value": ""
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "oauth2",
+              "flow": "client_credentials",
+              "accessTokenUrl": "/v1/auth/token",
+              "credentials": {
+                "clientId": "{{clientId}}",
+                "clientSecret": "{{clientSecret}}"
+              }
+            }
+          },
+          "docs": "`RATE LIMIT: 8 per minute`\n"
+        },
+        {
+          "info": {
+            "name": "Notify the result of an unpause request event",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://{{public-api-url}}/v1/storefront/unpause",
+            "headers": [
+              {
+                "name": "X-Store-Id",
+                "value": ""
+              },
+              {
+                "name": "X-Event-Id",
+                "value": ""
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "oauth2",
+              "flow": "client_credentials",
+              "accessTokenUrl": "/v1/auth/token",
+              "credentials": {
+                "clientId": "{{clientId}}",
+                "clientSecret": "{{clientSecret}}"
+              }
+            }
+          },
+          "docs": "`RATE LIMIT: 8 per minute`\n"
+        },
+        {
+          "info": {
+            "name": "Notify about store availability change from the eater side",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://{{public-api-url}}/v1/storefront/eater-side/status",
+            "headers": [
+              {
+                "name": "X-Store-Id",
+                "value": ""
+              },
+              {
+                "name": "X-Event-Id",
+                "value": ""
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "oauth2",
+              "flow": "client_credentials",
+              "accessTokenUrl": "/v1/auth/token",
+              "credentials": {
+                "clientId": "{{clientId}}",
+                "clientSecret": "{{clientSecret}}"
+              }
+            }
+          },
+          "docs": "`RATE LIMIT: 16 per minute`\n"
+        },
+        {
+          "info": {
+            "name": "Notify about store hours configuration change on eater side",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://{{public-api-url}}/v1/storefront/eater-side/hours",
+            "headers": [
+              {
+                "name": "X-Store-Id",
+                "value": ""
+              },
+              {
+                "name": "X-Event-Id",
+                "value": ""
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "oauth2",
+              "flow": "client_credentials",
+              "accessTokenUrl": "/v1/auth/token",
+              "credentials": {
+                "clientId": "{{clientId}}",
+                "clientSecret": "{{clientSecret}}"
+              }
+            }
+          },
+          "docs": "`RATE LIMIT: 16 per minute`\n"
+        },
+        {
+          "info": {
+            "name": "Notify about store details update",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://{{public-api-url}}/v1/market-intel/store-details",
+            "headers": [
+              {
+                "name": "X-Event-Id",
+                "value": ""
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "oauth2",
+              "flow": "client_credentials",
+              "accessTokenUrl": "/v1/auth/token",
+              "credentials": {
+                "clientId": "{{clientId}}",
+                "clientSecret": "{{clientSecret}}"
+              }
+            }
+          },
+          "docs": "Notify about store details update"
+        }
+      ]
+    },
+    {
+      "info": {
+        "name": "delivery_endpoints",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "Update delivery status",
+            "type": "http"
+          },
+          "http": {
+            "method": "PUT",
+            "url": "https://{{public-api-url}}/v1/delivery/:deliveryReferenceId/status",
+            "params": [
+              {
+                "name": "deliveryReferenceId",
+                "value": "",
+                "type": "path"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "oauth2",
+              "flow": "client_credentials",
+              "accessTokenUrl": "/v1/auth/token",
+              "credentials": {
+                "clientId": "{{clientId}}",
+                "clientSecret": "{{clientSecret}}"
+              }
+            }
+          },
+          "docs": "`RATE LIMIT: 8 per minute`\n"
+        },
+        {
+          "info": {
+            "name": "Notify the result of a request delivery quote event",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://{{public-api-url}}/v1/delivery/:deliveryReferenceId/quotes",
+            "headers": [
+              {
+                "name": "X-Store-Id",
+                "value": ""
+              },
+              {
+                "name": "X-Event-Id",
+                "value": ""
+              }
+            ],
+            "params": [
+              {
+                "name": "deliveryReferenceId",
+                "value": "",
+                "type": "path"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "oauth2",
+              "flow": "client_credentials",
+              "accessTokenUrl": "/v1/auth/token",
+              "credentials": {
+                "clientId": "{{clientId}}",
+                "clientSecret": "{{clientSecret}}"
+              }
+            }
+          },
+          "docs": "`RATE LIMIT: 8 per minute`\n"
+        },
+        {
+          "info": {
+            "name": "Notify the result of an accept delivery event",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://{{public-api-url}}/v1/delivery/:deliveryReferenceId/accept",
+            "headers": [
+              {
+                "name": "X-Store-Id",
+                "value": ""
+              },
+              {
+                "name": "X-Event-Id",
+                "value": ""
+              }
+            ],
+            "params": [
+              {
+                "name": "deliveryReferenceId",
+                "value": "",
+                "type": "path"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "oauth2",
+              "flow": "client_credentials",
+              "accessTokenUrl": "/v1/auth/token",
+              "credentials": {
+                "clientId": "{{clientId}}",
+                "clientSecret": "{{clientSecret}}"
+              }
+            }
+          },
+          "docs": "`RATE LIMIT: 8 per minute`\n"
+        },
+        {
+          "info": {
+            "name": "Notify the result of a cancel delivery event",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://{{public-api-url}}/v1/delivery/:deliveryReferenceId/cancel",
+            "headers": [
+              {
+                "name": "X-Store-Id",
+                "value": ""
+              },
+              {
+                "name": "X-Event-Id",
+                "value": ""
+              }
+            ],
+            "params": [
+              {
+                "name": "deliveryReferenceId",
+                "value": "",
+                "type": "path"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "oauth2",
+              "flow": "client_credentials",
+              "accessTokenUrl": "/v1/auth/token",
+              "credentials": {
+                "clientId": "{{clientId}}",
+                "clientSecret": "{{clientSecret}}"
+              }
+            }
+          },
+          "docs": "`RATE LIMIT: 8 per minute`\n"
+        },
+        {
+          "info": {
+            "name": "Publish delivery callback error",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://{{public-api-url}}/v1/delivery/callback/error",
+            "headers": [
+              {
+                "name": "X-Store-Id",
+                "value": ""
+              },
+              {
+                "name": "X-Event-Id",
+                "value": ""
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "oauth2",
+              "flow": "client_credentials",
+              "accessTokenUrl": "/v1/auth/token",
+              "credentials": {
+                "clientId": "{{clientId}}",
+                "clientSecret": "{{clientSecret}}"
+              }
+            }
+          },
+          "docs": "`RATE LIMIT: 16 per minute`\n"
+        },
+        {
+          "info": {
+            "name": "Notify the result of an update delivery request event",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://{{public-api-url}}/v1/delivery/:deliveryReferenceId/update",
+            "headers": [
+              {
+                "name": "X-Store-Id",
+                "value": ""
+              },
+              {
+                "name": "X-Event-Id",
+                "value": ""
+              }
+            ],
+            "params": [
+              {
+                "name": "deliveryReferenceId",
+                "value": "",
+                "type": "path"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "oauth2",
+              "flow": "client_credentials",
+              "accessTokenUrl": "/v1/auth/token",
+              "credentials": {
+                "clientId": "{{clientId}}",
+                "clientSecret": "{{clientSecret}}"
+              }
+            }
+          },
+          "docs": "`RATE LIMIT: 8 per minute`\n"
+        }
+      ]
+    },
+    {
+      "info": {
+        "name": "callback_endpoints",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "Publish callback error",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://{{public-api-url}}/v1/callback/error",
+            "headers": [
+              {
+                "name": "X-Store-Id",
+                "value": ""
+              },
+              {
+                "name": "X-Event-Id",
+                "value": ""
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "oauth2",
+              "flow": "client_credentials",
+              "accessTokenUrl": "/v1/auth/token",
+              "credentials": {
+                "clientId": "{{clientId}}",
+                "clientSecret": "{{clientSecret}}"
+              }
+            }
+          },
+          "docs": "`RATE LIMIT: 16 per minute` \n\nThis is the generalized callback error that should be used to return failures for all webhooks, unless otherwise specified. See [**failed event flow**](/docs/menus-integrations-failed-event-flow/) for details.\n"
+        }
+      ]
+    },
+    {
+      "info": {
+        "name": "ping_endpoints",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "Ping the system",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://{{public-api-url}}/v1/ping",
+            "headers": [
+              {
+                "name": "X-Store-Id",
+                "value": ""
+              },
+              {
+                "name": "X-Echo-Error",
+                "value": ""
+              }
+            ],
+            "auth": {
+              "type": "oauth2",
+              "flow": "client_credentials",
+              "accessTokenUrl": "/v1/auth/token",
+              "credentials": {
+                "clientId": "{{clientId}}",
+                "clientSecret": "{{clientSecret}}"
+              }
+            }
+          },
+          "docs": "`RATE LIMIT: 8 per minute`\n"
+        }
+      ]
+    },
+    {
+      "info": {
+        "name": "reports_endpoints",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "Request status of the report using jobId",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://{{public-api-url}}/v1/reports/:jobId",
+            "params": [
+              {
+                "name": "jobId",
+                "value": "",
+                "type": "path"
+              }
+            ],
+            "auth": {
+              "type": "oauth2",
+              "flow": "client_credentials",
+              "accessTokenUrl": "/v1/auth/token",
+              "credentials": {
+                "clientId": "{{clientId}}",
+                "clientSecret": "{{clientSecret}}"
+              }
+            }
+          },
+          "docs": "`RATE LIMIT: 2 per minute`\n"
+        },
+        {
+          "info": {
+            "name": "Request a business report for multiple stores",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://{{public-api-url}}/v1/reports/generate",
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "oauth2",
+              "flow": "client_credentials",
+              "accessTokenUrl": "/v1/auth/token",
+              "credentials": {
+                "clientId": "{{clientId}}",
+                "clientSecret": "{{clientSecret}}"
+              }
+            }
+          },
+          "docs": "Request a business report for multiple stores"
+        }
+      ]
+    },
+    {
+      "info": {
+        "name": "reviews_endpoints",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "Reply or schedule a reply to a review",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://{{public-api-url}}/v1/reviews/reply",
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "oauth2",
+              "flow": "client_credentials",
+              "accessTokenUrl": "/v1/auth/token",
+              "credentials": {
+                "clientId": "{{clientId}}",
+                "clientSecret": "{{clientSecret}}"
+              }
+            }
+          },
+          "docs": "Reply or schedule a reply to a review"
+        }
+      ]
+    },
+    {
+      "info": {
+        "name": "auth_endpoints",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "Generate token",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://{{public-api-url}}/v1/auth/token",
+            "body": {
+              "type": "form-urlencoded",
+              "data": []
+            }
+          },
+          "docs": "Client credentials in the request-body and HTTP Basic Auth are supported."
+        },
+        {
+          "info": {
+            "name": "OAuth 2.0 Authorize Endpoint",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://{{public-api-url}}/v1/auth/oauth2/authorize",
+            "params": [
+              {
+                "name": "client_id",
+                "value": "",
+                "type": "query",
+                "description": "The ID of the client (also known as the Application ID)."
+              },
+              {
+                "name": "redirect_uri",
+                "value": "",
+                "type": "query",
+                "description": "The URI to where the user should be redirected when the flow is successfully completed. It must be previously registered at Developer Portal in the application settings."
+              },
+              {
+                "name": "response_type",
+                "value": "",
+                "type": "query",
+                "description": "Specifies the expected response type. Only \"code\" is accepted."
+              },
+              {
+                "name": "scope",
+                "value": "",
+                "type": "query",
+                "description": "The scope to request, multiple scopes are passed delimited by a space character."
+              },
+              {
+                "name": "state",
+                "value": "",
+                "type": "query",
+                "description": "Can be used to store request-specific data. The server will return the unmodified state value back to the application."
+              },
+              {
+                "name": "code_challenge",
+                "value": "",
+                "type": "query",
+                "description": "A code verifier generated by the client application transformed by applying a cryptographic hash function, such as SHA-256, and encoding the result using URL-safe Base64 encoding."
+              },
+              {
+                "name": "code_challenge_method",
+                "value": "",
+                "type": "query",
+                "description": "Method used to transform the code verifier. The most common method is \"S256\", which stands for SHA-256."
+              }
+            ]
+          },
+          "docs": "Request a user's authorization to perform action on their behalf"
+        }
+      ]
+    },
+    {
+      "info": {
+        "name": "account_pairing_endpoints",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "Complete Store Onboarding",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://{{public-api-url}}/v1/stores",
+            "headers": [
+              {
+                "name": "X-Application-Id",
+                "value": ""
+              },
+              {
+                "name": "X-Event-Id",
+                "value": ""
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "oauth2",
+              "flow": "client_credentials",
+              "accessTokenUrl": "/v1/auth/token",
+              "credentials": {
+                "clientId": "{{clientId}}",
+                "clientSecret": "{{clientSecret}}"
+              }
+            }
+          },
+          "docs": "`RATE LIMIT: 2 per minute`\n\nThe asynchronous callback of the Upsert Store Webhook. The partner application will use this endpoint  to inform if the store data and credentials provided through the `Upsert Store Webhook` were enough to  create/update and validate the store. If informing success, the `Store ID` must be provided to  complete the store onboarding process. If informing failure, use the `Error Message` field to provide  details about the problem.\n"
+        },
+        {
+          "info": {
+            "name": "Update Store Status",
+            "type": "http"
+          },
+          "http": {
+            "method": "PUT",
+            "url": "https://{{public-api-url}}/v1/stores/status",
+            "headers": [
+              {
+                "name": "X-Store-Id",
+                "value": ""
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "oauth2",
+              "flow": "client_credentials",
+              "accessTokenUrl": "/v1/auth/token",
+              "credentials": {
+                "clientId": "{{clientId}}",
+                "clientSecret": "{{clientSecret}}"
+              }
+            }
+          },
+          "docs": "`RATE LIMIT: 2 per minute`\n\nThe partner application should call this endpoint when needing to change the status of a store that already completed the onboarding process.\n"
+        }
+      ]
+    },
+    {
+      "info": {
+        "name": "finance_endpoints",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "Post financial transactions",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://{{public-api-url}}/finance/v1/financial-transactions",
+            "headers": [
+              {
+                "name": "X-Store-Id",
+                "value": ""
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "oauth2",
+              "flow": "client_credentials",
+              "accessTokenUrl": "/v1/auth/token",
+              "credentials": {
+                "clientId": "{{clientId}}",
+                "clientSecret": "{{clientSecret}}"
+              }
+            }
+          },
+          "docs": "Post financial data related to a given order."
+        },
+        {
+          "info": {
+            "name": "Post a financial invoice",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://{{public-api-url}}/finance/v1/financial-invoices",
+            "headers": [
+              {
+                "name": "X-Store-Id",
+                "value": ""
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "oauth2",
+              "flow": "client_credentials",
+              "accessTokenUrl": "/v1/auth/token",
+              "credentials": {
+                "clientId": "{{clientId}}",
+                "clientSecret": "{{clientSecret}}"
+              }
+            }
+          },
+          "docs": "Post a financial invoice containing payout and financial data for orders in a given period of time."
+        }
+      ]
+    },
+    {
+      "info": {
+        "name": "inventory_endpoints",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "List inventory summaries",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://{{public-api-url}}/inventories/v1/summaries",
+            "headers": [
+              {
+                "name": "X-Store-Id",
+                "value": ""
+              }
+            ],
+            "params": [
+              {
+                "name": "limit",
+                "value": "",
+                "type": "query"
+              },
+              {
+                "name": "token",
+                "value": "",
+                "type": "query"
+              }
+            ],
+            "auth": {
+              "type": "oauth2",
+              "flow": "client_credentials",
+              "accessTokenUrl": "/v1/auth/token",
+              "credentials": {
+                "clientId": "{{clientId}}",
+                "clientSecret": "{{clientSecret}}"
+              }
+            }
+          },
+          "docs": "`RATE LIMIT: 32 per minute`\n\nList inventory summaries by the requested parameters.\n"
+        },
+        {
+          "info": {
+            "name": "List shipments",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://{{public-api-url}}/inventories/v1/shipments",
+            "headers": [
+              {
+                "name": "X-Store-Id",
+                "value": ""
+              }
+            ],
+            "params": [
+              {
+                "name": "limit",
+                "value": "",
+                "type": "query"
+              },
+              {
+                "name": "token",
+                "value": "",
+                "type": "query"
+              }
+            ],
+            "auth": {
+              "type": "oauth2",
+              "flow": "client_credentials",
+              "accessTokenUrl": "/v1/auth/token",
+              "credentials": {
+                "clientId": "{{clientId}}",
+                "clientSecret": "{{clientSecret}}"
+              }
+            }
+          },
+          "docs": "`RATE LIMIT: 8 per minute`\n\nList shipments by the requested parameters.\n"
+        },
+        {
+          "info": {
+            "name": "Create shipment",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://{{public-api-url}}/inventories/v1/shipments",
+            "headers": [
+              {
+                "name": "X-Store-Id",
+                "value": ""
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "oauth2",
+              "flow": "client_credentials",
+              "accessTokenUrl": "/v1/auth/token",
+              "credentials": {
+                "clientId": "{{clientId}}",
+                "clientSecret": "{{clientSecret}}"
+              }
+            }
+          },
+          "docs": "`RATE LIMIT: 32 per minute`\n\nCreate a new shipment.\n"
+        }
+      ]
+    },
+    {
+      "info": {
+        "name": "organization_endpoints",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "Get the organization managed by the user.",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://{{public-api-url}}/organization/v1/organization",
+            "auth": {
+              "type": "oauth2",
+              "flow": "client_credentials",
+              "accessTokenUrl": "/v1/auth/token",
+              "credentials": {
+                "clientId": "{{clientId}}",
+                "clientSecret": "{{clientSecret}}"
+              }
+            }
+          },
+          "docs": "Get the organization managed by the user."
+        },
+        {
+          "info": {
+            "name": "Get a brand of the organization managed by the user.",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://{{public-api-url}}/organization/v1/organization/brands/:brandId",
+            "params": [
+              {
+                "name": "brandId",
+                "value": "",
+                "type": "path"
+              }
+            ],
+            "auth": {
+              "type": "oauth2",
+              "flow": "client_credentials",
+              "accessTokenUrl": "/v1/auth/token",
+              "credentials": {
+                "clientId": "{{clientId}}",
+                "clientSecret": "{{clientSecret}}"
+              }
+            }
+          },
+          "docs": "Get a brand of the organization managed by the user."
+        },
+        {
+          "info": {
+            "name": "Get the list of brands of the organization managed by the user.",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://{{public-api-url}}/organization/v1/organization/brands",
+            "params": [
+              {
+                "name": "limit",
+                "value": "",
+                "type": "query"
+              },
+              {
+                "name": "token",
+                "value": "",
+                "type": "query"
+              }
+            ],
+            "auth": {
+              "type": "oauth2",
+              "flow": "client_credentials",
+              "accessTokenUrl": "/v1/auth/token",
+              "credentials": {
+                "clientId": "{{clientId}}",
+                "clientSecret": "{{clientSecret}}"
+              }
+            }
+          },
+          "docs": "Get the list of brands of the organization managed by the user."
+        },
+        {
+          "info": {
+            "name": "Get a store of the organization managed by the user.",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://{{public-api-url}}/organization/v1/organization/brands/:brandId/stores/:storeId",
+            "params": [
+              {
+                "name": "brandId",
+                "value": "",
+                "type": "path"
+              },
+              {
+                "name": "storeId",
+                "value": "",
+                "type": "path"
+              }
+            ],
+            "auth": {
+              "type": "oauth2",
+              "flow": "client_credentials",
+              "accessTokenUrl": "/v1/auth/token",
+              "credentials": {
+                "clientId": "{{clientId}}",
+                "clientSecret": "{{clientSecret}}"
+              }
+            }
+          },
+          "docs": "Get a store of the organization managed by the user."
+        },
+        {
+          "info": {
+            "name": "Get the list of stores of a given brand.",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://{{public-api-url}}/organization/v1/organization/brands/:brandId/stores",
+            "params": [
+              {
+                "name": "brandId",
+                "value": "",
+                "type": "path"
+              },
+              {
+                "name": "limit",
+                "value": "",
+                "type": "query"
+              },
+              {
+                "name": "token",
+                "value": "",
+                "type": "query"
+              }
+            ],
+            "auth": {
+              "type": "oauth2",
+              "flow": "client_credentials",
+              "accessTokenUrl": "/v1/auth/token",
+              "credentials": {
+                "clientId": "{{clientId}}",
+                "clientSecret": "{{clientSecret}}"
+              }
+            }
+          },
+          "docs": "Get the list of stores of a given brand."
+        },
+        {
+          "info": {
+            "name": "Get the partner application connection with the selected store.",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://{{public-api-url}}/organization/v1/organization/brands/:brandId/stores/:storeId/connection",
+            "params": [
+              {
+                "name": "brandId",
+                "value": "",
+                "type": "path"
+              },
+              {
+                "name": "storeId",
+                "value": "",
+                "type": "path"
+              }
+            ],
+            "auth": {
+              "type": "oauth2",
+              "flow": "client_credentials",
+              "accessTokenUrl": "/v1/auth/token",
+              "credentials": {
+                "clientId": "{{clientId}}",
+                "clientSecret": "{{clientSecret}}"
+              }
+            }
+          },
+          "docs": "Get the partner application connection with the selected store."
+        },
+        {
+          "info": {
+            "name": "Create a connection for the partner application with the selected store.",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://{{public-api-url}}/organization/v1/organization/brands/:brandId/stores/:storeId/connection",
+            "params": [
+              {
+                "name": "brandId",
+                "value": "",
+                "type": "path"
+              },
+              {
+                "name": "storeId",
+                "value": "",
+                "type": "path"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "oauth2",
+              "flow": "client_credentials",
+              "accessTokenUrl": "/v1/auth/token",
+              "credentials": {
+                "clientId": "{{clientId}}",
+                "clientSecret": "{{clientSecret}}"
+              }
+            }
+          },
+          "docs": "Create a connection for the partner application with the selected store."
+        },
+        {
+          "info": {
+            "name": "Delete the connection between the partner application and the selected store.",
+            "type": "http"
+          },
+          "http": {
+            "method": "DELETE",
+            "url": "https://{{public-api-url}}/organization/v1/organization/brands/:brandId/stores/:storeId/connection",
+            "params": [
+              {
+                "name": "brandId",
+                "value": "",
+                "type": "path"
+              },
+              {
+                "name": "storeId",
+                "value": "",
+                "type": "path"
+              }
+            ],
+            "auth": {
+              "type": "oauth2",
+              "flow": "client_credentials",
+              "accessTokenUrl": "/v1/auth/token",
+              "credentials": {
+                "clientId": "{{clientId}}",
+                "clientSecret": "{{clientSecret}}"
+              }
+            }
+          },
+          "docs": "Delete the connection between the partner application and the selected store."
+        }
+      ]
+    },
+    {
+      "info": {
+        "name": "marketintel_endpoints",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "Notify stores discovered at the geolocations",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://{{public-api-url}}/v1/market-intel/discovered-stores",
+            "headers": [
+              {
+                "name": "X-Event-Id",
+                "value": ""
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "oauth2",
+              "flow": "client_credentials",
+              "accessTokenUrl": "/v1/auth/token",
+              "credentials": {
+                "clientId": "{{clientId}}",
+                "clientSecret": "{{clientSecret}}"
+              }
+            }
+          },
+          "docs": "Notify stores discovered at the geolocations"
+        }
+      ]
+    },
+    {
+      "info": {
+        "name": "manager_loyalty_endpoints",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "Get enrollment config for a loyalty provider",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://{{public-api-url}}/manager/loyalty/v1/:source/user/enrollment-config",
+            "headers": [
+              {
+                "name": "X-Store-Id",
+                "value": ""
+              }
+            ],
+            "params": [
+              {
+                "name": "source",
+                "value": "",
+                "type": "path"
+              }
+            ],
+            "auth": {
+              "type": "oauth2",
+              "flow": "client_credentials",
+              "accessTokenUrl": "/v1/auth/token",
+              "credentials": {
+                "clientId": "{{clientId}}",
+                "clientSecret": "{{clientSecret}}"
+              }
+            }
+          },
+          "docs": "`RATE LIMIT: 8 per minute`\n"
+        },
+        {
+          "info": {
+            "name": "Get user by id",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://{{public-api-url}}/manager/loyalty/v1/:source/user",
+            "headers": [
+              {
+                "name": "X-Store-Id",
+                "value": ""
+              }
+            ],
+            "params": [
+              {
+                "name": "source",
+                "value": "",
+                "type": "path"
+              },
+              {
+                "name": "id",
+                "value": "",
+                "type": "query"
+              }
+            ],
+            "auth": {
+              "type": "oauth2",
+              "flow": "client_credentials",
+              "accessTokenUrl": "/v1/auth/token",
+              "credentials": {
+                "clientId": "{{clientId}}",
+                "clientSecret": "{{clientSecret}}"
+              }
+            }
+          },
+          "docs": "`RATE LIMIT: 8 per minute`\n"
+        },
+        {
+          "info": {
+            "name": "Create a loyalty user",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://{{public-api-url}}/manager/loyalty/v1/:source/user",
+            "headers": [
+              {
+                "name": "X-Store-Id",
+                "value": ""
+              }
+            ],
+            "params": [
+              {
+                "name": "source",
+                "value": "",
+                "type": "path"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "oauth2",
+              "flow": "client_credentials",
+              "accessTokenUrl": "/v1/auth/token",
+              "credentials": {
+                "clientId": "{{clientId}}",
+                "clientSecret": "{{clientSecret}}"
+              }
+            }
+          },
+          "docs": "`RATE LIMIT: 8 per minute`\n"
+        },
+        {
+          "info": {
+            "name": "Search loyalty users",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://{{public-api-url}}/manager/loyalty/v1/:source/user/search",
+            "headers": [
+              {
+                "name": "X-Store-Id",
+                "value": ""
+              }
+            ],
+            "params": [
+              {
+                "name": "token",
+                "value": "",
+                "type": "query"
+              },
+              {
+                "name": "limit",
+                "value": "",
+                "type": "query"
+              },
+              {
+                "name": "source",
+                "value": "",
+                "type": "path"
+              },
+              {
+                "name": "term",
+                "value": "",
+                "type": "query"
+              }
+            ],
+            "auth": {
+              "type": "oauth2",
+              "flow": "client_credentials",
+              "accessTokenUrl": "/v1/auth/token",
+              "credentials": {
+                "clientId": "{{clientId}}",
+                "clientSecret": "{{clientSecret}}"
+              }
+            }
+          },
+          "docs": "`RATE LIMIT: 8 per minute`\n"
+        },
+        {
+          "info": {
+            "name": "Compute applicable rewards",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://{{public-api-url}}/manager/loyalty/v1/:source/rewards/evaluate",
+            "headers": [
+              {
+                "name": "X-Store-Id",
+                "value": ""
+              }
+            ],
+            "params": [
+              {
+                "name": "source",
+                "value": "",
+                "type": "path"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "oauth2",
+              "flow": "client_credentials",
+              "accessTokenUrl": "/v1/auth/token",
+              "credentials": {
+                "clientId": "{{clientId}}",
+                "clientSecret": "{{clientSecret}}"
+              }
+            }
+          },
+          "docs": "`Supply both userId and order to get a list of applicable rewards for an order. Supply only userId to get a list of rewards the user can redeem` `RATE LIMIT: 8 per minute`\n"
+        },
+        {
+          "info": {
+            "name": "Simulate rewards",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://{{public-api-url}}/manager/loyalty/v1/:source/rewards/simulate",
+            "headers": [
+              {
+                "name": "X-Store-Id",
+                "value": ""
+              }
+            ],
+            "params": [
+              {
+                "name": "source",
+                "value": "",
+                "type": "path"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "oauth2",
+              "flow": "client_credentials",
+              "accessTokenUrl": "/v1/auth/token",
+              "credentials": {
+                "clientId": "{{clientId}}",
+                "clientSecret": "{{clientSecret}}"
+              }
+            }
+          },
+          "docs": "`Show what the effects will be after applying the selected rewards, and start the rewards transaction, only call this when user selected some reward, otherwise skip this call and use redeemAndAccumulateRewards API call.` `RATE LIMIT: 8 per minute`\n"
+        },
+        {
+          "info": {
+            "name": "Redeem and accumulate rewards",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://{{public-api-url}}/manager/loyalty/v1/:source/rewards/redeem-and-accumulate",
+            "headers": [
+              {
+                "name": "X-Store-Id",
+                "value": ""
+              }
+            ],
+            "params": [
+              {
+                "name": "source",
+                "value": "",
+                "type": "path"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "oauth2",
+              "flow": "client_credentials",
+              "accessTokenUrl": "/v1/auth/token",
+              "credentials": {
+                "clientId": "{{clientId}}",
+                "clientSecret": "{{clientSecret}}"
+              }
+            }
+          },
+          "docs": "`Redeem existing rewards and accumulate new rewards` `RATE LIMIT: 8 per minute`\n"
+        },
+        {
+          "info": {
+            "name": "Refund rewards",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://{{public-api-url}}/manager/loyalty/v1/:source/rewards/refund",
+            "headers": [
+              {
+                "name": "X-Store-Id",
+                "value": ""
+              }
+            ],
+            "params": [
+              {
+                "name": "source",
+                "value": "",
+                "type": "path"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "oauth2",
+              "flow": "client_credentials",
+              "accessTokenUrl": "/v1/auth/token",
+              "credentials": {
+                "clientId": "{{clientId}}",
+                "clientSecret": "{{clientSecret}}"
+              }
+            }
+          },
+          "docs": "`RATE LIMIT: 8 per minute`\n"
+        }
+      ]
+    },
+    {
+      "info": {
+        "name": "direct_orders_endpoints",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "query eater's related history orders",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://{{public-api-url}}/v1/eater/order-history",
+            "body": {
+              "type": "form-urlencoded",
+              "data": []
+            },
+            "auth": {
+              "type": "oauth2",
+              "flow": "client_credentials",
+              "accessTokenUrl": "/v1/auth/token",
+              "credentials": {
+                "clientId": "{{clientId}}",
+                "clientSecret": "{{clientSecret}}"
+              }
+            }
+          },
+          "docs": "`Provide an external eater ID to get a list of order related to that eater.`\n"
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}

@@ -417,3 +417,8 @@ candidate_tools:
   source_operation: openapi/cloudkitchens-public-api-openapi.yml#eaterOrderHistory
   description: query eater's related history orders
   group: direct_orders_endpoints
+deployment:
+  mode: none
+  verified: derived
+  checked: '2026-08-12'
+  source: catalog MCP census
