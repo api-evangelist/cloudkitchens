@@ -25,6 +25,17 @@ tags:
 - Delivery
 - Reporting
 - Loyalty
+- Real-Estate
+tags_raw:
+- Restaurant
+- Ghost Kitchens
+- Food Delivery
+- Order Management
+- Menu Management
+- Storefront
+- Delivery
+- Reporting
+- Loyalty
 - Real Estate
 created: '2026-08-01'
 modified: '2026-08-01'
@@ -52,6 +63,17 @@ apis:
     *.cloudkitchens.com), and CloudKitchens'' own developer portal build names api-staging.cloudkitchens.com as
     its staging counterpart.'
   tags:
+  - Order
+  - Menus
+  - Storefront
+  - Delivery
+  - Finance
+  - Inventory
+  - Reports
+  - Reviews
+  - Loyalty
+  - Organization
+  tags_raw:
   - Orders
   - Menus
   - Storefront
