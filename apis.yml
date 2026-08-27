@@ -46,49 +46,813 @@ maintainers:
 - FN: APIs.json
   email: info@apis.io
 apis:
-- aid: cloudkitchens:cloudkitchens-public-api
-  name: CloudKitchens Public API
-  description: The CloudKitchens Public API is a resource-oriented REST API over JSON secured with OAuth 2.0, used
-    by integration partners — ordering channels, POS and kitchen systems, delivery networks and reporting tools
-    — to work with CloudKitchens stores. It publishes 80 operations across 19 endpoint groups (orders, manager orders,
-    direct orders, menus, manager menus, storefront, manager storefront, delivery, finance, inventory, reports,
-    reviews, loyalty, organization, account pairing, store, auth, callback and ping) plus 27 webhook events, and
-    defines 320 reusable component schemas. Every store-scoped call carries an X-Store-Id header naming the partner's
-    own identifier for the store, which CloudKitchens translates to its internal store id.
+- aid: cloudkitchens:cloudkitchens-account-pairing-endpoints-api
+  name: CloudKitchens Account Pairing Endpoints API
+  description: Endpoints to manage store onboarding and status
   humanURL: https://developer-guides.cloudkitchens.com/docs/
   baseURL: https://api.cloudkitchens.com
-  x-baseURL-note: 'The published OpenAPI ships a templated server, https://{{public-api-url}}, because the concrete
-    base URL is provisioned per integration partner at onboarding. api.cloudkitchens.com is the production host:
-    it resolves, answers HTTPS, and presents a CloudKitchens-owned wildcard certificate (CN=cloudkitchens.com, SAN
-    *.cloudkitchens.com), and CloudKitchens'' own developer portal build names api-staging.cloudkitchens.com as
-    its staging counterpart.'
   tags:
-  - Order
-  - Menus
-  - Storefront
-  - Delivery
-  - Finance
-  - Inventory
-  - Reports
-  - Reviews
-  - Loyalty
-  - Organization
-  tags_raw:
-  - Orders
-  - Menus
-  - Storefront
-  - Delivery
-  - Finance
-  - Inventory
-  - Reports
-  - Reviews
-  - Loyalty
-  - Organization
+  - account_pairing_endpoints
   properties:
   - type: OpenAPI
-    url: openapi/cloudkitchens-public-api-openapi.yml
-  - type: Overlay
-    url: overlays/cloudkitchens-public-api-overlay.yaml
+    url: openapi/cloudkitchens-account-pairing-endpoints-api-openapi.yml
+  - type: Documentation
+    url: https://developer-guides.cloudkitchens.com/docs/
+  - type: APIReference
+    url: https://developer-guides.cloudkitchens.com/api-reference/
+  - type: GettingStarted
+    url: https://developer-guides.cloudkitchens.com/docs/onboard-application/
+  - type: Authentication
+    url: authentication/cloudkitchens-authentication.yml
+  - type: OAuthScopes
+    url: scopes/cloudkitchens-scopes.yml
+  - type: Webhooks
+    url: asyncapi/cloudkitchens-webhooks.yml
+  - type: RateLimits
+    url: rate-limits/cloudkitchens-rate-limits.yml
+  - type: ErrorCatalog
+    url: errors/cloudkitchens-problem-types.yml
+  - type: DataModel
+    url: data-model/cloudkitchens-data-model.yml
+  - type: Sandbox
+    url: sandbox/cloudkitchens-sandbox.yml
+- aid: cloudkitchens:cloudkitchens-account-pairing-webhooks-api
+  name: CloudKitchens Account Pairing Webhooks API
+  description: Webhooks to manage store onboarding and status
+  humanURL: https://developer-guides.cloudkitchens.com/docs/
+  baseURL: https://api.cloudkitchens.com
+  tags:
+  - account_pairing_webhooks
+  properties:
+  - type: OpenAPI
+    url: openapi/cloudkitchens-account-pairing-webhooks-api-openapi.yml
+  - type: Documentation
+    url: https://developer-guides.cloudkitchens.com/docs/
+  - type: APIReference
+    url: https://developer-guides.cloudkitchens.com/api-reference/
+  - type: GettingStarted
+    url: https://developer-guides.cloudkitchens.com/docs/onboard-application/
+  - type: Authentication
+    url: authentication/cloudkitchens-authentication.yml
+  - type: OAuthScopes
+    url: scopes/cloudkitchens-scopes.yml
+  - type: Webhooks
+    url: asyncapi/cloudkitchens-webhooks.yml
+  - type: RateLimits
+    url: rate-limits/cloudkitchens-rate-limits.yml
+  - type: ErrorCatalog
+    url: errors/cloudkitchens-problem-types.yml
+  - type: DataModel
+    url: data-model/cloudkitchens-data-model.yml
+  - type: Sandbox
+    url: sandbox/cloudkitchens-sandbox.yml
+- aid: cloudkitchens:cloudkitchens-auth-endpoints-api
+  name: CloudKitchens Auth Endpoints API
+  description: Endpoints to handle token management.
+  humanURL: https://developer-guides.cloudkitchens.com/docs/
+  baseURL: https://api.cloudkitchens.com
+  tags:
+  - auth_endpoints
+  properties:
+  - type: OpenAPI
+    url: openapi/cloudkitchens-auth-endpoints-api-openapi.yml
+  - type: Documentation
+    url: https://developer-guides.cloudkitchens.com/docs/
+  - type: APIReference
+    url: https://developer-guides.cloudkitchens.com/api-reference/
+  - type: GettingStarted
+    url: https://developer-guides.cloudkitchens.com/docs/onboard-application/
+  - type: Authentication
+    url: authentication/cloudkitchens-authentication.yml
+  - type: OAuthScopes
+    url: scopes/cloudkitchens-scopes.yml
+  - type: Webhooks
+    url: asyncapi/cloudkitchens-webhooks.yml
+  - type: RateLimits
+    url: rate-limits/cloudkitchens-rate-limits.yml
+  - type: ErrorCatalog
+    url: errors/cloudkitchens-problem-types.yml
+  - type: DataModel
+    url: data-model/cloudkitchens-data-model.yml
+  - type: Sandbox
+    url: sandbox/cloudkitchens-sandbox.yml
+- aid: cloudkitchens:cloudkitchens-callback-endpoints-api
+  name: CloudKitchens Callback Endpoints API
+  description: Endpoints for callback management.
+  humanURL: https://developer-guides.cloudkitchens.com/docs/
+  baseURL: https://api.cloudkitchens.com
+  tags:
+  - callback_endpoints
+  properties:
+  - type: OpenAPI
+    url: openapi/cloudkitchens-callback-endpoints-api-openapi.yml
+  - type: Documentation
+    url: https://developer-guides.cloudkitchens.com/docs/
+  - type: APIReference
+    url: https://developer-guides.cloudkitchens.com/api-reference/
+  - type: GettingStarted
+    url: https://developer-guides.cloudkitchens.com/docs/onboard-application/
+  - type: Authentication
+    url: authentication/cloudkitchens-authentication.yml
+  - type: OAuthScopes
+    url: scopes/cloudkitchens-scopes.yml
+  - type: Webhooks
+    url: asyncapi/cloudkitchens-webhooks.yml
+  - type: RateLimits
+    url: rate-limits/cloudkitchens-rate-limits.yml
+  - type: ErrorCatalog
+    url: errors/cloudkitchens-problem-types.yml
+  - type: DataModel
+    url: data-model/cloudkitchens-data-model.yml
+  - type: Sandbox
+    url: sandbox/cloudkitchens-sandbox.yml
+- aid: cloudkitchens:cloudkitchens-delivery-endpoints-api
+  name: CloudKitchens Delivery Endpoints API
+  description: Endpoints to manage delivery.
+  humanURL: https://developer-guides.cloudkitchens.com/docs/
+  baseURL: https://api.cloudkitchens.com
+  tags:
+  - delivery_endpoints
+  properties:
+  - type: OpenAPI
+    url: openapi/cloudkitchens-delivery-endpoints-api-openapi.yml
+  - type: Documentation
+    url: https://developer-guides.cloudkitchens.com/docs/
+  - type: APIReference
+    url: https://developer-guides.cloudkitchens.com/api-reference/
+  - type: GettingStarted
+    url: https://developer-guides.cloudkitchens.com/docs/onboard-application/
+  - type: Authentication
+    url: authentication/cloudkitchens-authentication.yml
+  - type: OAuthScopes
+    url: scopes/cloudkitchens-scopes.yml
+  - type: Webhooks
+    url: asyncapi/cloudkitchens-webhooks.yml
+  - type: RateLimits
+    url: rate-limits/cloudkitchens-rate-limits.yml
+  - type: ErrorCatalog
+    url: errors/cloudkitchens-problem-types.yml
+  - type: DataModel
+    url: data-model/cloudkitchens-data-model.yml
+  - type: Sandbox
+    url: sandbox/cloudkitchens-sandbox.yml
+- aid: cloudkitchens:cloudkitchens-delivery-webhooks-api
+  name: CloudKitchens Delivery Webhooks API
+  description: Webhooks from the delivery domain.
+  humanURL: https://developer-guides.cloudkitchens.com/docs/
+  baseURL: https://api.cloudkitchens.com
+  tags:
+  - delivery_webhooks
+  properties:
+  - type: OpenAPI
+    url: openapi/cloudkitchens-delivery-webhooks-api-openapi.yml
+  - type: Documentation
+    url: https://developer-guides.cloudkitchens.com/docs/
+  - type: APIReference
+    url: https://developer-guides.cloudkitchens.com/api-reference/
+  - type: GettingStarted
+    url: https://developer-guides.cloudkitchens.com/docs/onboard-application/
+  - type: Authentication
+    url: authentication/cloudkitchens-authentication.yml
+  - type: OAuthScopes
+    url: scopes/cloudkitchens-scopes.yml
+  - type: Webhooks
+    url: asyncapi/cloudkitchens-webhooks.yml
+  - type: RateLimits
+    url: rate-limits/cloudkitchens-rate-limits.yml
+  - type: ErrorCatalog
+    url: errors/cloudkitchens-problem-types.yml
+  - type: DataModel
+    url: data-model/cloudkitchens-data-model.yml
+  - type: Sandbox
+    url: sandbox/cloudkitchens-sandbox.yml
+- aid: cloudkitchens:cloudkitchens-direct-orders-endpoints-api
+  name: CloudKitchens Direct Orders Endpoints API
+  description: Endpoints to get orders directly.
+  humanURL: https://developer-guides.cloudkitchens.com/docs/
+  baseURL: https://api.cloudkitchens.com
+  tags:
+  - direct_orders_endpoints
+  properties:
+  - type: OpenAPI
+    url: openapi/cloudkitchens-direct-orders-endpoints-api-openapi.yml
+  - type: Documentation
+    url: https://developer-guides.cloudkitchens.com/docs/
+  - type: APIReference
+    url: https://developer-guides.cloudkitchens.com/api-reference/
+  - type: GettingStarted
+    url: https://developer-guides.cloudkitchens.com/docs/onboard-application/
+  - type: Authentication
+    url: authentication/cloudkitchens-authentication.yml
+  - type: OAuthScopes
+    url: scopes/cloudkitchens-scopes.yml
+  - type: Webhooks
+    url: asyncapi/cloudkitchens-webhooks.yml
+  - type: RateLimits
+    url: rate-limits/cloudkitchens-rate-limits.yml
+  - type: ErrorCatalog
+    url: errors/cloudkitchens-problem-types.yml
+  - type: DataModel
+    url: data-model/cloudkitchens-data-model.yml
+  - type: Sandbox
+    url: sandbox/cloudkitchens-sandbox.yml
+- aid: cloudkitchens:cloudkitchens-finance-endpoints-api
+  name: CloudKitchens Finance Endpoints API
+  description: Endpoints to handle financial data.
+  humanURL: https://developer-guides.cloudkitchens.com/docs/
+  baseURL: https://api.cloudkitchens.com
+  tags:
+  - finance_endpoints
+  properties:
+  - type: OpenAPI
+    url: openapi/cloudkitchens-finance-endpoints-api-openapi.yml
+  - type: Documentation
+    url: https://developer-guides.cloudkitchens.com/docs/
+  - type: APIReference
+    url: https://developer-guides.cloudkitchens.com/api-reference/
+  - type: GettingStarted
+    url: https://developer-guides.cloudkitchens.com/docs/onboard-application/
+  - type: Authentication
+    url: authentication/cloudkitchens-authentication.yml
+  - type: OAuthScopes
+    url: scopes/cloudkitchens-scopes.yml
+  - type: Webhooks
+    url: asyncapi/cloudkitchens-webhooks.yml
+  - type: RateLimits
+    url: rate-limits/cloudkitchens-rate-limits.yml
+  - type: ErrorCatalog
+    url: errors/cloudkitchens-problem-types.yml
+  - type: DataModel
+    url: data-model/cloudkitchens-data-model.yml
+  - type: Sandbox
+    url: sandbox/cloudkitchens-sandbox.yml
+- aid: cloudkitchens:cloudkitchens-inventory-endpoints-api
+  name: CloudKitchens Inventory Endpoints API
+  description: Endpoints to interact with product inventory.
+  humanURL: https://developer-guides.cloudkitchens.com/docs/
+  baseURL: https://api.cloudkitchens.com
+  tags:
+  - inventory_endpoints
+  properties:
+  - type: OpenAPI
+    url: openapi/cloudkitchens-inventory-endpoints-api-openapi.yml
+  - type: Documentation
+    url: https://developer-guides.cloudkitchens.com/docs/
+  - type: APIReference
+    url: https://developer-guides.cloudkitchens.com/api-reference/
+  - type: GettingStarted
+    url: https://developer-guides.cloudkitchens.com/docs/onboard-application/
+  - type: Authentication
+    url: authentication/cloudkitchens-authentication.yml
+  - type: OAuthScopes
+    url: scopes/cloudkitchens-scopes.yml
+  - type: Webhooks
+    url: asyncapi/cloudkitchens-webhooks.yml
+  - type: RateLimits
+    url: rate-limits/cloudkitchens-rate-limits.yml
+  - type: ErrorCatalog
+    url: errors/cloudkitchens-problem-types.yml
+  - type: DataModel
+    url: data-model/cloudkitchens-data-model.yml
+  - type: Sandbox
+    url: sandbox/cloudkitchens-sandbox.yml
+- aid: cloudkitchens:cloudkitchens-manager-loyalty-endpoints-api
+  name: CloudKitchens Manager Loyalty Endpoints API
+  description: Endpoints to manage loyalty.
+  humanURL: https://developer-guides.cloudkitchens.com/docs/
+  baseURL: https://api.cloudkitchens.com
+  tags:
+  - manager_loyalty_endpoints
+  properties:
+  - type: OpenAPI
+    url: openapi/cloudkitchens-manager-loyalty-endpoints-api-openapi.yml
+  - type: Documentation
+    url: https://developer-guides.cloudkitchens.com/docs/
+  - type: APIReference
+    url: https://developer-guides.cloudkitchens.com/api-reference/
+  - type: GettingStarted
+    url: https://developer-guides.cloudkitchens.com/docs/onboard-application/
+  - type: Authentication
+    url: authentication/cloudkitchens-authentication.yml
+  - type: OAuthScopes
+    url: scopes/cloudkitchens-scopes.yml
+  - type: Webhooks
+    url: asyncapi/cloudkitchens-webhooks.yml
+  - type: RateLimits
+    url: rate-limits/cloudkitchens-rate-limits.yml
+  - type: ErrorCatalog
+    url: errors/cloudkitchens-problem-types.yml
+  - type: DataModel
+    url: data-model/cloudkitchens-data-model.yml
+  - type: Sandbox
+    url: sandbox/cloudkitchens-sandbox.yml
+- aid: cloudkitchens:cloudkitchens-manager-menu-endpoints-api
+  name: CloudKitchens Manager Menu Endpoints API
+  description: Endpoints for applications managing menus related data and operations.
+  humanURL: https://developer-guides.cloudkitchens.com/docs/
+  baseURL: https://api.cloudkitchens.com
+  tags:
+  - manager_menu_endpoints
+  properties:
+  - type: OpenAPI
+    url: openapi/cloudkitchens-manager-menu-endpoints-api-openapi.yml
+  - type: Documentation
+    url: https://developer-guides.cloudkitchens.com/docs/
+  - type: APIReference
+    url: https://developer-guides.cloudkitchens.com/api-reference/
+  - type: GettingStarted
+    url: https://developer-guides.cloudkitchens.com/docs/onboard-application/
+  - type: Authentication
+    url: authentication/cloudkitchens-authentication.yml
+  - type: OAuthScopes
+    url: scopes/cloudkitchens-scopes.yml
+  - type: Webhooks
+    url: asyncapi/cloudkitchens-webhooks.yml
+  - type: RateLimits
+    url: rate-limits/cloudkitchens-rate-limits.yml
+  - type: ErrorCatalog
+    url: errors/cloudkitchens-problem-types.yml
+  - type: DataModel
+    url: data-model/cloudkitchens-data-model.yml
+  - type: Sandbox
+    url: sandbox/cloudkitchens-sandbox.yml
+- aid: cloudkitchens:cloudkitchens-manager-order-endpoints-api
+  name: CloudKitchens Manager Order Endpoints API
+  description: >-
+    Endpoints for applications that act on the merchant/store side of an order rather than as the ordering
+    marketplace — typically Point-of-Sale (POS) systems, Business Intelligence (BI) tools, and reporting
+    integrations.
+
+
+    This domain lets a merchant-side application retrieve a store's orders and manage them on the store's
+    behalf as they progress through their lifecycle.
+  humanURL: https://developer-guides.cloudkitchens.com/docs/
+  baseURL: https://api.cloudkitchens.com
+  tags:
+  - manager_order_endpoints
+  properties:
+  - type: OpenAPI
+    url: openapi/cloudkitchens-manager-order-endpoints-api-openapi.yml
+  - type: Documentation
+    url: https://developer-guides.cloudkitchens.com/docs/
+  - type: APIReference
+    url: https://developer-guides.cloudkitchens.com/api-reference/
+  - type: GettingStarted
+    url: https://developer-guides.cloudkitchens.com/docs/onboard-application/
+  - type: Authentication
+    url: authentication/cloudkitchens-authentication.yml
+  - type: OAuthScopes
+    url: scopes/cloudkitchens-scopes.yml
+  - type: Webhooks
+    url: asyncapi/cloudkitchens-webhooks.yml
+  - type: RateLimits
+    url: rate-limits/cloudkitchens-rate-limits.yml
+  - type: ErrorCatalog
+    url: errors/cloudkitchens-problem-types.yml
+  - type: DataModel
+    url: data-model/cloudkitchens-data-model.yml
+  - type: Sandbox
+    url: sandbox/cloudkitchens-sandbox.yml
+- aid: cloudkitchens:cloudkitchens-manager-orders-webhooks-api
+  name: CloudKitchens Manager Orders Webhooks API
+  description: >-
+    Webhooks delivered to merchant-side applications (POS, BI, and reporting integrations) so they can
+    react to changes in an order as it progresses through its lifecycle.
+  humanURL: https://developer-guides.cloudkitchens.com/docs/
+  baseURL: https://api.cloudkitchens.com
+  tags:
+  - manager_orders_webhooks
+  properties:
+  - type: OpenAPI
+    url: openapi/cloudkitchens-manager-orders-webhooks-api-openapi.yml
+  - type: Documentation
+    url: https://developer-guides.cloudkitchens.com/docs/
+  - type: APIReference
+    url: https://developer-guides.cloudkitchens.com/api-reference/
+  - type: GettingStarted
+    url: https://developer-guides.cloudkitchens.com/docs/onboard-application/
+  - type: Authentication
+    url: authentication/cloudkitchens-authentication.yml
+  - type: OAuthScopes
+    url: scopes/cloudkitchens-scopes.yml
+  - type: Webhooks
+    url: asyncapi/cloudkitchens-webhooks.yml
+  - type: RateLimits
+    url: rate-limits/cloudkitchens-rate-limits.yml
+  - type: ErrorCatalog
+    url: errors/cloudkitchens-problem-types.yml
+  - type: DataModel
+    url: data-model/cloudkitchens-data-model.yml
+  - type: Sandbox
+    url: sandbox/cloudkitchens-sandbox.yml
+- aid: cloudkitchens:cloudkitchens-manager-storefront-endpoints-api
+  name: CloudKitchens Manager Storefront Endpoints API
+  description: Endpoints for applications managing storefront related data and operations.
+  humanURL: https://developer-guides.cloudkitchens.com/docs/
+  baseURL: https://api.cloudkitchens.com
+  tags:
+  - manager_storefront_endpoints
+  properties:
+  - type: OpenAPI
+    url: openapi/cloudkitchens-manager-storefront-endpoints-api-openapi.yml
+  - type: Documentation
+    url: https://developer-guides.cloudkitchens.com/docs/
+  - type: APIReference
+    url: https://developer-guides.cloudkitchens.com/api-reference/
+  - type: GettingStarted
+    url: https://developer-guides.cloudkitchens.com/docs/onboard-application/
+  - type: Authentication
+    url: authentication/cloudkitchens-authentication.yml
+  - type: OAuthScopes
+    url: scopes/cloudkitchens-scopes.yml
+  - type: Webhooks
+    url: asyncapi/cloudkitchens-webhooks.yml
+  - type: RateLimits
+    url: rate-limits/cloudkitchens-rate-limits.yml
+  - type: ErrorCatalog
+    url: errors/cloudkitchens-problem-types.yml
+  - type: DataModel
+    url: data-model/cloudkitchens-data-model.yml
+  - type: Sandbox
+    url: sandbox/cloudkitchens-sandbox.yml
+- aid: cloudkitchens:cloudkitchens-marketintel-endpoints-api
+  name: CloudKitchens Marketintel Endpoints API
+  description: >-
+    The marketintel_endpoints API from CloudKitchens — 1 operation(s) for marketintel_endpoints.
+  humanURL: https://developer-guides.cloudkitchens.com/docs/
+  baseURL: https://api.cloudkitchens.com
+  tags:
+  - marketintel_endpoints
+  properties:
+  - type: OpenAPI
+    url: openapi/cloudkitchens-marketintel-endpoints-api-openapi.yml
+  - type: Documentation
+    url: https://developer-guides.cloudkitchens.com/docs/
+  - type: APIReference
+    url: https://developer-guides.cloudkitchens.com/api-reference/
+  - type: GettingStarted
+    url: https://developer-guides.cloudkitchens.com/docs/onboard-application/
+  - type: Authentication
+    url: authentication/cloudkitchens-authentication.yml
+  - type: OAuthScopes
+    url: scopes/cloudkitchens-scopes.yml
+  - type: Webhooks
+    url: asyncapi/cloudkitchens-webhooks.yml
+  - type: RateLimits
+    url: rate-limits/cloudkitchens-rate-limits.yml
+  - type: ErrorCatalog
+    url: errors/cloudkitchens-problem-types.yml
+  - type: DataModel
+    url: data-model/cloudkitchens-data-model.yml
+  - type: Sandbox
+    url: sandbox/cloudkitchens-sandbox.yml
+- aid: cloudkitchens:cloudkitchens-menus-endpoints-api
+  name: CloudKitchens Menus Endpoints API
+  description: Endpoints to manage menus.
+  humanURL: https://developer-guides.cloudkitchens.com/docs/
+  baseURL: https://api.cloudkitchens.com
+  tags:
+  - menus_endpoints
+  properties:
+  - type: OpenAPI
+    url: openapi/cloudkitchens-menus-endpoints-api-openapi.yml
+  - type: Documentation
+    url: https://developer-guides.cloudkitchens.com/docs/
+  - type: APIReference
+    url: https://developer-guides.cloudkitchens.com/api-reference/
+  - type: GettingStarted
+    url: https://developer-guides.cloudkitchens.com/docs/onboard-application/
+  - type: Authentication
+    url: authentication/cloudkitchens-authentication.yml
+  - type: OAuthScopes
+    url: scopes/cloudkitchens-scopes.yml
+  - type: Webhooks
+    url: asyncapi/cloudkitchens-webhooks.yml
+  - type: RateLimits
+    url: rate-limits/cloudkitchens-rate-limits.yml
+  - type: ErrorCatalog
+    url: errors/cloudkitchens-problem-types.yml
+  - type: DataModel
+    url: data-model/cloudkitchens-data-model.yml
+  - type: Sandbox
+    url: sandbox/cloudkitchens-sandbox.yml
+- aid: cloudkitchens:cloudkitchens-menus-webhooks-api
+  name: CloudKitchens Menus Webhooks API
+  description: Webhooks from menus domain.
+  humanURL: https://developer-guides.cloudkitchens.com/docs/
+  baseURL: https://api.cloudkitchens.com
+  tags:
+  - menus_webhooks
+  properties:
+  - type: OpenAPI
+    url: openapi/cloudkitchens-menus-webhooks-api-openapi.yml
+  - type: Documentation
+    url: https://developer-guides.cloudkitchens.com/docs/
+  - type: APIReference
+    url: https://developer-guides.cloudkitchens.com/api-reference/
+  - type: GettingStarted
+    url: https://developer-guides.cloudkitchens.com/docs/onboard-application/
+  - type: Authentication
+    url: authentication/cloudkitchens-authentication.yml
+  - type: OAuthScopes
+    url: scopes/cloudkitchens-scopes.yml
+  - type: Webhooks
+    url: asyncapi/cloudkitchens-webhooks.yml
+  - type: RateLimits
+    url: rate-limits/cloudkitchens-rate-limits.yml
+  - type: ErrorCatalog
+    url: errors/cloudkitchens-problem-types.yml
+  - type: DataModel
+    url: data-model/cloudkitchens-data-model.yml
+  - type: Sandbox
+    url: sandbox/cloudkitchens-sandbox.yml
+- aid: cloudkitchens:cloudkitchens-orders-endpoints-api
+  name: CloudKitchens Orders Endpoints API
+  description: >-
+    Endpoints used by ordering marketplaces and other order sources to send orders to a store and keep
+    them up to date.
+
+
+    This domain lets an order source submit new orders as customers place them, reflect later changes
+    as the orders progress, and backfill historical orders for reporting.
+  humanURL: https://developer-guides.cloudkitchens.com/docs/
+  baseURL: https://api.cloudkitchens.com
+  tags:
+  - orders_endpoints
+  properties:
+  - type: OpenAPI
+    url: openapi/cloudkitchens-orders-endpoints-api-openapi.yml
+  - type: Documentation
+    url: https://developer-guides.cloudkitchens.com/docs/
+  - type: APIReference
+    url: https://developer-guides.cloudkitchens.com/api-reference/
+  - type: GettingStarted
+    url: https://developer-guides.cloudkitchens.com/docs/onboard-application/
+  - type: Authentication
+    url: authentication/cloudkitchens-authentication.yml
+  - type: OAuthScopes
+    url: scopes/cloudkitchens-scopes.yml
+  - type: Webhooks
+    url: asyncapi/cloudkitchens-webhooks.yml
+  - type: RateLimits
+    url: rate-limits/cloudkitchens-rate-limits.yml
+  - type: ErrorCatalog
+    url: errors/cloudkitchens-problem-types.yml
+  - type: DataModel
+    url: data-model/cloudkitchens-data-model.yml
+  - type: Sandbox
+    url: sandbox/cloudkitchens-sandbox.yml
+- aid: cloudkitchens:cloudkitchens-orders-webhooks-api
+  name: CloudKitchens Orders Webhooks API
+  description: Webhooks from orders domains.
+  humanURL: https://developer-guides.cloudkitchens.com/docs/
+  baseURL: https://api.cloudkitchens.com
+  tags:
+  - orders_webhooks
+  properties:
+  - type: OpenAPI
+    url: openapi/cloudkitchens-orders-webhooks-api-openapi.yml
+  - type: Documentation
+    url: https://developer-guides.cloudkitchens.com/docs/
+  - type: APIReference
+    url: https://developer-guides.cloudkitchens.com/api-reference/
+  - type: GettingStarted
+    url: https://developer-guides.cloudkitchens.com/docs/onboard-application/
+  - type: Authentication
+    url: authentication/cloudkitchens-authentication.yml
+  - type: OAuthScopes
+    url: scopes/cloudkitchens-scopes.yml
+  - type: Webhooks
+    url: asyncapi/cloudkitchens-webhooks.yml
+  - type: RateLimits
+    url: rate-limits/cloudkitchens-rate-limits.yml
+  - type: ErrorCatalog
+    url: errors/cloudkitchens-problem-types.yml
+  - type: DataModel
+    url: data-model/cloudkitchens-data-model.yml
+  - type: Sandbox
+    url: sandbox/cloudkitchens-sandbox.yml
+- aid: cloudkitchens:cloudkitchens-organization-endpoints-api
+  name: CloudKitchens Organization Endpoints API
+  description: >-
+    Endpoints to interact with with organizations/brands/stores and with integration connections.
+  humanURL: https://developer-guides.cloudkitchens.com/docs/
+  baseURL: https://api.cloudkitchens.com
+  tags:
+  - organization_endpoints
+  properties:
+  - type: OpenAPI
+    url: openapi/cloudkitchens-organization-endpoints-api-openapi.yml
+  - type: Documentation
+    url: https://developer-guides.cloudkitchens.com/docs/
+  - type: APIReference
+    url: https://developer-guides.cloudkitchens.com/api-reference/
+  - type: GettingStarted
+    url: https://developer-guides.cloudkitchens.com/docs/onboard-application/
+  - type: Authentication
+    url: authentication/cloudkitchens-authentication.yml
+  - type: OAuthScopes
+    url: scopes/cloudkitchens-scopes.yml
+  - type: Webhooks
+    url: asyncapi/cloudkitchens-webhooks.yml
+  - type: RateLimits
+    url: rate-limits/cloudkitchens-rate-limits.yml
+  - type: ErrorCatalog
+    url: errors/cloudkitchens-problem-types.yml
+  - type: DataModel
+    url: data-model/cloudkitchens-data-model.yml
+  - type: Sandbox
+    url: sandbox/cloudkitchens-sandbox.yml
+- aid: cloudkitchens:cloudkitchens-ping-endpoints-api
+  name: CloudKitchens Ping Endpoints API
+  description: Endpoints to ping and test system authentication.
+  humanURL: https://developer-guides.cloudkitchens.com/docs/
+  baseURL: https://api.cloudkitchens.com
+  tags:
+  - ping_endpoints
+  properties:
+  - type: OpenAPI
+    url: openapi/cloudkitchens-ping-endpoints-api-openapi.yml
+  - type: Documentation
+    url: https://developer-guides.cloudkitchens.com/docs/
+  - type: APIReference
+    url: https://developer-guides.cloudkitchens.com/api-reference/
+  - type: GettingStarted
+    url: https://developer-guides.cloudkitchens.com/docs/onboard-application/
+  - type: Authentication
+    url: authentication/cloudkitchens-authentication.yml
+  - type: OAuthScopes
+    url: scopes/cloudkitchens-scopes.yml
+  - type: Webhooks
+    url: asyncapi/cloudkitchens-webhooks.yml
+  - type: RateLimits
+    url: rate-limits/cloudkitchens-rate-limits.yml
+  - type: ErrorCatalog
+    url: errors/cloudkitchens-problem-types.yml
+  - type: DataModel
+    url: data-model/cloudkitchens-data-model.yml
+  - type: Sandbox
+    url: sandbox/cloudkitchens-sandbox.yml
+- aid: cloudkitchens:cloudkitchens-ping-webhooks-api
+  name: CloudKitchens Ping Webhooks API
+  description: Webhooks to ping and test the system integration.
+  humanURL: https://developer-guides.cloudkitchens.com/docs/
+  baseURL: https://api.cloudkitchens.com
+  tags:
+  - ping_webhooks
+  properties:
+  - type: OpenAPI
+    url: openapi/cloudkitchens-ping-webhooks-api-openapi.yml
+  - type: Documentation
+    url: https://developer-guides.cloudkitchens.com/docs/
+  - type: APIReference
+    url: https://developer-guides.cloudkitchens.com/api-reference/
+  - type: GettingStarted
+    url: https://developer-guides.cloudkitchens.com/docs/onboard-application/
+  - type: Authentication
+    url: authentication/cloudkitchens-authentication.yml
+  - type: OAuthScopes
+    url: scopes/cloudkitchens-scopes.yml
+  - type: Webhooks
+    url: asyncapi/cloudkitchens-webhooks.yml
+  - type: RateLimits
+    url: rate-limits/cloudkitchens-rate-limits.yml
+  - type: ErrorCatalog
+    url: errors/cloudkitchens-problem-types.yml
+  - type: DataModel
+    url: data-model/cloudkitchens-data-model.yml
+  - type: Sandbox
+    url: sandbox/cloudkitchens-sandbox.yml
+- aid: cloudkitchens:cloudkitchens-reports-endpoints-api
+  name: CloudKitchens Reports Endpoints API
+  description: Endpoints to reports generation operations
+  humanURL: https://developer-guides.cloudkitchens.com/docs/
+  baseURL: https://api.cloudkitchens.com
+  tags:
+  - reports_endpoints
+  properties:
+  - type: OpenAPI
+    url: openapi/cloudkitchens-reports-endpoints-api-openapi.yml
+  - type: Documentation
+    url: https://developer-guides.cloudkitchens.com/docs/
+  - type: APIReference
+    url: https://developer-guides.cloudkitchens.com/api-reference/
+  - type: GettingStarted
+    url: https://developer-guides.cloudkitchens.com/docs/onboard-application/
+  - type: Authentication
+    url: authentication/cloudkitchens-authentication.yml
+  - type: OAuthScopes
+    url: scopes/cloudkitchens-scopes.yml
+  - type: Webhooks
+    url: asyncapi/cloudkitchens-webhooks.yml
+  - type: RateLimits
+    url: rate-limits/cloudkitchens-rate-limits.yml
+  - type: ErrorCatalog
+    url: errors/cloudkitchens-problem-types.yml
+  - type: DataModel
+    url: data-model/cloudkitchens-data-model.yml
+  - type: Sandbox
+    url: sandbox/cloudkitchens-sandbox.yml
+- aid: cloudkitchens:cloudkitchens-reports-webhooks-api
+  name: CloudKitchens Reports Webhooks API
+  description: Webhooks from the reports generation operations
+  humanURL: https://developer-guides.cloudkitchens.com/docs/
+  baseURL: https://api.cloudkitchens.com
+  tags:
+  - reports_webhooks
+  properties:
+  - type: OpenAPI
+    url: openapi/cloudkitchens-reports-webhooks-api-openapi.yml
+  - type: Documentation
+    url: https://developer-guides.cloudkitchens.com/docs/
+  - type: APIReference
+    url: https://developer-guides.cloudkitchens.com/api-reference/
+  - type: GettingStarted
+    url: https://developer-guides.cloudkitchens.com/docs/onboard-application/
+  - type: Authentication
+    url: authentication/cloudkitchens-authentication.yml
+  - type: OAuthScopes
+    url: scopes/cloudkitchens-scopes.yml
+  - type: Webhooks
+    url: asyncapi/cloudkitchens-webhooks.yml
+  - type: RateLimits
+    url: rate-limits/cloudkitchens-rate-limits.yml
+  - type: ErrorCatalog
+    url: errors/cloudkitchens-problem-types.yml
+  - type: DataModel
+    url: data-model/cloudkitchens-data-model.yml
+  - type: Sandbox
+    url: sandbox/cloudkitchens-sandbox.yml
+- aid: cloudkitchens:cloudkitchens-reviews-endpoints-api
+  name: CloudKitchens Reviews Endpoints API
+  description: Endpoints for review operations
+  humanURL: https://developer-guides.cloudkitchens.com/docs/
+  baseURL: https://api.cloudkitchens.com
+  tags:
+  - reviews_endpoints
+  properties:
+  - type: OpenAPI
+    url: openapi/cloudkitchens-reviews-endpoints-api-openapi.yml
+  - type: Documentation
+    url: https://developer-guides.cloudkitchens.com/docs/
+  - type: APIReference
+    url: https://developer-guides.cloudkitchens.com/api-reference/
+  - type: GettingStarted
+    url: https://developer-guides.cloudkitchens.com/docs/onboard-application/
+  - type: Authentication
+    url: authentication/cloudkitchens-authentication.yml
+  - type: OAuthScopes
+    url: scopes/cloudkitchens-scopes.yml
+  - type: Webhooks
+    url: asyncapi/cloudkitchens-webhooks.yml
+  - type: RateLimits
+    url: rate-limits/cloudkitchens-rate-limits.yml
+  - type: ErrorCatalog
+    url: errors/cloudkitchens-problem-types.yml
+  - type: DataModel
+    url: data-model/cloudkitchens-data-model.yml
+  - type: Sandbox
+    url: sandbox/cloudkitchens-sandbox.yml
+- aid: cloudkitchens:cloudkitchens-storefront-endpoints-api
+  name: CloudKitchens Storefront Endpoints API
+  description: Endpoints to manage storefront state
+  humanURL: https://developer-guides.cloudkitchens.com/docs/
+  baseURL: https://api.cloudkitchens.com
+  tags:
+  - storefront_endpoints
+  properties:
+  - type: OpenAPI
+    url: openapi/cloudkitchens-storefront-endpoints-api-openapi.yml
+  - type: Documentation
+    url: https://developer-guides.cloudkitchens.com/docs/
+  - type: APIReference
+    url: https://developer-guides.cloudkitchens.com/api-reference/
+  - type: GettingStarted
+    url: https://developer-guides.cloudkitchens.com/docs/onboard-application/
+  - type: Authentication
+    url: authentication/cloudkitchens-authentication.yml
+  - type: OAuthScopes
+    url: scopes/cloudkitchens-scopes.yml
+  - type: Webhooks
+    url: asyncapi/cloudkitchens-webhooks.yml
+  - type: RateLimits
+    url: rate-limits/cloudkitchens-rate-limits.yml
+  - type: ErrorCatalog
+    url: errors/cloudkitchens-problem-types.yml
+  - type: DataModel
+    url: data-model/cloudkitchens-data-model.yml
+  - type: Sandbox
+    url: sandbox/cloudkitchens-sandbox.yml
+- aid: cloudkitchens:cloudkitchens-storefront-webhooks-api
+  name: CloudKitchens Storefront Webhooks API
+  description: Webhooks from storefront domain.
+  humanURL: https://developer-guides.cloudkitchens.com/docs/
+  baseURL: https://api.cloudkitchens.com
+  tags:
+  - storefront_webhooks
+  properties:
+  - type: OpenAPI
+    url: openapi/cloudkitchens-storefront-webhooks-api-openapi.yml
   - type: Documentation
     url: https://developer-guides.cloudkitchens.com/docs/
   - type: APIReference
