@@ -11,6 +11,18 @@ description: 'CloudKitchens, operated by City Storage Systems, builds and runs d
   webhook endpoints, and stores are onboarded manually by a CloudKitchens Account Representative, who issues the
   Application ID and Client Secret for the production and staging environments and provisions the partner-specific
   API base URL.'
+deliveryModel:
+  model: saas
+  open_source: false
+  commercial: true
+  callable_host: false
+  label: Hosted service · you call their endpoint
+  confidence: medium
+  source:
+  - openapi
+  - pricing
+  generated: '2026-08-28'
+  method: derived
 image: https://developer.cloudkitchens.com/favicon.ico
 url: https://raw.githubusercontent.com/api-evangelist/cloudkitchens/refs/heads/main/apis.yml
 x-type: company
