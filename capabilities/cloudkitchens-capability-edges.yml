@@ -1,0 +1,81 @@
+slug: cloudkitchens
+provider: CloudKitchens
+generated_by: planning/capability-mapping/scripts/classify_capabilities.py
+model: claude-opus-5
+frame:
+- Real Estate
+min_confidence: 0.7
+capability_model:
+  source: https://github.com/vincentmakes/turbo-ea-capabilities
+  license: CC-BY-4.0
+  attribution: Turbo EA Capabilities by Vincent Verdet — Turbo EA, https://github.com/vincentmakes/turbo-ea-capabilities,
+    CC BY 4.0
+  notice: NOTICE
+edge_count: 6
+edges:
+- tag: manager_loyalty_endpoints
+  spec_file: cloudkitchens-manager-loyalty-endpoints-api-openapi.yml
+  capability_id: BC-420.40
+  capability_id_l1: BC-420
+  capability_name: Loyalty & Retention Management
+  confidence: 0.88
+  evidence: POST /manager/loyalty/v1/{source}/user "Create a loyalty user"; "Compute applicable rewards";
+    "Redeem and accumulate rewards"; schemas SubtotalReward, UserAccount, GetEnrollmentConfigResponse
+  reason: Explicit loyalty programme enrolment, reward computation, redemption and accrual — loyalty &
+    retention management.
+- tag: manager_order_endpoints
+  spec_file: cloudkitchens-manager-order-endpoints-api-openapi.yml
+  capability_id: BC-520.40
+  capability_id_l1: BC-520
+  capability_name: Order Fulfilment Management
+  confidence: 0.75
+  evidence: POST /manager/order/v1/sources/{source}/orders/{orderId}/confirm  Request order confirmation;
+    .../ready-to-pickup  Mark an order as ready to pickup; .../fulfill  Mark an order as fulfilled
+  reason: Operations manage the lifecycle of customer food orders through confirmation, cancellation,
+    prep-time, ready-to-pickup and fulfilment states — order promising and fulfilment orchestration, i.e.
+    Order Fulfilment Management. Not a Real-Estate-specific capability.
+- tag: orders_endpoints
+  spec_file: cloudkitchens-orders-endpoints-api-openapi.yml
+  capability_id: BC-520.40
+  capability_id_l1: BC-520
+  capability_name: Order Fulfilment Management
+  confidence: 0.75
+  evidence: POST /v1/orders  createOrder; POST /v1/orders/{orderId}/status  Update order status; PUT /v1/orders/{orderId}/delivery  Update
+    order delivery information
+  reason: Creation, status progression, payment and delivery-information updates on customer orders constitute
+    order capture and fulfilment orchestration. Cross-industry Order Fulfilment Management is the honest
+    reading for a restaurant-tech vendor.
+- tag: delivery_endpoints
+  spec_file: cloudkitchens-delivery-endpoints-api-openapi.yml
+  capability_id: BC-520.50
+  capability_id_l1: BC-520
+  capability_name: Logistics Operations Management
+  confidence: 0.72
+  evidence: PUT /v1/delivery/{deliveryReferenceId}/status "Update delivery status"; "Notify the result
+    of a request delivery quote event"; schemas DropoffInfo, VehicleInformation, Distance, DeliveryCost,
+    PictureProof
+  reason: Operations orchestrate courier delivery quoting, acceptance, cancellation and status/proof-of-delivery
+    for orders — last-mile logistics execution. Some of the surface is callback notification, which tempers
+    confidence.
+- tag: inventory_endpoints
+  spec_file: cloudkitchens-inventory-endpoints-api-openapi.yml
+  capability_id: BC-530
+  capability_id_l1: BC-530
+  capability_name: Inventory Management
+  confidence: 0.72
+  evidence: GET /inventories/v1/summaries "List inventory summaries"; POST /inventories/v1/shipments "Create
+    shipment"; schemas InventorySummary, ShipmentLineItem, Gtin
+  reason: Stock summaries per store plus inbound shipment creation is inventory management for kitchen
+    supplies; kept at L1 as the mix of stock visibility and shipment creation spans stock level and replenishment
+    sub-capabilities.
+- tag: marketintel_endpoints
+  spec_file: cloudkitchens-marketintel-endpoints-api-openapi.yml
+  capability_id: BC-400.30
+  capability_id_l1: BC-400
+  capability_name: Market Intelligence Management
+  confidence: 0.7
+  evidence: POST /v1/market-intel/discovered-stores  Notify stores discovered at the geolocations; schemas
+    Marketintel_StoreRating, Marketintel_StoreSales, Marketintel_StorePriceLevel, Marketintel_StoreChain
+  reason: The surface reports competitor stores discovered at given geolocations along with their ratings,
+    sales, price level and chain — competitive/market intelligence gathering. Single operation keeps confidence
+    moderate.

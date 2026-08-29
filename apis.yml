@@ -886,6 +886,9 @@ apis:
   - type: Sandbox
     url: sandbox/cloudkitchens-sandbox.yml
 common:
+- type: CapabilityMap
+  url: capabilities/cloudkitchens-capability-edges.yml
+  name: CloudKitchens Business Capability Map
 - type: MCPServer
   url: mcp/cloudkitchens-mcp.yml
 - type: Website
