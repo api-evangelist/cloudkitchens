@@ -3,9 +3,12 @@
   "feeds": [
     {
       "source": "https://cloudkitchens.com/faq",
-      "error": "HTTPError"
+      "feed_url": "https://cloudkitchens.com/faq",
+      "title": "",
+      "saved": 0,
+      "method": "none"
     }
   ],
   "post_count": 0,
-  "fetched": "2026-08-22T20:20:02Z"
+  "fetched": "2026-08-30T22:33:40Z"
 }

@@ -64,6 +64,8 @@ apis:
   humanURL: https://developer-guides.cloudkitchens.com/docs/
   baseURL: https://api.cloudkitchens.com
   tags:
+  - Account Pairing Endpoints
+  tags_raw:
   - account_pairing_endpoints
   properties:
   - type: OpenAPI
@@ -94,6 +96,8 @@ apis:
   humanURL: https://developer-guides.cloudkitchens.com/docs/
   baseURL: https://api.cloudkitchens.com
   tags:
+  - Account Pairing Webhooks
+  tags_raw:
   - account_pairing_webhooks
   properties:
   - type: OpenAPI
@@ -124,6 +128,8 @@ apis:
   humanURL: https://developer-guides.cloudkitchens.com/docs/
   baseURL: https://api.cloudkitchens.com
   tags:
+  - Auth Endpoints
+  tags_raw:
   - auth_endpoints
   properties:
   - type: OpenAPI
@@ -154,6 +160,8 @@ apis:
   humanURL: https://developer-guides.cloudkitchens.com/docs/
   baseURL: https://api.cloudkitchens.com
   tags:
+  - Callback Endpoints
+  tags_raw:
   - callback_endpoints
   properties:
   - type: OpenAPI
@@ -184,6 +192,8 @@ apis:
   humanURL: https://developer-guides.cloudkitchens.com/docs/
   baseURL: https://api.cloudkitchens.com
   tags:
+  - Delivery Endpoints
+  tags_raw:
   - delivery_endpoints
   properties:
   - type: OpenAPI
@@ -214,6 +224,8 @@ apis:
   humanURL: https://developer-guides.cloudkitchens.com/docs/
   baseURL: https://api.cloudkitchens.com
   tags:
+  - Delivery Webhooks
+  tags_raw:
   - delivery_webhooks
   properties:
   - type: OpenAPI
@@ -244,6 +256,8 @@ apis:
   humanURL: https://developer-guides.cloudkitchens.com/docs/
   baseURL: https://api.cloudkitchens.com
   tags:
+  - Direct Orders Endpoints
+  tags_raw:
   - direct_orders_endpoints
   properties:
   - type: OpenAPI
@@ -274,6 +288,8 @@ apis:
   humanURL: https://developer-guides.cloudkitchens.com/docs/
   baseURL: https://api.cloudkitchens.com
   tags:
+  - Finance Endpoints
+  tags_raw:
   - finance_endpoints
   properties:
   - type: OpenAPI
@@ -304,6 +320,8 @@ apis:
   humanURL: https://developer-guides.cloudkitchens.com/docs/
   baseURL: https://api.cloudkitchens.com
   tags:
+  - Inventory Endpoints
+  tags_raw:
   - inventory_endpoints
   properties:
   - type: OpenAPI
@@ -334,6 +352,8 @@ apis:
   humanURL: https://developer-guides.cloudkitchens.com/docs/
   baseURL: https://api.cloudkitchens.com
   tags:
+  - Manager Loyalty Endpoints
+  tags_raw:
   - manager_loyalty_endpoints
   properties:
   - type: OpenAPI
@@ -364,6 +384,8 @@ apis:
   humanURL: https://developer-guides.cloudkitchens.com/docs/
   baseURL: https://api.cloudkitchens.com
   tags:
+  - Manager Menu Endpoints
+  tags_raw:
   - manager_menu_endpoints
   properties:
   - type: OpenAPI
@@ -401,6 +423,8 @@ apis:
   humanURL: https://developer-guides.cloudkitchens.com/docs/
   baseURL: https://api.cloudkitchens.com
   tags:
+  - Manager Order Endpoints
+  tags_raw:
   - manager_order_endpoints
   properties:
   - type: OpenAPI
@@ -433,6 +457,8 @@ apis:
   humanURL: https://developer-guides.cloudkitchens.com/docs/
   baseURL: https://api.cloudkitchens.com
   tags:
+  - Manager Orders Webhooks
+  tags_raw:
   - manager_orders_webhooks
   properties:
   - type: OpenAPI
@@ -463,6 +489,8 @@ apis:
   humanURL: https://developer-guides.cloudkitchens.com/docs/
   baseURL: https://api.cloudkitchens.com
   tags:
+  - Manager Storefront Endpoints
+  tags_raw:
   - manager_storefront_endpoints
   properties:
   - type: OpenAPI
@@ -494,6 +522,8 @@ apis:
   humanURL: https://developer-guides.cloudkitchens.com/docs/
   baseURL: https://api.cloudkitchens.com
   tags:
+  - Market Intel Endpoints
+  tags_raw:
   - marketintel_endpoints
   properties:
   - type: OpenAPI
@@ -524,6 +554,8 @@ apis:
   humanURL: https://developer-guides.cloudkitchens.com/docs/
   baseURL: https://api.cloudkitchens.com
   tags:
+  - Menus Endpoints
+  tags_raw:
   - menus_endpoints
   properties:
   - type: OpenAPI
@@ -554,6 +586,8 @@ apis:
   humanURL: https://developer-guides.cloudkitchens.com/docs/
   baseURL: https://api.cloudkitchens.com
   tags:
+  - Menus Webhooks
+  tags_raw:
   - menus_webhooks
   properties:
   - type: OpenAPI
@@ -590,6 +624,8 @@ apis:
   humanURL: https://developer-guides.cloudkitchens.com/docs/
   baseURL: https://api.cloudkitchens.com
   tags:
+  - Orders Endpoints
+  tags_raw:
   - orders_endpoints
   properties:
   - type: OpenAPI
@@ -620,6 +656,8 @@ apis:
   humanURL: https://developer-guides.cloudkitchens.com/docs/
   baseURL: https://api.cloudkitchens.com
   tags:
+  - Orders Webhooks
+  tags_raw:
   - orders_webhooks
   properties:
   - type: OpenAPI
@@ -651,6 +689,8 @@ apis:
   humanURL: https://developer-guides.cloudkitchens.com/docs/
   baseURL: https://api.cloudkitchens.com
   tags:
+  - Organization Endpoints
+  tags_raw:
   - organization_endpoints
   properties:
   - type: OpenAPI
@@ -681,6 +721,8 @@ apis:
   humanURL: https://developer-guides.cloudkitchens.com/docs/
   baseURL: https://api.cloudkitchens.com
   tags:
+  - Ping Endpoints
+  tags_raw:
   - ping_endpoints
   properties:
   - type: OpenAPI
@@ -711,6 +753,8 @@ apis:
   humanURL: https://developer-guides.cloudkitchens.com/docs/
   baseURL: https://api.cloudkitchens.com
   tags:
+  - Ping Webhooks
+  tags_raw:
   - ping_webhooks
   properties:
   - type: OpenAPI
@@ -741,6 +785,8 @@ apis:
   humanURL: https://developer-guides.cloudkitchens.com/docs/
   baseURL: https://api.cloudkitchens.com
   tags:
+  - Reports Endpoints
+  tags_raw:
   - reports_endpoints
   properties:
   - type: OpenAPI
@@ -771,6 +817,8 @@ apis:
   humanURL: https://developer-guides.cloudkitchens.com/docs/
   baseURL: https://api.cloudkitchens.com
   tags:
+  - Reports Webhooks
+  tags_raw:
   - reports_webhooks
   properties:
   - type: OpenAPI
@@ -801,6 +849,8 @@ apis:
   humanURL: https://developer-guides.cloudkitchens.com/docs/
   baseURL: https://api.cloudkitchens.com
   tags:
+  - Reviews Endpoints
+  tags_raw:
   - reviews_endpoints
   properties:
   - type: OpenAPI
@@ -831,6 +881,8 @@ apis:
   humanURL: https://developer-guides.cloudkitchens.com/docs/
   baseURL: https://api.cloudkitchens.com
   tags:
+  - Storefront Endpoints
+  tags_raw:
   - storefront_endpoints
   properties:
   - type: OpenAPI
@@ -861,6 +913,8 @@ apis:
   humanURL: https://developer-guides.cloudkitchens.com/docs/
   baseURL: https://api.cloudkitchens.com
   tags:
+  - Storefront Webhooks
+  tags_raw:
   - storefront_webhooks
   properties:
   - type: OpenAPI
