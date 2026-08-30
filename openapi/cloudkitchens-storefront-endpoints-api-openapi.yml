@@ -1,0 +1,1136 @@
+openapi: 3.2.0
+info:
+  title: Public Storefront Endpoints API
+  description: "# Overview\n\nThe API endpoints are developed around [RESTful](https://en.wikipedia.org/wiki/Representational_state_transfer) principles secure via the OAuth2.0 protocol.\n\nBeyond the entry points, the API also provides a line of communication into your system via [webhooks](https://en.wikipedia.org/wiki/Webhook).\n\nFor testing purposes, we offer a staging environment. Also, more detailed information about the business rules and workflows can be found on the [**Documentation Section**](/docs/)\n\n## Versioning\nEach API is versioned individually, but we follow these rules:\n- Non breaking changes (eg: adding new fields) are added in the current version without previous communication\n- Breaking changes (fields removal, semantic changed or schema update) have the version incremented\n- Users will be notified about new versions and will be given time to migrate (the time will be set on a case by case basis)\n- Once users migrate to the new version, we will deprecate the old ones\n- Once there is a new version for an API, we won't accept new integrations targeting old versions\n\n## API General Definitions\nThe APIs use resource-oriented URLs communicating, primarily, via JSON and leveraging the HTTP headers, [response status codes](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status), and verbs.\n\nTo exemplify how the API is to be consumed, consider a fake GET resource endpoint invocation below:\n\n```\ncurl --request GET 'https://{{public-api-url}}/v1/resource/123' \\\n--header 'Authorization: Bearer 34fdabeeafds=' --header 'X-Store-Id: 321'\n```\n\n|      Header      | Description |\n| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |\n|`Authorization`   | Standard HTTP header is used to associate the request with the originating invoker. The content of this header is a `Bearer` token generated from you client_secret, defined in the [API Auth](#/section/Guides/API-Auth) guide.|\n|`X-Store-Id`      | The ID of the store in your system this call acts on behalf of. |\n\n_All resource endpoints expect the `Authorization` header, the remaining headers are explicitly stated in the individual endpoint documentation section._\n\nWith these headers, the system will:\n - Validate the client token, making sure the call is originating from a trusted source.\n - Validate that the Application has the permission to access the `v1/resource/{id}` resource via the Application's pre-configured scopes.\n - Translate your X-Store-Id to our internal store ID (e.g. `AAA`).\n - Validate and retrieve resource `AAA`, that is associated to your Application via store id `321`.\n\nPOST/PUT methods will look similar to the GET calls, but they'll take in a body in the HTTP request (default to the application/json content-type).\n\n```\ncurl --location --request POST 'https://{{public-api-url}}/v1/resource' \\\n--header 'Authorization: Bearer 34fdabeeafds=' --header 'X-Store-Id: 321'\n--data '{\"foo\": \"bar\"}'\n```\n\n## API Authentication/Authorization\n\n<SecurityDefinitions />\n\n## Webhook\n\nThe Public API is able to send notifications to your system via HTTP POST requests.\n\nEvery webhook is signed using HMAC-SHA256 that is present in the header `X-HMAC-SHA256`, and you can also authenticate the requests using Basic Auth, Bearer Token or HMAC-SHA1 (legacy). Please, refer to [**Webhook Authentication Guide**](/docs/guides-webhook-authentication/) for more details.\n\n_Please work with your Account Representative to setup your Application's Webhook configurations._\n\n```\nExample Base-URL = https://{{your-server-url}}/webhook\n```\n\n### Notification Schema\n\n| **Name**                | **Type** | **Description**                                                      |\n| ------------------------| ---------| -------------------------------------------------------------------- |\n| eventId                 | string   | Unique id of the event.                                              |\n| eventTime               | string   | The time the event occurred.                                         |\n| eventType               | string   | The type of event (e.g. create_order).                               |\n| metadata.storeId        | string   | Id of the store for which the event is being published.              |\n| metadata.applicationId  | string   | Id of the application for which the event is being published.        |\n| metadata.resourceId     | string   | The external identifier of the resource that this event refers to.   |\n| metadata.resourceHref   | string   | The endpoint to fetch the details of the resource.                   |\n| metadata.payload        | object   | The event object which will be detailed in each Webhook description. |\n\n### Notification Request Example\n\n```\ncurl --location --request POST 'https://{{your-server-url}}/webhook' \\\n--header 'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.142 Safari/537.36' \\\n--header 'Authorization: MAC <hash signature>' \\\n--header 'Content-Type: application/json' \\\n--data-raw '{\n   \"eventId\": \"123456\",\n   \"eventTime\": \"2020-10-10T20:06:02:123Z\",\n   \"eventType\": \"orders.new_order\",\n   \"metadata\": {\n      \"storeId\": \"755fd19a-7562-487a-b615-171a9f89d669\",\n      \"applicationId\": \"e22f94b3-967c-4e26-bf39-9e364066b68b\",\n      \"resourceHref\": \"https://{{public-api-url}}/v1/orders/bf9f1d81-f213-496e-a026-91b6af44996c\",\n      \"resourceId\": \"bf9f1d81-f213-496e-a026-91b6af44996c\",\n      \"payload\": {}\n   }\n}\n```\n\n### Expected Response\n\nThe partner application should return an HTTP 200 response code with an empty response body to acknowledge receipt of the webhook event.\n## Rate Limiting\nPlease, refer to [**Rate Limiting Guide**](/docs/guides-rate-limiting/) for more details.\n\n## Error codes\nThe APIs use standard HTTP status codes to indicate the success or failure of a request. Error codes are divided into two categories: 4XX codes for client-side errors and 5xx codes for server-side errors.\n### 4XX Client-Side Errors\nClient-side errors are indicated by status codes in the 4xx range. These errors are typically the result of a problem with the request made by your application.\nIf a client-side error occurs, our API will return a response that includes an appropriate error message. This message will provide information about the cause of the error. The aim of these messages is to assist you in identifying and resolving the issue.\nFor example, if you submit a request with missing or invalid parameters, you might receive a 400 Bad Request error with a message indicating which parameters were missing or incorrect.\n### 5XX Server-Side Errors\nServer-side errors are represented by status codes in the 5xx range. These errors suggest a problem with our server, not with your application's request.\nServer-side errors are typically transient, meaning they are temporary. If a server-side error occurs, we recommend that the client retries the same request with the exact same parameters.\nFor example, if you get a 500 Internal Server Error, it's possible that our server is suffering a temporary problem. In such cases, retrying the request after a short delay is often successful.\nIf you continually receive server-side errors, reach out to our support team for further assistance."
+  version: v1
+  license:
+    name: Proprietary
+servers:
+- url: https://{{public-api-url}}
+  description: Staging server url
+tags:
+- name: storefront_endpoints
+  description: Endpoints to manage storefront state
+  x-displayName: Storefront
+paths:
+  /v1/storefront/availability:
+    post:
+      tags:
+      - storefront_endpoints
+      summary: Notify about store availability change
+      description: '`RATE LIMIT: 16 per minute`
+
+        '
+      operationId: postStoreAvailabilityChange
+      parameters:
+      - $ref: '#/components/parameters/storeIdHeader'
+      - $ref: '#/components/parameters/eventIdOptionalHeader'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StoreAvailabilityEventResult'
+        required: true
+      responses:
+        '204':
+          description: The store availability change was successfully processed
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+      security:
+      - OAuth2.0:
+        - storefront.store_availability
+  /v1/storefront/hours:
+    post:
+      tags:
+      - storefront_endpoints
+      summary: Notify about store hours configuration change
+      description: '`RATE LIMIT: 16 per minute`
+
+        '
+      operationId: postStoreHoursConfigurationChange
+      parameters:
+      - $ref: '#/components/parameters/storeIdHeader'
+      - $ref: '#/components/parameters/eventIdOptionalHeader'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StoreHoursConfigurationEventResult'
+        required: true
+      responses:
+        '204':
+          description: The store hours configuration change was successfully processed.
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+      security:
+      - OAuth2.0:
+        - storefront.store_hours_configuration
+  /v1/storefront/pause:
+    post:
+      tags:
+      - storefront_endpoints
+      summary: Notify the result of a pause request event
+      description: '`RATE LIMIT: 8 per minute`
+
+        '
+      operationId: postPauseStoreEventResult
+      parameters:
+      - $ref: '#/components/parameters/storeIdHeader'
+      - $ref: '#/components/parameters/eventIdHeader'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PauseStoreEventResult'
+        required: true
+      responses:
+        '204':
+          description: The pause store event result was successfully processed
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+      security:
+      - OAuth2.0:
+        - storefront.store_pause_unpause
+  /v1/storefront/unpause:
+    post:
+      tags:
+      - storefront_endpoints
+      summary: Notify the result of an unpause request event
+      description: '`RATE LIMIT: 8 per minute`
+
+        '
+      operationId: postUnpauseStoreEventResult
+      parameters:
+      - $ref: '#/components/parameters/storeIdHeader'
+      - $ref: '#/components/parameters/eventIdHeader'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UnpauseStoreEventResult'
+        required: true
+      responses:
+        '204':
+          description: The unpause store event result was successfully processed
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+      security:
+      - OAuth2.0:
+        - storefront.store_pause_unpause
+  /v1/storefront/eater-side/status:
+    post:
+      tags:
+      - storefront_endpoints
+      summary: Notify about store availability change from the eater side
+      description: '`RATE LIMIT: 16 per minute`
+
+        '
+      operationId: postEaterSideStoreAvailabilityChange
+      parameters:
+      - $ref: '#/components/parameters/storeIdHeader'
+      - $ref: '#/components/parameters/eventIdOptionalHeader'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StoreAvailabilityEventResult'
+        required: true
+      responses:
+        '204':
+          description: The store availability change was successfully processed
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+      security:
+      - OAuth2.0:
+        - storefront.store_availability
+  /v1/storefront/eater-side/hours:
+    post:
+      tags:
+      - storefront_endpoints
+      summary: Notify about store hours configuration change on eater side
+      description: '`RATE LIMIT: 16 per minute`
+
+        '
+      operationId: postEaterSideStoreHoursConfigurationChange
+      parameters:
+      - $ref: '#/components/parameters/storeIdHeader'
+      - $ref: '#/components/parameters/eventIdOptionalHeader'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StoreHoursConfigurationEventResult'
+        required: true
+      responses:
+        '204':
+          description: The store hours configuration change was successfully processed.
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+      security:
+      - OAuth2.0:
+        - storefront.store_hours_configuration
+  /v1/market-intel/store-details:
+    post:
+      tags:
+      - storefront_endpoints
+      summary: Notify about store details update
+      operationId: postGetStoreDetailsResult
+      parameters:
+      - $ref: '#/components/parameters/eventIdOptionalHeader'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GetStoreDetailsEventResult'
+        required: true
+      responses:
+        '204':
+          description: The store details updates were successfully processed
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+      security:
+      - OAuth2.0:
+        - marketintel.service_integration
+components:
+  schemas:
+    Marketintel_StoreRating:
+      type: object
+      properties:
+        ratingScore:
+          type:
+          - number
+          - 'null'
+          description: The normalized rating score of the store.
+          example: 2
+        estimatedRatingCount:
+          type:
+          - integer
+          - 'null'
+          description: The estimated number of scores in the rating.
+          example: 100
+        displayRatingCount:
+          type:
+          - string
+          - 'null'
+          description: The display text of the number of scores in the rating.
+          example:
+          - 20+
+          - 20
+      description: The Store rating information. At least one of the ratingScore, estimatedRatingCount or displayRatingCount need to be present.
+    StoreHoursConfiguration:
+      required:
+      - timezone
+      type: object
+      properties:
+        deliveryHours:
+          $ref: '#/components/schemas/StoreHours'
+        pickupHours:
+          $ref: '#/components/schemas/StoreHours'
+        timezone:
+          type: string
+          description: The store time zone identifier. (e.g. America/New_York)
+          example: America/Los_Angeles
+      description: The current store hours configuration of a store.
+    Storefront_TimeRange:
+      type: object
+      properties:
+        startTime:
+          type: string
+          description: Start time of the range in 24 hour format.
+          example: 08:00
+        endTime:
+          type: string
+          description: End time of the range in 24 hour format.
+          example: 08:00
+      description: Time range in a given date.
+    Marketintel_StoreSales:
+      type: object
+      properties:
+        periodType:
+          type:
+          - string
+          - 'null'
+          description: The period type of the sales data
+          example: null
+        numberOfSales:
+          type:
+          - integer
+          - 'null'
+          description: The number of sales.
+          example: 100
+        displayNumberOfSales:
+          type:
+          - string
+          - 'null'
+          description: The display text of the number of sales.
+          example:
+          - 20
+          - 20+
+      description: The Store Sales information. At least one of the periodType, numberOfSales or displayNumberOfSales need to be present.
+    ErrorDetail:
+      type: object
+      properties:
+        attribute:
+          type: string
+          description: The error attribute.
+          example: Order Currency Code
+        message:
+          type: string
+          description: The error detail description.
+          example: Order Currency Code must be exactly 3 characters
+      description: The error detail response object.
+    Marketintel_StoreChain:
+      type: object
+      properties:
+        chainId:
+          type:
+          - string
+          - 'null'
+          description: The external chain id.
+          example: 1
+        chainName:
+          type:
+          - string
+          - 'null'
+          description: The name of the chain.
+          example: Macdonalds
+      description: The Store Chain information.
+    PauseStoreEventResult:
+      type: object
+      properties:
+        closureId:
+          type: string
+          description: ID required to unpause a store, if available
+          example: 4109d2c9-8bc5-413c-af3e-1c92aa381e41
+        eventResultMetadata:
+          $ref: '#/components/schemas/RequiredEventResultMetadata'
+      description: Result of an event that requested to pause a store.
+    ErrorMessage:
+      type: object
+      properties:
+        message:
+          type: string
+          description: The error description.
+          example: The request body is invalid.
+        details:
+          type: array
+          description: The error details.
+          items:
+            $ref: '#/components/schemas/ErrorDetail'
+      description: The error response object.
+    Address:
+      type:
+      - object
+      - 'null'
+      properties:
+        fullAddress:
+          type:
+          - string
+          - 'null'
+          description: Full, human comprehensible address. It is usually formatted in the order appropriate for your locale.
+          example: 123 Sample Street Ste 100, San Francisco, CA 94103
+        postalCode:
+          type: string
+          description: Postal code of the address.
+          example: '20500'
+        city:
+          type: string
+          description: The city/town portion of the address.
+          example: Washington
+        state:
+          type: string
+          description: Highest administrative subdivision which is used for postal addresses of a country or region. For example, this can be a state, a province, or a prefecture.
+          example: DC
+        countryCode:
+          type: string
+          description: CLDR country code. See http://cldr.unicode.org/
+          example: US
+        addressLines:
+          type:
+          - array
+          - 'null'
+          description: Address lines (e.g. street, PO Box, or company name) or the full single line address (e.g. street, city, state, country, zip).
+          example:
+          - 1600 Pennsylvania Avenue NW
+          - 123 Sample Street Ste 100, San Francisco, CA 94103
+          items:
+            type: string
+        linesOfAddress:
+          type:
+          - array
+          - 'null'
+          deprecated: true
+          description: 'Deprecated: use addressLines. Address lines (e.g. street, PO Box, or company name) or the full single line address (e.g. street, city, state, country, zip).'
+          example:
+          - 1600 Pennsylvania Avenue NW
+          - 123 Sample Street Ste 100, San Francisco, CA 94103
+          items:
+            type: string
+        location:
+          $ref: '#/components/schemas/Location'
+      description: Order delivery address.
+    StoreAvailabilityEventResult:
+      type: object
+      properties:
+        storeState:
+          type:
+          - string
+          - 'null'
+          description: Represents the current state of a store.
+          enum:
+          - OPEN
+          - OFF_HOUR
+          - SERVICE_PROVIDER_PAUSED
+          - OPERATOR_PAUSED
+          - SERVICE_PROVIDER_PAUSED_COURIERS_UNAVAILABLE
+          - STORE_UNAVAILABLE
+          - HOLIDAY_HOUR
+          - MENU_UNAVAILABLE
+          - SERVICE_PROVIDER_PAUSED_MISCONFIGURED
+          - OPEN_FOR_PICKUP_ONLY
+          - OPEN_FOR_DELIVERY_ONLY
+          - CLOSED_FOR_UNDETERMINED_REASON
+        statusChangedAt:
+          type:
+          - string
+          - 'null'
+          description: The time when the store changed to the current state.
+          format: date-time
+          example: '2007-12-03T10:15:30+01:00'
+        eventResultMetadata:
+          $ref: '#/components/schemas/EventResultMetadata'
+      description: The current state of a store.
+    Money:
+      required:
+      - amount
+      - currencyCode
+      type: object
+      properties:
+        currencyCode:
+          maxLength: 3
+          minLength: 3
+          type: string
+          description: The 3-letter currency code (ISO 4217) to use for all monetary values.
+          example: EUR
+        amount:
+          minimum: 0
+          type: number
+          description: Amount value.
+          example: 25.21
+      description: Money amount.
+      example: 25.21
+    Marketintel_SpecialHours:
+      required:
+      - date
+      - timeRanges
+      - type
+      type: object
+      properties:
+        date:
+          type: string
+          description: Date the special hour configuration applies.
+          format: date
+          example: '2021-10-01'
+        timeRanges:
+          type: array
+          minItems: 1
+          description: Hours range applied to configured date.
+          items:
+            $ref: '#/components/schemas/Marketintel_TimeRange'
+        type:
+          type: string
+          description: Store state that should be applied during the configured special hour.
+          enum:
+          - OPEN
+          - CLOSED
+      description: Describes the configuration of special store hours.
+    Marketintel_TimeRange:
+      required:
+      - end
+      - start
+      type: object
+      properties:
+        start:
+          type: string
+          description: Start time of the range in 24 hour format.
+          example: 08:00
+        end:
+          type: string
+          description: End time of the range in 24 hour format.
+          example: '22:00'
+      description: Time range in a given date.
+    Location:
+      required:
+      - latitude
+      - longitude
+      type:
+      - object
+      - 'null'
+      properties:
+        latitude:
+          type: number
+          description: The latitude of the location.
+          format: double
+          example: 38.8977
+        longitude:
+          type: number
+          description: The longitude of the location.
+          format: double
+          example: 77.0365
+      description: Latitude and longitude of the address.
+    Storefront_RegularHours:
+      required:
+      - dayOfWeek
+      - timeRanges
+      type: object
+      properties:
+        dayOfWeek:
+          type: string
+          description: Day of the week.
+          enum:
+          - MONDAY
+          - TUESDAY
+          - WEDNESDAY
+          - THURSDAY
+          - FRIDAY
+          - SATURDAY
+          - SUNDAY
+        timeRanges:
+          type: array
+          minItems: 1
+          description: Hours range applied to the provided day of the week
+          items:
+            $ref: '#/components/schemas/Storefront_TimeRange'
+      description: Describes the configuration of regular hours.
+    Marketintel_StorePriceLevel:
+      type: object
+      properties:
+        priceLevel:
+          type:
+          - number
+          - 'null'
+          description: The price level of the store in numeric rating.
+          example: 3
+        priceLevelName:
+          type:
+          - string
+          - 'null'
+          description: The price level of the store in text.
+          example: $$$
+      description: The Store Price Level information. At least one of the price level or price level name need to be present.
+    Marketintel_GeoLocationInformation:
+      type: object
+      properties:
+        regionId:
+          type: string
+          description: The region id of the geographical location.
+          example:
+          - LATAM-N
+        superRegion:
+          type: string
+          description: The super region of the geographical location.
+          example:
+          - LATAM
+        h3Index:
+          type: string
+          description: The H3Index value of the geographic location.
+          example:
+          - 886d344c81fffff
+        searchText:
+          type:
+          - string
+          - 'null'
+          description: The text used to search for stores.
+          example:
+          - chinese food
+        address:
+          type: object
+          description: The address of the geographical location.
+          $ref: '#/components/schemas/Address'
+      description: The geographical location information used to discover stores.  This information will need be pass back with the result.
+    Marketintel_RegularHours:
+      required:
+      - days
+      - timeRanges
+      type: object
+      properties:
+        days:
+          type: array
+          description: The day of the week this configuration applies.
+          items:
+            type: string
+            description: Day of the week.
+            enum:
+            - MONDAY
+            - TUESDAY
+            - WEDNESDAY
+            - THURSDAY
+            - FRIDAY
+            - SATURDAY
+            - SUNDAY
+        timeRanges:
+          type: array
+          description: Hours range applied to the provided day of the week
+          items:
+            $ref: '#/components/schemas/Marketintel_TimeRange'
+      description: Describes the configuration of regular hours.
+    StoreHoursConfigurationEventResult:
+      type: object
+      properties:
+        storeHoursConfiguration:
+          $ref: '#/components/schemas/StoreHoursConfiguration'
+        statusChangedAt:
+          type: string
+          description: The time when the store hours configuration changed.
+          format: date-time
+          example: '2007-12-03T10:15:30+01:00'
+        eventResultMetadata:
+          $ref: '#/components/schemas/EventResultMetadata'
+      description: The current store hours configuration.
+    RequiredEventResultMetadata:
+      type: object
+      properties:
+        operationStatus:
+          type: string
+          description: Status of the operation requested by an event.
+          enum:
+          - SUCCEEDED
+          - INTERNAL_ERROR
+          - AUTHENTICATION_FAILURE
+          - AUTHORIZATION_FAILURE
+          - UNKNOWN_FAILURE
+          - INVALID_STORE_STATE
+          - INVALID_STORE_CONFIGURATION
+          - OPERATION_NOT_SUPPORTED
+          - IGNORED_ALREADY_IN_REQUESTED_STATE
+          - INVALID_REQUEST
+        additionalInformation:
+          type:
+          - string
+          - 'null'
+          description: Additional details about the event result, if available.
+          example: Completed without problems.
+        operationFinishedAt:
+          type: string
+          description: Time when the processing of the event finished.
+          format: date-time
+          example: '2007-12-03T10:15:30+01:00'
+      description: Information about the result of a storefront event.
+    EventResultMetadata:
+      type:
+      - object
+      - 'null'
+      properties:
+        operationStatus:
+          type: string
+          description: Status of the operation requested by an event.
+          enum:
+          - SUCCEEDED
+          - INTERNAL_ERROR
+          - AUTHENTICATION_FAILURE
+          - AUTHORIZATION_FAILURE
+          - UNKNOWN_FAILURE
+          - INVALID_STORE_STATE
+          - INVALID_STORE_CONFIGURATION
+          - OPERATION_NOT_SUPPORTED
+          - IGNORED_ALREADY_IN_REQUESTED_STATE
+          - INVALID_REQUEST
+        additionalInformation:
+          type:
+          - string
+          - 'null'
+          description: Additional details about the event result, if available.
+          example: Completed without problems.
+        operationFinishedAt:
+          type: string
+          description: Time when the processing of the event finished.
+          format: date-time
+          example: '2007-12-03T10:15:30+01:00'
+      description: Information about the result of a storefront event.
+    GetStoreDetailsEventResult:
+      type: object
+      properties:
+        superRegion:
+          type: string
+          description: Represents a super region geographical mapping.
+          example: LATAM
+        storeDetails:
+          type: array
+          minItems: 0
+          description: Represents a list of stores
+          items:
+            $ref: '#/components/schemas/Marketintel_StoreDetails'
+      description: The result of an event that request to store details.
+    StoreHours:
+      type:
+      - object
+      - 'null'
+      properties:
+        regularHours:
+          type: array
+          description: List of regular hours configuration.
+          items:
+            $ref: '#/components/schemas/Storefront_RegularHours'
+        specialHours:
+          type:
+          - array
+          - 'null'
+          description: List of special hours configuration.
+          items:
+            $ref: '#/components/schemas/Storefront_SpecialHours'
+      description: Represents store hours configuration with regular hours and special hours.
+    Marketintel_StoreDeliveryInformation:
+      type: object
+      properties:
+        minDeliveryBasketSize:
+          type:
+          - object
+          - 'null'
+          description: The minimum basket value of the order needed for delivery
+          $ref: '#/components/schemas/Money'
+        deliveryFee:
+          type:
+          - object
+          - 'null'
+          description: The delivery fee for the order
+          $ref: '#/components/schemas/Money'
+        deliveryType:
+          type:
+          - string
+          - 'null'
+          description: The delivery type for the order
+          example: Third Party
+        deliveryTimeMinutes:
+          type:
+          - integer
+          - 'null'
+          description: The estimated delivery time in minutes
+          example: 30
+      description: The Store delivery information.
+    Marketintel_HoursData:
+      required:
+      - regularHours
+      - specialHours
+      - timeZone
+      type: object
+      properties:
+        timeZone:
+          type: string
+          description: TimeZone of all times under it. (https://www.joda.org/joda-time/timezones.html)
+          format: timezone-id
+          example: America/Los_Angeles
+        regularHours:
+          type: array
+          description: List of regular hours configuration.
+          items:
+            $ref: '#/components/schemas/Marketintel_RegularHours'
+        specialHours:
+          type: array
+          description: List of special hours configuration, for occasions like Christmas, Thanksgiving, or any other holidays.
+          items:
+            $ref: '#/components/schemas/Marketintel_SpecialHours'
+      description: Represents hours configuration with regular hours and special hours.
+    StoreId:
+      type: string
+      description: The unique identifier of the store in the partner application. This ID, along with the `Application ID`, will be used to match the correct store when performing operations. It cannot be longer than 255 characters and must only contain printable ASCII characters. During on-boarding, this ID will be similar to `onboarding:905bb725-b141-4a9b-832a-1f254f772c94` (where the UUID is the Internal Store ID). During off-boarding, this field will be filled with the last known Store ID, or with an empty string, in case none is found. In that case, please fall back to the provided `internalStoreId` (a.k.a. Sku-Sku ID).
+      example: partner-store-unique-identifier
+    Storefront_SpecialHours:
+      required:
+      - date
+      - timeRanges
+      - specialHourType
+      type: object
+      properties:
+        date:
+          type: string
+          description: Date the special hour configuration applies.
+          format: date
+          example: '2021-10-01'
+        timeRanges:
+          type: array
+          minItems: 1
+          description: Hours range applied to configured date.
+          items:
+            $ref: '#/components/schemas/Storefront_TimeRange'
+        specialHourType:
+          type: string
+          description: Store state that should be applied during the configured special hour.
+          enum:
+          - OPEN
+          - CLOSED
+      description: Describes the configuration of special store hours.
+    Marketintel_Coordinates:
+      type: object
+      properties:
+        coordinatesType:
+          type: string
+          description: Coordinates type
+          enum:
+          - WGS84
+          - GCJ02
+        location:
+          type: object
+          description: The longitude and latitude of a location.
+          $ref: '#/components/schemas/Location'
+      description: The geographical coordinates of a location.
+    Marketintel_StoreDetails:
+      type: object
+      properties:
+        regionId:
+          type:
+          - string
+          - 'null'
+          description: The region that store belongs to.
+          example: LATAM-N
+        provider:
+          type: string
+          description: The store information provider
+          example: ubereats-provider
+        id:
+          type: string
+          description: The external store id
+          example: 12345
+        storeUrl:
+          type:
+          - string
+          - 'null'
+          description: The store url
+          example: 30
+        location:
+          type: object
+          description: The Geographic location used to discover the store
+          $ref: '#/components/schemas/Marketintel_GeoLocationInformation'
+        address:
+          type:
+          - object
+          - 'null'
+          description: The store address
+          $ref: '#/components/schemas/Address'
+        phoneNumbers:
+          type: array
+          minItems: 0
+          description: The store phone numbers.
+          items:
+            type: string
+            example: 613-123-4567
+        storeName:
+          type:
+          - string
+          - 'null'
+          description: The name of the store.
+          example: McDonald's
+        menu:
+          type:
+          - object
+          - 'null'
+          description: The store menu.
+          $ref: '#/components/schemas/Marketintel_StoreMenu'
+        storeHours:
+          type:
+          - object
+          - 'null'
+          description: The store hours.
+          $ref: '#/components/schemas/Marketintel_HoursData'
+        tags:
+          type: array
+          minItems: 0
+          description: The store tags
+          items:
+            description: The store tag
+            example: chinese
+        storeBannerPhotoUrl:
+          type:
+          - string
+          - 'null'
+          description: The store bannel photo url.
+          example: https://www.ubereats.com/ca/store/mcdonalds-1000-rideau-street/1QY5X6QcQX2Q4Z3Z3QZQYQ.jpg
+        storeRating:
+          type:
+          - object
+          - 'null'
+          description: The store ratings.
+          $ref: '#/components/schemas/Marketintel_StoreRating'
+        coordinates:
+          type:
+          - object
+          - 'null'
+          description: The coordinates of the store.
+          $ref: '#/components/schemas/Marketintel_Coordinates'
+        storeSales:
+          type:
+          - object
+          - 'null'
+          description: The store sales information.
+          $ref: '#/components/schemas/Marketintel_StoreSales'
+        avgBasketAmount:
+          type:
+          - object
+          - 'null'
+          description: The average order amount.
+          $ref: '#/components/schemas/Money'
+        storePromotions:
+          type: array
+          minItems: 0
+          description: The store promotions.
+          items:
+            $ref: '#/components/schemas/Marketintel_StorePromotion'
+        storeChain:
+          type: object
+          description: The store chain information.
+          $ref: '#/components/schemas/Marketintel_StoreChain'
+        storeDeliveryInformation:
+          type:
+          - object
+          - 'null'
+          description: The Store delivery information.
+          $ref: '#/components/schemas/Marketintel_StoreDeliveryInformation'
+        logoPhotoUrl:
+          type:
+          - string
+          - 'null'
+          description: The store photo url.
+          example: https://www.ubereats.com/ca/store/mcdonalds-1000-rideau-street/1QY5X6QcQX2Q4Z3Z3QZQYQ.jpg
+        priceLevel:
+          type:
+          - string
+          - 'null'
+          description: The estimated delivery time in minutes.
+          $ref: '#/components/schemas/Marketintel_StorePriceLevel'
+      description: The Store delivery information.
+    Marketintel_StorePromotion:
+      type: object
+      properties:
+        displayName:
+          type:
+          - string
+          - 'null'
+          description: The name of the promotion.
+          example: Flat rate discount on Christmas day
+        promotionType:
+          type:
+          - string
+          - 'null'
+          description: The type of promotion.
+          example: Flat rate discount
+        campaignType:
+          type:
+          - string
+          - 'null'
+          description: The type of promotion campaign.
+          example: Christmas
+        promotionId:
+          type:
+          - string
+          - 'null'
+          description: The external promotion id.
+          example: 12345
+      description: The Store Promotion information. At least one of the displayName, promotionType, campaignType or promotionId need to be present.
+    Marketintel_StoreMenu:
+      type: object
+      properties:
+        category:
+          type:
+          - string
+          - 'null'
+          description: The grouping category name.
+          example: Fast Food
+        ids:
+          type: array
+          description: The list of external store ids in the list in rank order.
+          items:
+            type: string
+            description: The external id the store
+            example: 123456
+        location:
+          type: object
+          description: The geographic location of the stores that was searched from.
+      description: The Store listing in ranking order based on category.
+    UnpauseStoreEventResult:
+      type: object
+      properties:
+        eventResultMetadata:
+          $ref: '#/components/schemas/RequiredEventResultMetadata'
+      description: Result of an event that requested to unpause a store.
+  responses:
+    '422':
+      description: The request body is not valid.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorMessage'
+    '403':
+      description: Authorization not valid for the requested resource.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorMessage'
+    '404':
+      description: Resource not found.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorMessage'
+    '400':
+      description: The request is malformed.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorMessage'
+    '401':
+      description: Invalid authorization.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorMessage'
+  parameters:
+    eventIdHeader:
+      name: X-Event-Id
+      in: header
+      required: true
+      schema:
+        type: string
+        description: Unique identifier of the event that this callback refers to.
+        example: cf0ce51b-d74e-40d3-b177-1925ab4edc0c
+    storeIdHeader:
+      name: X-Store-Id
+      in: header
+      required: true
+      schema:
+        $ref: '#/components/schemas/StoreId'
+    eventIdOptionalHeader:
+      name: X-Event-Id
+      in: header
+      required: false
+      schema:
+        type: string
+        description: Optional unique identifier of the event that this callback refers to.
+        example: cf0ce51b-d74e-40d3-b177-1925ab4edc0c
+  securitySchemes:
+    OAuth2.0:
+      type: oauth2
+      description: "The **Authorization API** is based on the [OAuth2.0 protocol](https://tools.ietf.org/html/rfc6749), supporting the (Client Credentials)[https://datatracker.ietf.org/doc/html/rfc6749#section-4.4] and the (Authorization Code)[https://datatracker.ietf.org/doc/html/rfc6749#section-4.1] flows. Resources expect a valid token sent as a `Bearer` token in the HTTP `Authorization` header.\n### Scopes\nScopes must be configured by our internal team to be enabled for an app. Once the scopes are configured they can be enabled on the Application Settings Page in Developer Portal. Each endpoint requires a given scope that can be verified on each endpoint documentation. When generating an OAuth2.0 token multiple scopes can be requested.\n\n### Authorization Code Flow\nTo perform this flow, the authorization code flow must be enabled in the Application Settings Page in Developer Portal. When enabling the flow it is mandatory to provide a redirect URI pointing to your application. Once the flow is complete we will redirect the user to this URI passing the 'code' and 'state' parameters.\nThe Authorization Code flow provides a temporary code that the client application can exchange for an access token. To start the flow the application must request the user authorization. This is done by sending a request to https://{{public-api-url}}/v1/auth/oauth2/authorize.\nExample\n```\ncurl --location 'https://{{public-api-url}}/v1/auth/oauth2/authorize?client_id=[CLIENT_ID]&redirect_uri=[REDIRECT_URI]&response_type=code&scope=organization.read&state=8A9D16B4C3E25F6A'\n```\nThis call will return a 302 redirecting the user to our authorization page. If the user approves the application, we will redirect to configured URI passing the authorization code in the query parameter 'code'. The 'state' parameter is also sent to ensure the source of the data.\nWith the authorization code, the client application can generate the token.\n### Client Credentials Flow\nThe client_credentials flow does not require any steps before generating the token. Once your application is ready, and the client_id and client_secret are available, the token can be generated by following the instructions in the next section.\n\n### Generate Token\nTo generate the token, use the `Client ID` and `Client Secret` (provided during onboarding), and optionally the authorization code obtained after performing the Authorization Code flow, to the [Token Auth endpoint](#operation/requestToken) endpoint. The result of this invocation is a token that is valid for a pre-determined time or until it is manually revoked.\n\nThe access token obtained will be sent as a `Bearer` value of the `Authorization` HTTP header.\n\nClient credentials in the request-body and HTTP Basic Auth are supported.\n\n#### Request Example for client_credentials\n```\ncurl --location --request POST 'https://{{public-api-url}}/v1/auth/token' \\\n  --header 'Content-Type: application/x-www-form-urlencoded' \\\n  --data-urlencode 'scope=ping' \\\n  --data-urlencode 'grant_type=client_credentials' \\\n  --data-urlencode 'client_id=[APPLICATION_ID]' \\\n  --data-urlencode 'client_secret=[CLIENT_SECRET]'\n\n```\n#### Request Example for authorization_code\n```\ncurl --location --request POST 'https://{{public-api-url}}/v1/auth/token' \\\n  --header 'Content-Type: application/x-www-form-urlencoded' \\\n  --data-urlencode 'scope=ping' \\\n  --data-urlencode 'grant_type=authorization_code' \\\n  --data-urlencode 'client_id=[APPLICATION_ID]' \\\n  --data-urlencode 'client_secret=[CLIENT_SECRET]' \\\n  --data-urlencode 'code=[code]' \\\n  --data-urlencode 'redirect_uri=[redirect_uri]'\n\n```\n#### Response Example\n```\n{\n  \"access_token\": \"oMahtBwBbnZeh4Q66mSuLFmk2V0_CLCKVt0aYcNJlcg.yditzjwCP7yp0PgR6AzQR3wQ1rTdCjkcPeAMuyfK-NU\",\n  \"expires_in\": 2627999,\n  \"scope\": \"ping orders.create\",\n  \"token_type\": \"bearer\"\n}\n```\n\n### Token Usage\n\nThe token provided in field `access_token` is used to authenticate when consuming the API endpoints. Send the token value in the `Authorization` header of every request. The token expiration time is represented in the field `expired_in`, in seconds. Currently, all tokens are valid for 30 days and should be stored and re-used while still valid.\n\nNote that occasionally, a 401 error may be returned for a valid token due to an internal service issue. Such occurrences should be rare. To prevent exposing potential vulnerabilities to attackers, the Public API does not disclose other types of errors in the authentication flow if for any reason the token can't be validated (when it's a valid token then it's ok to return 5XX or other 4XX though - such as 403). In such scenarios, although the internal auth flow avoids retries to prevent attacks, if the token is known to be valid and not expired, a retry with a backoff interval by the client is advised. Another option is to request a new token.\n\n#### Example\n\n```\ncurl --location --request GET 'https://{{public-api-url}}/v1/ping' \\\n  --header 'Authorization: Bearer <access_token>' \\\n  --header 'X-Store-Id: <storeId>'\n\n```\n"
+      flows:
+        clientCredentials:
+          tokenUrl: /v1/auth/token
+          scopes:
+            catalog: Permission to interact with product inventory for existing stores.
+            delivery.provider: Permission to provide delivery services for existing orders.
+            finance: Permission to provide financial data for orders/stores.
+            manager.menus: Permission to manage menus.
+            manager.orders: Permission to manage orders.
+            manager.storefront: Permission to manage storefront.
+            menus.async_job.read: Permission to read the status of a menu upsert job.
+            menus.entity_suspension: Permission to notify the result of a menu entity availability update, after being requested by a webhook event.
+            menus.get_current: Permission to send the current state of a menu, after being requested by a webhook event.
+            menus.publish: Permission to notify the result of a publish menus operation for a given store.
+            menus.read: Permission to read the current menus for a given store.
+            menus.upsert: Permission to create/update menus for a given store.
+            menus.upsert_hours: Permission to notify the receiving of the upsert hours menu event, after being requested by a webhook event.
+            orders.create: Permission to create new order for a given store.
+            orders.read: Permission to read orders and connected data.
+            orders.update: Permission to create and update new orders for a given store.
+            ping: Permission to ping the system.
+            reports.generate_report: Permission to request reports for given store(s) and period of time.
+            reviews.reply: Permission to reply to reviews.
+            storefront.store_pause_unpause: Permission to notify the result of a pause/unpause operation, after being requested by a webhook event.
+            storefront.store_availability: Permission to send the current state of store.
+            storefront.store_hours_configuration: Permission to send the current store hours configuration.
+            stores.manage: Permission to onboard stores and update the identifier.
+            callback.error.write: Token has permission to send failed webhook event results.
+            manager.loyalty: Permission to interact with loyalty services.
+            direct.orders: Permission to interact with direct order services.
+            store.read: Permission to query store information.
+        authorizationCode:
+          authorizationUrl: /v1/auth/oauth2/authorize
+          tokenUrl: /v1/auth/token
+          scopes:
+            organization.read: Permission to read data for organization/brands/stores on behalf of a user.
+            organization.service_integration: Permission to manage the your integration with a given store on behalf of a user.
+x-tagGroups:
+- name: Endpoints
+  tags:
+  - account_pairing_endpoints
+  - auth_endpoints
+  - callback_endpoints
+  - delivery_endpoints
+  - finance_endpoints
+  - inventory_endpoints
+  - manager_menu_endpoints
+  - manager_order_endpoints
+  - manager_storefront_endpoints
+  - menus_endpoints
+  - orders_endpoints
+  - organization_endpoints
+  - ping_endpoints
+  - reports_endpoints
+  - reviews_endpoints
+  - storefront_endpoints
+  - manager_loyalty_endpoints
+  - direct_orders_endpoints
+  - store_endpoints
+- name: Webhooks
+  tags:
+  - account_pairing_webhooks
+  - delivery_webhooks
+  - manager_orders_webhooks
+  - menus_webhooks
+  - orders_webhooks
+  - ping_webhooks
+  - reports_webhooks
+  - storefront_webhooks

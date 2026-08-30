@@ -1,0 +1,1647 @@
+openapi: 3.2.0
+info:
+  title: Public Manager Menu Endpoints API
+  description: "# Overview\n\nThe API endpoints are developed around [RESTful](https://en.wikipedia.org/wiki/Representational_state_transfer) principles secure via the OAuth2.0 protocol.\n\nBeyond the entry points, the API also provides a line of communication into your system via [webhooks](https://en.wikipedia.org/wiki/Webhook).\n\nFor testing purposes, we offer a staging environment. Also, more detailed information about the business rules and workflows can be found on the [**Documentation Section**](/docs/)\n\n## Versioning\nEach API is versioned individually, but we follow these rules:\n- Non breaking changes (eg: adding new fields) are added in the current version without previous communication\n- Breaking changes (fields removal, semantic changed or schema update) have the version incremented\n- Users will be notified about new versions and will be given time to migrate (the time will be set on a case by case basis)\n- Once users migrate to the new version, we will deprecate the old ones\n- Once there is a new version for an API, we won't accept new integrations targeting old versions\n\n## API General Definitions\nThe APIs use resource-oriented URLs communicating, primarily, via JSON and leveraging the HTTP headers, [response status codes](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status), and verbs.\n\nTo exemplify how the API is to be consumed, consider a fake GET resource endpoint invocation below:\n\n```\ncurl --request GET 'https://{{public-api-url}}/v1/resource/123' \\\n--header 'Authorization: Bearer 34fdabeeafds=' --header 'X-Store-Id: 321'\n```\n\n|      Header      | Description |\n| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |\n|`Authorization`   | Standard HTTP header is used to associate the request with the originating invoker. The content of this header is a `Bearer` token generated from you client_secret, defined in the [API Auth](#/section/Guides/API-Auth) guide.|\n|`X-Store-Id`      | The ID of the store in your system this call acts on behalf of. |\n\n_All resource endpoints expect the `Authorization` header, the remaining headers are explicitly stated in the individual endpoint documentation section._\n\nWith these headers, the system will:\n - Validate the client token, making sure the call is originating from a trusted source.\n - Validate that the Application has the permission to access the `v1/resource/{id}` resource via the Application's pre-configured scopes.\n - Translate your X-Store-Id to our internal store ID (e.g. `AAA`).\n - Validate and retrieve resource `AAA`, that is associated to your Application via store id `321`.\n\nPOST/PUT methods will look similar to the GET calls, but they'll take in a body in the HTTP request (default to the application/json content-type).\n\n```\ncurl --location --request POST 'https://{{public-api-url}}/v1/resource' \\\n--header 'Authorization: Bearer 34fdabeeafds=' --header 'X-Store-Id: 321'\n--data '{\"foo\": \"bar\"}'\n```\n\n## API Authentication/Authorization\n\n<SecurityDefinitions />\n\n## Webhook\n\nThe Public API is able to send notifications to your system via HTTP POST requests.\n\nEvery webhook is signed using HMAC-SHA256 that is present in the header `X-HMAC-SHA256`, and you can also authenticate the requests using Basic Auth, Bearer Token or HMAC-SHA1 (legacy). Please, refer to [**Webhook Authentication Guide**](/docs/guides-webhook-authentication/) for more details.\n\n_Please work with your Account Representative to setup your Application's Webhook configurations._\n\n```\nExample Base-URL = https://{{your-server-url}}/webhook\n```\n\n### Notification Schema\n\n| **Name**                | **Type** | **Description**                                                      |\n| ------------------------| ---------| -------------------------------------------------------------------- |\n| eventId                 | string   | Unique id of the event.                                              |\n| eventTime               | string   | The time the event occurred.                                         |\n| eventType               | string   | The type of event (e.g. create_order).                               |\n| metadata.storeId        | string   | Id of the store for which the event is being published.              |\n| metadata.applicationId  | string   | Id of the application for which the event is being published.        |\n| metadata.resourceId     | string   | The external identifier of the resource that this event refers to.   |\n| metadata.resourceHref   | string   | The endpoint to fetch the details of the resource.                   |\n| metadata.payload        | object   | The event object which will be detailed in each Webhook description. |\n\n### Notification Request Example\n\n```\ncurl --location --request POST 'https://{{your-server-url}}/webhook' \\\n--header 'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.142 Safari/537.36' \\\n--header 'Authorization: MAC <hash signature>' \\\n--header 'Content-Type: application/json' \\\n--data-raw '{\n   \"eventId\": \"123456\",\n   \"eventTime\": \"2020-10-10T20:06:02:123Z\",\n   \"eventType\": \"orders.new_order\",\n   \"metadata\": {\n      \"storeId\": \"755fd19a-7562-487a-b615-171a9f89d669\",\n      \"applicationId\": \"e22f94b3-967c-4e26-bf39-9e364066b68b\",\n      \"resourceHref\": \"https://{{public-api-url}}/v1/orders/bf9f1d81-f213-496e-a026-91b6af44996c\",\n      \"resourceId\": \"bf9f1d81-f213-496e-a026-91b6af44996c\",\n      \"payload\": {}\n   }\n}\n```\n\n### Expected Response\n\nThe partner application should return an HTTP 200 response code with an empty response body to acknowledge receipt of the webhook event.\n## Rate Limiting\nPlease, refer to [**Rate Limiting Guide**](/docs/guides-rate-limiting/) for more details.\n\n## Error codes\nThe APIs use standard HTTP status codes to indicate the success or failure of a request. Error codes are divided into two categories: 4XX codes for client-side errors and 5xx codes for server-side errors.\n### 4XX Client-Side Errors\nClient-side errors are indicated by status codes in the 4xx range. These errors are typically the result of a problem with the request made by your application.\nIf a client-side error occurs, our API will return a response that includes an appropriate error message. This message will provide information about the cause of the error. The aim of these messages is to assist you in identifying and resolving the issue.\nFor example, if you submit a request with missing or invalid parameters, you might receive a 400 Bad Request error with a message indicating which parameters were missing or incorrect.\n### 5XX Server-Side Errors\nServer-side errors are represented by status codes in the 5xx range. These errors suggest a problem with our server, not with your application's request.\nServer-side errors are typically transient, meaning they are temporary. If a server-side error occurs, we recommend that the client retries the same request with the exact same parameters.\nFor example, if you get a 500 Internal Server Error, it's possible that our server is suffering a temporary problem. In such cases, retrying the request after a short delay is often successful.\nIf you continually receive server-side errors, reach out to our support team for further assistance."
+  version: v1
+  license:
+    name: Proprietary
+servers:
+- url: https://{{public-api-url}}
+  description: Staging server url
+tags:
+- name: manager_menu_endpoints
+  description: Endpoints for applications managing menus related data and operations.
+  x-displayName: Menus Manager
+paths:
+  /v1/menus:
+    get:
+      tags:
+      - manager_menu_endpoints
+      summary: Get the menus for a store
+      description: '`RATE LIMIT: 8 per minute`
+
+        '
+      operationId: getMenu
+      parameters:
+      - $ref: '#/components/parameters/storeIdHeader'
+      responses:
+        '200':
+          description: The store's menu.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Menus'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+      security:
+      - OAuth2.0:
+        - menus.read
+  /v1/menus/jobs/{jobId}:
+    get:
+      tags:
+      - manager_menu_endpoints
+      summary: Get the async menu job status
+      description: '`RATE LIMIT: 8 per minute`
+
+        '
+      operationId: getAsyncJobStatus
+      parameters:
+      - $ref: '#/components/parameters/storeIdHeader'
+      - name: jobId
+        in: path
+        required: true
+        schema:
+          type: string
+          description: The unique identifier of the job.
+          example: 295f76b4-5725-4bf5-a8ab-97943dbdc3b4
+      responses:
+        '200':
+          description: The menu async job status.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MenuAsynchronousJob'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+      security:
+      - OAuth2.0:
+        - menus.async_job.read
+  /manager/menu/v1/menus/publish-targets:
+    get:
+      tags:
+      - manager_menu_endpoints
+      summary: Get the publish-targets for a store
+      description: '`RATE LIMIT: 2 per minute`
+
+        '
+      operationId: managerGetMenuPublishTargets
+      parameters:
+      - $ref: '#/components/parameters/storeIdHeader'
+      responses:
+        '200':
+          description: The store's menu publish-targets.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MenuPublishTargets'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+      security:
+      - OAuth2.0:
+        - manager.menus
+  /manager/menu/v1/menus/publish:
+    post:
+      tags:
+      - manager_menu_endpoints
+      summary: Publish menus to targets for a store
+      description: '`RATE LIMIT: 2 per minute`
+
+        '
+      operationId: managerPublishMenu
+      parameters:
+      - $ref: '#/components/parameters/storeIdHeader'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MenuPublishRequest'
+        required: true
+      responses:
+        '202':
+          description: The menu publish will be processed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MenuPublishResponse'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '409':
+          description: Conflicting Menu targets.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MenuPublishResponse'
+        '422':
+          $ref: '#/components/responses/422'
+      security:
+      - OAuth2.0:
+        - manager.menus
+  /manager/menu/v1/menus/menu-sync:
+    post:
+      tags:
+      - manager_menu_endpoints
+      summary: Synchronize store menu with POS menu
+      description: '`RATE LIMIT: 2 per minute`
+
+        '
+      operationId: menuSync
+      parameters:
+      - $ref: '#/components/parameters/storeIdHeader'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PosMenuSyncRequest'
+        required: false
+      responses:
+        '202':
+          description: The Menu Sync will be processed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PosMenuSyncResponse'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+      security:
+      - OAuth2.0:
+        - manager.menus
+  /manager/menu/v1/menus/entities/availability/suspend:
+    post:
+      tags:
+      - manager_menu_endpoints
+      summary: Suspend menu entities targets for a store
+      description: '`RATE LIMIT: 16 per minute`
+
+        '
+      operationId: managerSuspendMenuEntities
+      parameters:
+      - $ref: '#/components/parameters/storeIdHeader'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SuspendItemsRequest'
+        required: true
+      responses:
+        '202':
+          description: The suspend menu entities will be processed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MenuAsynchronousJob'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+      security:
+      - OAuth2.0:
+        - manager.menus
+  /manager/menu/v1/menus/entities/availability/unsuspend:
+    post:
+      tags:
+      - manager_menu_endpoints
+      summary: Unsuspend menu entities targets for a store
+      description: '`RATE LIMIT: 16 per minute`
+
+        '
+      operationId: managerUnsuspendMenuEntities
+      parameters:
+      - $ref: '#/components/parameters/storeIdHeader'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UnsuspendItemsRequest'
+        required: true
+      responses:
+        '202':
+          description: The suspend menu entities will be processed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MenuAsynchronousJob'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+      security:
+      - OAuth2.0:
+        - manager.menus
+  /manager/menu/v1/bootstrap:
+    post:
+      tags:
+      - manager_menu_endpoints
+      summary: Bootstrap menus for a store
+      description: '`RATE LIMIT: 2 per minute`
+
+        '
+      operationId: managerBootstrap
+      parameters:
+      - $ref: '#/components/parameters/storeIdHeader'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BootstrapMenuRequest'
+        required: true
+      responses:
+        '202':
+          description: The menu will be bootstrapped.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MenuAsynchronousJob'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+      security:
+      - OAuth2.0:
+        - manager.menus
+components:
+  schemas:
+    Menu_POS:
+      title: All Menus for the store, indexed by ID
+      required:
+      - id
+      - name
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier for Menu.
+          example: ff6dd693-5e55-4a92-a359-ea61b23ed423
+        name:
+          type: string
+          description: Name of the Menu.
+          example: Tasty BBQ
+        categoryIds:
+          type: array
+          default: []
+          description: Identifiers of the categories within this Menu.
+          items:
+            type: string
+        fulfillmentModes:
+          type: array
+          default: []
+          description: The ways in which this menu may be fulfilled. If no values are specified, it is assumed that all fulfillment types are allowed.
+          items:
+            type: string
+            description: How an item from a menu is allowed to be fulfilled when ordered by a user.
+            enum:
+            - DELIVERY
+            - PICK_UP
+            - DINE_IN
+        description:
+          type: string
+          description: Description of the Menu.
+          example: Cooking up BBQ deliciousness from around the globe!
+        hours:
+          $ref: '#/components/schemas/Hours'
+        additionalCharges:
+          type:
+          - array
+          - 'null'
+          description: Additional charges to apply for this menu. All additional charges specified on a menu will only be applied once per order.
+          items:
+            $ref: '#/components/schemas/AdditionalCharge'
+      description: A menu for a store.
+    JobReference:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique identifier of the job.
+          format: uuid
+        status:
+          type: string
+          description: The status of the job.
+          enum:
+          - PENDING
+          - FAILED
+          - SUCCESS
+          - UNKNOWN
+      description: The job reference.
+    CustomBulkResolutionOptions:
+      type:
+      - object
+      - 'null'
+      properties:
+        updateNames:
+          type: boolean
+          description: Update the linked entity's names to match the linked external entity's.
+        updatePrices:
+          type: boolean
+          description: Update the linked entity's price to match the linked external entity's.
+        updateDescriptions:
+          type: boolean
+          description: Update the linked entity's description to match the linked external entity's.
+        createUnmatchedEntities:
+          type: boolean
+          description: Create unmatched external entities in the menu.
+        deleteMissingEntities:
+          type: boolean
+          description: Delete entities that are missing external links.
+        bootstrapPhotosToEntities:
+          type: boolean
+          description: Bootstrap linked item photos.
+        copyEntityPaths:
+          type: boolean
+          description: Copies the entity paths from the external menu.
+        updateItemSuspensionStatus:
+          type: boolean
+          description: Update Item suspension status.
+        updateHours:
+          type: boolean
+          description: Update menu hours.
+        assignItemsToLocations:
+          type: boolean
+          description: If an item exists at a location in the POS, it will automatically be assigned to that location.
+        unassignItemsFromLocations:
+          type: boolean
+          description: If an item is removed from a location in the POS, it will automatically be unassigned from that location.
+        updateMenuOrganization:
+          type: boolean
+          description: The organization of modifiers into modifier groups, modifier groups into items and items into categories will be replicated from the POS menu.
+        updateItemArrangement:
+          type: boolean
+          description: The arrangement of menu products as displayed in your POS will be replicated.
+        updateModifierGroupRules:
+          type: boolean
+          description: Update modifier group selection rules.
+        updateTaxes:
+          type: boolean
+          description: Update taxes.
+    PosMenuSyncRequest:
+      type: object
+      properties:
+        shouldPublishChanges:
+          type:
+          - boolean
+          - 'null'
+          description: Whether or not to publish changes to external services after bulk resolution.
+        useCustomOptions:
+          type:
+          - boolean
+          - 'null'
+          description: If true, use `customBulkResolutionOptions` instead of menu configuration.
+        customBulkResolutionOptions:
+          $ref: '#/components/schemas/CustomBulkResolutionOptions'
+    MenuPublishTarget:
+      type: object
+      properties:
+        status:
+          type: string
+          description: The status of a menu publish target.
+          enum:
+          - READY
+          - PUBLISH_IN_PROGRESS
+          - ERROR
+      description: Information about the target.
+    Menus:
+      required:
+      - categories
+      - modifierGroups
+      - photos
+      type: object
+      properties:
+        photos:
+          title: All photos for the store, indexed by ID
+          type: object
+          additionalProperties:
+            x-additionalPropertiesName: photoId
+            $ref: '#/components/schemas/Photo'
+          example:
+            c75d9460-5d48-423d-8d01-f825fd5b1672:
+              id: c75d9460-5d48-423d-8d01-f825fd5b1672
+              fileName: c75d9460-5d48-423d-8d01-f825fd5b1672.jpeg
+              url: https://example.com/photos/c75d9460-5d48-423d-8d01-f825fd5b1672.jpeg
+        categories:
+          title: All Categories for the store, indexed by ID
+          type: object
+          additionalProperties:
+            x-additionalPropertiesName: categoryId
+            $ref: '#/components/schemas/Category'
+          example:
+            b01485b0-034a-47c5-8a0a-0eeca08bf994:
+              name: Drinks
+              description: All drink items served up nice and fresh!
+              id: b01485b0-034a-47c5-8a0a-0eeca08bf994
+              itemIds:
+              - fa4f0192-4c4e-4455-9db8-61d428c34969
+        modifierGroups:
+          title: All ModifierGroups for the Store, indexed by ID
+          type: object
+          additionalProperties:
+            x-additionalPropertiesName: modifierGroupId
+            $ref: '#/components/schemas/ModifierGroup'
+          example:
+            f4c69056-3ae3-4517-9294-5ceec8df5f81:
+              id: f4c69056-3ae3-4517-9294-5ceec8df5f81
+              name: Add Straw
+              minimumSelections: 0
+              maximumSelections: 1
+              defaultModifierSelectionData:
+                defaultModifierSelections:
+                - itemId: 6d53cf04-9d62-40f5-a8b3-706e3377668f
+                  selectionQuantity: 1
+              itemIds:
+              - 6d53cf04-9d62-40f5-a8b3-706e3377668f
+              type: DEFAULT
+              exposedThirdPartyInfos:
+              - externalId: ff6dd693-5e55-4a92-a359-ea61b23ed423
+                externalServiceSlug: 3PD
+        menus:
+          title: All Menus for the store, indexed by ID
+          type: object
+          additionalProperties:
+            x-additionalPropertiesName: menuId
+            $ref: '#/components/schemas/Menu_POS'
+          example:
+            ff6dd693-5e55-4a92-a359-ea61b23ed423:
+              id: ff6dd693-5e55-4a92-a359-ea61b23ed423
+              name: Tasty BBQ
+              categoryIds:
+              - b01485b0-034a-47c5-8a0a-0eeca08bf994
+              fulfillmentModes:
+              - DELIVERY
+              description: Cooking up BBQ deliciousness from around the globe!
+              hours:
+                intervals:
+                - day: MONDAY
+                  fromHour: 7
+                  fromMinute: 30
+                  toHour: 22
+                  toMinute: 0
+              additionalCharges:
+              - chargeType: PACKAGING_CHARGE
+                flatCharge:
+                  currencyCode: USD
+                  amount: 1.5
+        items:
+          title: All Items for the store, indexed by ID
+          type: object
+          additionalProperties:
+            x-additionalPropertiesName: itemId
+            $ref: '#/components/schemas/MenuItem_POS'
+          example:
+            fa4f0192-4c4e-4455-9db8-61d428c34969:
+              id: fa4f0192-4c4e-4455-9db8-61d428c34969
+              name: Canned Coke
+              description: Best soda pop ever made
+              price:
+                currencyCode: USD
+                amount: 7.65
+              status:
+                saleStatus: FOR_SALE
+              modifierGroupIds:
+              - f4c69056-3ae3-4517-9294-5ceec8df5f81
+              photoIds:
+              - c75d9460-5d48-423d-8d01-f825fd5b1672
+              priceOverrides:
+              - rules:
+                - type: FulfillmentModeOverrideRule
+                  fulfillmentMode: PICK_UP
+                price:
+                  currencyCode: USD
+                  amount: 7
+              skuDetails:
+                skuSlug: canned-coke-355ml
+                skuId: 3bac7aed-c8c1-4bfa-a98a-350317e55072
+                dietaryClassifications:
+                - tag: VEGAN
+                allergenClassifications:
+                - tag: GLUTEN
+                  containsAllergen: false
+                - tag: PEANUT
+                  containsAllergen: true
+                storageRequirements:
+                - tag: COLD
+                - tag: AVOID_SUNLIGHT
+                additives:
+                - flavor enhancers
+                - food coloring
+                containsAlcohol: false
+                nutritionalInfo:
+                  energyKcal:
+                    low: 1
+                    high: 100
+                  nutritionContent:
+                    servingSizeInGrams: 100
+                    servingSizeInMilliliters: 100
+                    fats: 100.2
+                    saturatedFats: 3.5
+                    monoUnsaturatedFats: 5.2,
+                    polyUnsaturatedFats: 1.3,
+                    carbohydrates: 3.2,
+                    sugar: 101,
+                    polyols: 1.1,
+                    starch: 1.2,
+                    protein: 1.3,
+                    salt: 1.4,
+                    sodium: 1.5,
+                    fibres: 1.6,
+                    vitaminC: 1.7,
+                    calcium: 1.8,
+                    magnesium: 1.9,
+                    chloride: 2.0,
+                    fluoride: 2.1,
+                    potassium: 2.2,
+                    caffeine: 2.3,
+                    energy: 2.4
+                servings:
+                  min: 1
+                  max: 2
+                producerInformation: The Coca-Cola Company
+                distributorInformation: The Coca-Cola Company
+                countryOfOriginIso2: US
+              additionalCharges:
+              - chargeType: PACKAGING_CHARGE
+                percentageCharge:
+                  decimalValue: 0.015
+              tax:
+                percentageValue:
+                  decimalValue: 0.513
+                isValueAddedTax: true
+            6d53cf04-9d62-40f5-a8b3-706e3377668f:
+              id: 6d53cf04-9d62-40f5-a8b3-706e3377668f
+              name: Paper straw
+              description: A paper straw
+              price:
+                currencyCode: USD
+                amount: 0.5
+              status:
+                saleStatus: FOR_SALE
+      description: All menus associated with a store.
+    ItemTax:
+      required:
+      - percentageValue
+      - isValueAddedTax
+      type: object
+      properties:
+        percentageValue:
+          $ref: '#/components/schemas/PercentageValue'
+          description: Specify the percentage value of the tax.
+        isValueAddedTax:
+          type: boolean
+          description: Whether this tax is a value-added tax.
+      description: The tax configuration.
+    MenuPublishRequest:
+      type: object
+      properties:
+        menuPublishTargets:
+          type: array
+          description: MenuPublishTargets to publish to.
+          example:
+          - doordash
+          - ubereats
+          items:
+            type: string
+            description: MenuPublishTargets to publish to.
+            example: '["doordash","ubereats"]'
+    ItemPriceOverride:
+      required:
+      - amount
+      - currencyCode
+      - rules
+      type: object
+      properties:
+        rules:
+          type: array
+          minItems: 1
+          description: Override rules for when this price override should be applied.
+          items:
+            $ref: '#/components/schemas/OverrideRule'
+        currencyCode:
+          maxLength: 3
+          minLength: 3
+          type: string
+          description: The 3-letter currency code (ISO 4217) to use for all monetary values.
+          example: EUR
+        amount:
+          type: number
+          description: Amount the Item costs
+          example: 25.21
+      description: Price override for an item
+    ErrorDetail:
+      type: object
+      properties:
+        attribute:
+          type: string
+          description: The error attribute.
+          example: Order Currency Code
+        message:
+          type: string
+          description: The error detail description.
+          example: Order Currency Code must be exactly 3 characters
+      description: The error detail response object.
+    DefaultModifierSelectionData:
+      required:
+      - defaultModifierSelections
+      type: object
+      properties:
+        defaultModifierSelections:
+          type: array
+          description: The default modifier selections for this modifier group.
+          items:
+            $ref: '#/components/schemas/DefaultModifierSelection'
+      description: The default modifiers selections for a modifier group.
+    UnitPriceAndCount:
+      required:
+      - unitPrice
+      - count
+      type: object
+      properties:
+        unitPrice:
+          $ref: '#/components/schemas/Money'
+        count:
+          minimum: 1
+          type: integer
+          description: The count for the additional charge.
+          example: 3
+      description: Unit price and count for additional charges.
+      example: 3 x $25.21
+    ModifierGroup:
+      title: All ModifierGroups for the Store, indexed by ID
+      required:
+      - id
+      - name
+      type: object
+      properties:
+        id:
+          type: string
+          description: The identifier that exists in the third party system. During a menu publish event, uuidV4 ids will be generated for new entities that do not yet exist in the internal menu.
+          example: da0e4e94-5670-4175-897a-3b7dde45bed5
+        name:
+          type: string
+          description: Name of ModifierGroup.
+          example: Choose your type of bagel
+        minimumSelections:
+          minimum: 0
+          type: integer
+          description: Minimum number of selections customers can make in this ModifierGroup. 0 means no min limits.
+          format: int32
+        maximumSelections:
+          minimum: 0
+          type: integer
+          description: Maximum number of selections customers can make in this ModifierGroup. 0 means no max limits.
+          format: int32
+        maxPerModifierSelectionQuantity:
+          minimum: 0
+          default: 1
+          type: integer
+          description: Maximum number of selections customers can make for each modifier item in this ModifierGroup. 0 means there is no limit to how many times they can select a single modifier item. If not specified, a value of 1 will be used as the default value.
+          format: int32
+        defaultModifierSelectionData:
+          $ref: '#/components/schemas/DefaultModifierSelectionData'
+        itemIds:
+          type: array
+          default: []
+          description: Identifiers of each Item within this ModifierGroup.
+          items:
+            type: string
+        description:
+          type: string
+          description: The description for this modifier group.
+          example: Choose any of these delicious types of bagels
+        type:
+          type: string
+          description: 'Experimental: The type of this modifier group, for informative purposes. It can be one of the following values: `DEFAULT`, `UPSELL`, `INGREDIENT_REMOVAL`, `INGREDIENT_ADD`, `PREPARE_INSTRUCTIONS`, `SIZE_MODIFICATION`, `PACKAGING_INSTRUCTION` and `CONDIMENT`.'
+          example: DEFAULT
+        exposedThirdPartyInfos:
+          type: array
+          default: []
+          description: Additional information about the menu that should be exposed to third party
+          items:
+            $ref: '#/components/schemas/ExposedThirdPartyInfo'
+      description: Items are sold on the menu. Modifiers to items are items themselves and their relationship is defined by ModifierGroup.
+    ExposedThirdPartyInfo:
+      required:
+      - externalId
+      - externalServiceSlug
+      type: object
+      properties:
+        externalId:
+          type: string
+          description: 'The identifier that exists in the third party system. '
+          example: da0e4e94-5670-4175-897a-3b7dde45bed5
+        externalServiceSlug:
+          type: string
+          description: The slug of the third party service.
+          example: tasty-bbq
+      description: Information about a third party service that is exposed to the another service. Usually, this is used to expose an POS ID to an OFO.
+    ErrorMessage:
+      type: object
+      properties:
+        message:
+          type: string
+          description: The error description.
+          example: The request body is invalid.
+        details:
+          type: array
+          description: The error details.
+          items:
+            $ref: '#/components/schemas/ErrorDetail'
+      description: The error response object.
+    SkuBarcode:
+      type: object
+      properties:
+        barcodeType:
+          type: string
+          description: The type of the barcode.
+          enum:
+          - UPC
+          - GTIN
+          - ASIN
+          - INTERNAL
+        value:
+          type: string
+          description: The value of the barcode.
+          example: 049000028904 (UPC)
+      description: A barcode for the product which may be common types like UPC, GTIN, ASIN or an internal type.
+    DietaryClassification:
+      type: object
+      properties:
+        tag:
+          type: string
+          description: The type of dietary classification.
+          enum:
+          - VEGAN
+          - VEGETARIAN
+          - NON_VEGETARIAN
+          - EGG
+          - KOSHER
+          - HALAL
+          - PLANT_BASED
+          - PALEO
+          - KETO
+      description: Dietary classification information.
+    BootstrapMenuRequest:
+      required:
+      - templateName
+      - externalServiceSlug
+      type: object
+      properties:
+        templateName:
+          type: string
+          description: Name for the bootstrapped template menu
+          example: My Store's Menu
+        externalServiceSlug:
+          type: string
+          description: The external service from which to bootstrap menu data
+          example: ubereats-api
+        enableTemplate:
+          type:
+          - boolean
+          - 'null'
+          description: Whether or not to enable the template at the bootstrapped store
+        stationId:
+          type:
+          - string
+          - 'null'
+          description: The id of the station to which to assign bootstrapped items, unnecessary for brick and mortar
+          example: 9cc4bb5e-bc97-40d9-af28-c02ef1483610
+        posSlug:
+          type:
+          - string
+          - 'null'
+          description: The slug for the POS to connect to
+          example: pos-slug
+    PercentageValue:
+      required:
+      - decimalValue
+      type: object
+      properties:
+        decimalValue:
+          minimum: 0
+          type: number
+          description: Percentage value in decimal format.
+          example: 0.513
+      description: Percentage value in decimal format.
+      example: A decimalValue of 0.513 will equate to 51.3%
+    HourInterval:
+      type: object
+      properties:
+        day:
+          type: string
+          description: Day of the week.
+          example: Monday
+          enum:
+          - MONDAY
+          - TUESDAY
+          - WEDNESDAY
+          - THURSDAY
+          - FRIDAY
+          - SATURDAY
+          - SUNDAY
+        fromHour:
+          maximum: 23
+          minimum: 0
+          type: integer
+          description: Beginning hour of interval.
+          format: int32
+          example: 8
+        fromMinute:
+          maximum: 59
+          minimum: 0
+          type: integer
+          description: Beginning minute of interval.
+          format: int32
+          example: 0
+        toHour:
+          maximum: 23
+          minimum: 0
+          type: integer
+          description: Ending hour of interval.
+          format: int32
+          example: 20
+        toMinute:
+          maximum: 59
+          minimum: 0
+          type: integer
+          description: Ending minute of interval.
+          format: int32
+          example: 45
+      description: Represents the beginning and ending of operating time for a menu specific to a Day.
+    Money:
+      required:
+      - amount
+      - currencyCode
+      type: object
+      properties:
+        currencyCode:
+          maxLength: 3
+          minLength: 3
+          type: string
+          description: The 3-letter currency code (ISO 4217) to use for all monetary values.
+          example: EUR
+        amount:
+          minimum: 0
+          type: number
+          description: Amount value.
+          example: 25.21
+      description: Money amount.
+      example: 25.21
+    MenuPublishTargets:
+      type: object
+      properties:
+        menuPublishTargets:
+          type: object
+          additionalProperties:
+            x-additionalPropertiesName: menuPublishTargetName
+            $ref: '#/components/schemas/MenuPublishTarget'
+          example:
+            rappi:
+              status: PUBLISH_IN_PROGRESS
+          description: Map of MenuPublishTarget names to their targets. The target can only be published to if the status is READY.
+    SuspendItemsRequest:
+      required:
+      - entityIds
+      - note
+      - status
+      type: object
+      properties:
+        entityIds:
+          type: array
+          description: Entity IDs to suspend. These should be the IDs as you represent them in your system.
+          example:
+          - 9cc4bb5e-bc97-40d9-af28-c02ef1483610
+          items:
+            type: string
+            description: Entity IDs to suspend.
+            example: '["9cc4bb5e-bc97-40d9-af28-c02ef1483610","9929290d-31eb-425d-8732-17c4074ac75e"]'
+        note:
+          type: string
+          description: The reason you are suspending the items.
+          example: Out of item
+        status:
+          $ref: '#/components/schemas/SuspensionStatus'
+    ItemStatus:
+      required:
+      - saleStatus
+      type: object
+      properties:
+        saleStatus:
+          type: string
+          description: The sale status of the item.
+          example: TEMPORARILY_NOT_FOR_SALE
+          enum:
+          - FOR_SALE
+          - INDEFINITELY_NOT_FOR_SALE
+          - TEMPORARILY_NOT_FOR_SALE
+        suspendedUntil:
+          type:
+          - string
+          - 'null'
+          description: 'ISO-8601 timestamp representing the time the saleStatus value is supposed to change to FOR_SALE. Set only when current saleStatus value is TEMPORARILY_NOT_FOR_SALE. E.g.: 2020-11-23T21:33:51Z, 2007-12-03T10:15:30+01:00'
+          format: date-time
+          example: '2007-12-03T10:15:30+01:00'
+      description: Represents whether an Item is for sale, indefinitely not for sale, or not for sale until a specific time.
+    MenuJobPublishState:
+      type:
+      - object
+      - 'null'
+      additionalProperties:
+        x-additionalPropertiesName: menuPublishTarget
+        $ref: '#/components/schemas/MenuPublishJobState'
+      description: Only present if the MenuJobType is PUBLISH. Contains a map of MenuPublishTarget services to their corresponding statuses.
+      example:
+        rappi:
+          status: FAILED
+          message: Failed to publish menu due to error ...
+    Servings:
+      type: object
+      properties:
+        min:
+          type: integer
+          description: The minimum value of servings.
+          example: 1
+        max:
+          type: integer
+          description: The maximum value of servings.
+          example: 2
+      description: The number of people an item serves. If only one serving value is known, set both min and max to that value.
+    MenuJobType:
+      type: string
+      description: Type of job.
+      enum:
+      - UPSERT
+      - PUBLISH
+      - UPDATE_AVAILABILITY
+      - SYNC
+      - UNKNOWN
+      example: PUBLISH
+    Photo:
+      title: All photos for the store, indexed by ID
+      required:
+      - contentType
+      - fileName
+      - id
+      - url
+      type: object
+      properties:
+        url:
+          type: string
+          description: URL of the photo.
+          example: https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_272x92dp.png
+        fileName:
+          type: string
+          description: File name
+          example: image.jpg
+        id:
+          type: string
+          description: Identifier of the Photo.
+          example: e9174f75-a293-4908-bba7-9db69871ad81
+        contentType:
+          type: string
+          description: 'The media type of the file. Deprecated: Use the media type served from the photo URL instead.'
+          example: image/jpeg, image/png
+          deprecated: true
+      description: All data required to represent a Photo for an entity in menus.
+    OverrideRule:
+      required:
+      - externalServiceSlug
+      type: object
+      properties:
+        externalServiceSlug:
+          type: string
+          description: 'The service slug for which this rule should apply. E.g.: If externalServiceSlug is UberEats, then the priceOverride should be applied to UberEats.'
+          example: ubereats
+      description: Override rule for when to apply price overrides
+    MenuItem_POS:
+      title: All Items for the store, indexed by ID
+      required:
+      - id
+      - name
+      - photoIds
+      - price
+      - status
+      type: object
+      properties:
+        id:
+          type: string
+          minLength: 1
+          description: Internal identifier of this Item.
+          example: faa4c79f-480d-4de1-bc34-5fb74ef082ef
+        name:
+          type: string
+          description: Name of this Item
+          example: Bagel
+        photoIds:
+          type: array
+          description: A list of Photo references associated with the Item.
+          items:
+            type: string
+        price:
+          $ref: '#/components/schemas/Money'
+        status:
+          $ref: '#/components/schemas/ItemStatus'
+        description:
+          type: string
+          description: Description of this Item
+          example: Delicious bagel!
+        modifierGroupIds:
+          type: array
+          default: []
+          description: Identifiers of each ModifierGroup within this Item.
+          items:
+            type: string
+            example: 7152ee6e-e941-45c1-9008-2e306b479114
+        priceOverrides:
+          type:
+          - array
+          - 'null'
+          description: Specify price overrides for different service slugs.
+          items:
+            $ref: '#/components/schemas/ItemPriceOverride'
+        skuDetails:
+          $ref: '#/components/schemas/SkuDetails'
+        additionalCharges:
+          type:
+          - array
+          - 'null'
+          description: Additional charges to apply for this item. Additional charges will be applied for every instance of this item within an order.
+          items:
+            $ref: '#/components/schemas/AdditionalCharge'
+        tax:
+          $ref: '#/components/schemas/ItemTax'
+          description: The tax configuration for the menu item.
+      description: Items are sold on the Menu. Modifiers to items are items themselves and their relationship is defined by ModifierGroup.
+    UnsuspendItemsRequest:
+      type: object
+      properties:
+        entityIds:
+          type: array
+          description: Entity IDs to unsuspend. These should be the IDs as you represent them in your system.
+          example:
+          - 9cc4bb5e-bc97-40d9-af28-c02ef1483610
+          items:
+            type: string
+            description: Entity IDs to unsuspend.
+            example: '["9cc4bb5e-bc97-40d9-af28-c02ef1483610","9929290d-31eb-425d-8732-17c4074ac75e"]'
+        note:
+          type: string
+          description: The reason you are unsuspending the items.
+          example: Item back in stock
+    EnergyKcal:
+      type: object
+      properties:
+        low:
+          type: number
+          description: The minimum calorie value for an item.
+          example: 1
+        high:
+          type: number
+          description: The maximum calorie value for an item.
+          example: 100
+      description: The calorie range of the item. If only one calorie value is known, set both low and high to that value.
+    AllergenClassification:
+      type: object
+      properties:
+        tag:
+          type: string
+          description: The type of allergen classification.
+          enum:
+          - GLUTEN
+          - DAIRY
+          - WHEAT
+          - RYE
+          - BARLEY
+          - OAT
+          - SPELT
+          - KAMUT
+          - CRUSTACEAN
+          - MOLLUSK
+          - EGG
+          - FISH
+          - PEANUT
+          - SOYBEAN
+          - NUT
+          - ALMOND
+          - HAZELNUT
+          - WALNUT
+          - CASHEW
+          - PECAN
+          - BRAZIL_NUT
+          - PISTACHIO
+          - MACADAMIA_NUT
+          - QUEENSLAND_NUT
+          - LUPIN
+          - CELERY
+          - MUSTARD
+          - SESAME_SEED
+          - SULFITE
+          - CAFFEINE
+          - PHENYLALANINE
+        containsAllergen:
+          type: boolean
+          description: Indication of whether or not the product contains this allergen. If the status of the allergen is unknown, a classification should not be provided for this product.
+      description: Allergen classification information.
+    MenuAsynchronousJob:
+      type: object
+      properties:
+        jobReference:
+          $ref: '#/components/schemas/JobReference'
+        jobType:
+          $ref: '#/components/schemas/MenuJobType'
+        publishJobState:
+          $ref: '#/components/schemas/MenuJobPublishState'
+      description: The job created to process the menu request.
+    AdditionalCharge:
+      required:
+      - chargeType
+      type: object
+      properties:
+        chargeType:
+          type: string
+          description: The type of the additional charge.
+          enum:
+          - PACKAGING_CHARGE
+          - CONTAINER_DEPOSIT
+        flatCharge:
+          $ref: '#/components/schemas/Money'
+        percentageCharge:
+          $ref: '#/components/schemas/PercentageValue'
+        unitPriceAndCount:
+          $ref: '#/components/schemas/UnitPriceAndCount'
+      description: Additional charge to apply. Exactly one of either flatCharge or percentageCharge should be provided.
+    NutritionContent:
+      type: object
+      properties:
+        servingSizeInGrams:
+          type: number
+          description: The serving size in grams. This field and the servingSizeInMilliliters field are mutually exclusive.
+          example: 100
+        servingSizeInMilliliters:
+          type: number
+          description: The serving size in milliliters. This field and the servingSizeInGrams are mutually exclusive.
+          example: 100
+        fats:
+          type: number
+          description: The fats in grams per serving size.
+          example: 2.3
+        saturatedFats:
+          type: number
+          description: The saturated fats in grams per serving size.
+          example: 1.4
+        monoUnsaturatedFats:
+          type: number
+          description: The mono unsaturated fats in grams per serving size.
+          example: 1.5
+        polyUnsaturatedFats:
+          type: number
+          description: The poly unsaturated fats in grams per serving size.
+          example: 5.3
+        carbohydrates:
+          type: number
+          description: The carbohydrates in grams per serving size.
+          example: 1.8
+        sugar:
+          type: number
+          description: The sugar in grams per serving size.
+          example: 1.7
+        polyols:
+          type: number
+          description: The polyols in grams per serving size.
+          example: 9.3
+        starch:
+          type: number
+          description: The starch in grams per serving size.
+          example: 1.1
+        protein:
+          type: number
+          description: The protein in grams per serving size.
+          example: 7.3
+        salt:
+          type: number
+          description: The salt in grams per serving size.
+          example: 1.5
+        sodium:
+          type: number
+          description: The sodium in grams per serving size.
+          example: 0.3
+        fibres:
+          type: number
+          description: The fibres in grams per serving size.
+          example: 1.9
+        vitaminC:
+          type: number
+          description: The vitamin C in milligrams per serving size.
+          example: 9.3
+        calcium:
+          type: number
+          description: The calcium in milligrams per serving size.
+          example: 1.2
+        magnesium:
+          type: number
+          description: The magnesium in milligrams per serving size.
+          example: 1.3
+        chloride:
+          type: number
+          description: The chloride in milligrams per serving size.
+          example: 1.3
+        fluoride:
+          type: number
+          description: The fluoride in milligrams per serving size.
+          example: 3.3
+        potassium:
+          type: number
+          description: The potassium in milligrams per serving size.
+          example: 22.3
+        caffeine:
+          type: number
+          description: The caffeine in milligrams per serving size.
+          example: 81.3
+        energy:
+          type: number
+          description: The energy in kcal per serving size.
+          example: 991.3
+      description: The nutrition content of the item.
+    MenuPublishResponseMenuPublishTargets:
+      type:
+      - object
+      - 'null'
+      properties:
+        menuPublishTargets:
+          type: object
+          additionalProperties:
+            x-additionalPropertiesName: menuPublishTargetName
+            $ref: '#/components/schemas/MenuPublishTarget'
+          description: Map of MenuPublishTarget names to their targets. The target can only be published to if the status is READY.
+          example:
+            rappi:
+              status: PUBLISH_IN_PROGRESS
+      description: Only present if the request fails. Meant to help debugging why the request failed.
+    NutritionalInfo:
+      type: object
+      properties:
+        energyKcal:
+          $ref: '#/components/schemas/EnergyKcal'
+        nutritionContent:
+          $ref: '#/components/schemas/NutritionContent'
+      description: The nutritional information of an item.
+    MenuPublishResponse:
+      type: object
+      properties:
+        requestSubmitted:
+          type: boolean
+          description: Whether the request was submitted or not.
+        jobId:
+          type:
+          - string
+          - 'null'
+          description: Only present if the request succeeds. Job ID to check on the status with the MenuAsyncJob endpoint.
+          format: uuid
+        menuPublishTargets:
+          $ref: '#/components/schemas/MenuPublishResponseMenuPublishTargets'
+    DefaultModifierSelection:
+      required:
+      - itemId
+      - selectionQuantity
+      type: object
+      properties:
+        itemId:
+          type: string
+          description: The id of the modifier item that this default selection pertains to. This id must be present in the item ids of the modifier group.
+          example: da0e4e94-5670-4175-897a-3b7dde45bed5
+        selectionQuantity:
+          minimum: 0
+          type: integer
+          description: The default quantity of the modifier item to be selected.
+          format: int32
+      description: A default modifier selection consists of a reference to the modifier and the default selected quantity of that modifier.
+    StorageRequirement:
+      type: object
+      properties:
+        tag:
+          type: string
+          description: Storage requirements for the product.
+          enum:
+          - FROZEN
+          - COLD
+          - DRY
+          - ROOM_TEMPERATURE
+          - AVOID_SUNLIGHT
+      description: Storage requirements for the product.
+    PosMenuSyncResponse:
+      type: object
+      properties:
+        jobId:
+          type:
+          - string
+          - 'null'
+          description: Only present if the request succeeds. Job ID to check on the status with the MenuAsyncJob endpoint.
+          format: uuid
+    StoreId:
+      type: string
+      description: The unique identifier of the store in the partner application. This ID, along with the `Application ID`, will be used to match the correct store when performing operations. It cannot be longer than 255 characters and must only contain printable ASCII characters. During on-boarding, this ID will be similar to `onboarding:905bb725-b141-4a9b-832a-1f254f772c94` (where the UUID is the Internal Store ID). During off-boarding, this field will be filled with the last known Store ID, or with an empty string, in case none is found. In that case, please fall back to the provided `internalStoreId` (a.k.a. Sku-Sku ID).
+      example: partner-store-unique-identifier
+    MenuPublishJobState:
+      type: object
+      properties:
+        status:
+          type: string
+          description: Status of the menu publish.
+          enum:
+          - PENDING
+          - FAILED
+          - SUCCESS
+          - UNKNOWN
+        message:
+          type:
+          - string
+          - 'null'
+          description: Only present if status is FAILED. Contains the error message returned by our menu systems.
+      description: Information about the menu publish target.
+    Hours:
+      required:
+      - intervals
+      type: object
+      properties:
+        intervals:
+          type: array
+          minItems: 1
+          description: List of HourIntervals.
+          items:
+            $ref: '#/components/schemas/HourInterval'
+      description: Hours are represented as a list of HourIntervals.
+    SkuDetails:
+      type: object
+      properties:
+        skuSlug:
+          type: string
+          description: A system-unique, human-readable identifier for the product.
+          example: russet-potato-fries-200g
+        skuId:
+          type: string
+          description: A unique identifier for the product.
+          example: 3bac7aed-c8c1-4bfa-a98a-350317e55072
+        barcodes:
+          type: array
+          description: Barcodes for this product.
+          items:
+            $ref: '#/components/schemas/SkuBarcode'
+        dietaryClassifications:
+          type: array
+          description: All dietary classifications that apply to the product.
+          items:
+            $ref: '#/components/schemas/DietaryClassification'
+        allergenClassifications:
+          type: array
+          description: All allergens that are present in the product.
+          items:
+            $ref: '#/components/schemas/AllergenClassification'
+        storageRequirements:
+          type: array
+          description: All storage requirements that apply to the product.
+          items:
+            $ref: '#/components/schemas/StorageRequirement'
+        additives:
+          type: array
+          default: []
+          description: All additives present in the item. Additives are free strings.
+          items:
+            type: string
+          example:
+          - flavor enhancers
+          - emulsifiers
+          - antioxidants
+        countryOfOriginIso2:
+          maxLength: 2
+          minLength: 2
+          type: string
+          description: The 2-letter country ISO2 code for where the product originated from.
+          example:
+          - US
+          - CN
+          - DE
+        containsAlcohol:
+          type: boolean
+          description: Indicates whether or not this product contains alcohol.
+        nutritionalInfo:
+          $ref: '#/components/schemas/NutritionalInfo'
+          description: The nutritional information for the product.
+        servings:
+          $ref: '#/components/schemas/Servings'
+          description: The number of servings for the product.
+        producerInformation:
+          type: string
+          description: Information about the producer of this product. May or may not be the same as the distributor.
+          example: The Coca-Cola Company
+        distributorInformation:
+          type: string
+          description: Information about the distributor of this product. May or may not be the same as the producer.
+          example: The Coca-Cola Company
+      description: Details of the product being prepared or a pre-packaged good being sold. Includes information such as UPC barcode, unique identifiers, or classification information.
+    SuspensionStatus:
+      required:
+      - isIndefinite
+      type: object
+      properties:
+        isIndefinite:
+          type: boolean
+          description: True if the suspension is indefinite
+        suspendedUntil:
+          type:
+          - string
+          - 'null'
+          description: 'ISO-8601 timestamp representing the time the saleStatus value is supposed to change to FOR_SALE. Set only when current saleStatus value is TEMPORARILY_NOT_FOR_SALE. E.g.: 2020-11-23T21:33:51Z, 2007-12-03T10:15:30+01:00'
+          format: date-time
+          example: '2007-12-03T10:15:30+01:00'
+      description: The type of suspension this will be.
+    Category:
+      required:
+      - id
+      - name
+      type: object
+      properties:
+        id:
+          type: string
+          description: The identifier that exists in the third party system. During a menu publish event, uuidV4 ids will be generated for new entities that do not yet exist in the internal menu.
+          example: b01485b0-034a-47c5-8a0a-0eeca08bf994
+        name:
+          type: string
+          description: Name of Category.
+          example: Drinks
+        description:
+          type: string
+          description: Description of Category.
+          example: All drink items served up nice and fresh!
+        itemIds:
+          type: array
+          default: []
+          description: All items in the category.
+          items:
+            type: string
+          example:
+          - fa4f0192-4c4e-4455-9db8-61d428c34969
+        photoIds:
+          type: array
+          description: A list of Photo references associated with the Category.
+          default: []
+          items:
+            type: string
+        exposedThirdPartyInfos:
+          type: array
+          default: []
+          description: Additional information about the menu that should be exposed to third party
+          items:
+            $ref: '#/components/schemas/ExposedThirdPartyInfo'
+      description: Categories contain a list of Item references.
+  responses:
+    '422':
+      description: The request body is not valid.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorMessage'
+    '403':
+      description: Authorization not valid for the requested resource.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorMessage'
+    '404':
+      description: Resource not found.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorMessage'
+    '400':
+      description: The request is malformed.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorMessage'
+    '401':
+      description: Invalid authorization.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorMessage'
+  parameters:
+    storeIdHeader:
+      name: X-Store-Id
+      in: header
+      required: true
+      schema:
+        $ref: '#/components/schemas/StoreId'
+  securitySchemes:
+    OAuth2.0:
+      type: oauth2
+      description: "The **Authorization API** is based on the [OAuth2.0 protocol](https://tools.ietf.org/html/rfc6749), supporting the (Client Credentials)[https://datatracker.ietf.org/doc/html/rfc6749#section-4.4] and the (Authorization Code)[https://datatracker.ietf.org/doc/html/rfc6749#section-4.1] flows. Resources expect a valid token sent as a `Bearer` token in the HTTP `Authorization` header.\n### Scopes\nScopes must be configured by our internal team to be enabled for an app. Once the scopes are configured they can be enabled on the Application Settings Page in Developer Portal. Each endpoint requires a given scope that can be verified on each endpoint documentation. When generating an OAuth2.0 token multiple scopes can be requested.\n\n### Authorization Code Flow\nTo perform this flow, the authorization code flow must be enabled in the Application Settings Page in Developer Portal. When enabling the flow it is mandatory to provide a redirect URI pointing to your application. Once the flow is complete we will redirect the user to this URI passing the 'code' and 'state' parameters.\nThe Authorization Code flow provides a temporary code that the client application can exchange for an access token. To start the flow the application must request the user authorization. This is done by sending a request to https://{{public-api-url}}/v1/auth/oauth2/authorize.\nExample\n```\ncurl --location 'https://{{public-api-url}}/v1/auth/oauth2/authorize?client_id=[CLIENT_ID]&redirect_uri=[REDIRECT_URI]&response_type=code&scope=organization.read&state=8A9D16B4C3E25F6A'\n```\nThis call will return a 302 redirecting the user to our authorization page. If the user approves the application, we will redirect to configured URI passing the authorization code in the query parameter 'code'. The 'state' parameter is also sent to ensure the source of the data.\nWith the authorization code, the client application can generate the token.\n### Client Credentials Flow\nThe client_credentials flow does not require any steps before generating the token. Once your application is ready, and the client_id and client_secret are available, the token can be generated by following the instructions in the next section.\n\n### Generate Token\nTo generate the token, use the `Client ID` and `Client Secret` (provided during onboarding), and optionally the authorization code obtained after performing the Authorization Code flow, to the [Token Auth endpoint](#operation/requestToken) endpoint. The result of this invocation is a token that is valid for a pre-determined time or until it is manually revoked.\n\nThe access token obtained will be sent as a `Bearer` value of the `Authorization` HTTP header.\n\nClient credentials in the request-body and HTTP Basic Auth are supported.\n\n#### Request Example for client_credentials\n```\ncurl --location --request POST 'https://{{public-api-url}}/v1/auth/token' \\\n  --header 'Content-Type: application/x-www-form-urlencoded' \\\n  --data-urlencode 'scope=ping' \\\n  --data-urlencode 'grant_type=client_credentials' \\\n  --data-urlencode 'client_id=[APPLICATION_ID]' \\\n  --data-urlencode 'client_secret=[CLIENT_SECRET]'\n\n```\n#### Request Example for authorization_code\n```\ncurl --location --request POST 'https://{{public-api-url}}/v1/auth/token' \\\n  --header 'Content-Type: application/x-www-form-urlencoded' \\\n  --data-urlencode 'scope=ping' \\\n  --data-urlencode 'grant_type=authorization_code' \\\n  --data-urlencode 'client_id=[APPLICATION_ID]' \\\n  --data-urlencode 'client_secret=[CLIENT_SECRET]' \\\n  --data-urlencode 'code=[code]' \\\n  --data-urlencode 'redirect_uri=[redirect_uri]'\n\n```\n#### Response Example\n```\n{\n  \"access_token\": \"oMahtBwBbnZeh4Q66mSuLFmk2V0_CLCKVt0aYcNJlcg.yditzjwCP7yp0PgR6AzQR3wQ1rTdCjkcPeAMuyfK-NU\",\n  \"expires_in\": 2627999,\n  \"scope\": \"ping orders.create\",\n  \"token_type\": \"bearer\"\n}\n```\n\n### Token Usage\n\nThe token provided in field `access_token` is used to authenticate when consuming the API endpoints. Send the token value in the `Authorization` header of every request. The token expiration time is represented in the field `expired_in`, in seconds. Currently, all tokens are valid for 30 days and should be stored and re-used while still valid.\n\nNote that occasionally, a 401 error may be returned for a valid token due to an internal service issue. Such occurrences should be rare. To prevent exposing potential vulnerabilities to attackers, the Public API does not disclose other types of errors in the authentication flow if for any reason the token can't be validated (when it's a valid token then it's ok to return 5XX or other 4XX though - such as 403). In such scenarios, although the internal auth flow avoids retries to prevent attacks, if the token is known to be valid and not expired, a retry with a backoff interval by the client is advised. Another option is to request a new token.\n\n#### Example\n\n```\ncurl --location --request GET 'https://{{public-api-url}}/v1/ping' \\\n  --header 'Authorization: Bearer <access_token>' \\\n  --header 'X-Store-Id: <storeId>'\n\n```\n"
+      flows:
+        clientCredentials:
+          tokenUrl: /v1/auth/token
+          scopes:
+            catalog: Permission to interact with product inventory for existing stores.
+            delivery.provider: Permission to provide delivery services for existing orders.
+            finance: Permission to provide financial data for orders/stores.
+            manager.menus: Permission to manage menus.
+            manager.orders: Permission to manage orders.
+            manager.storefront: Permission to manage storefront.
+            menus.async_job.read: Permission to read the status of a menu upsert job.
+            menus.entity_suspension: Permission to notify the result of a menu entity availability update, after being requested by a webhook event.
+            menus.get_current: Permission to send the current state of a menu, after being requested by a webhook event.
+            menus.publish: Permission to notify the result of a publish menus operation for a given store.
+            menus.read: Permission to read the current menus for a given store.
+            menus.upsert: Permission to create/update menus for a given store.
+            menus.upsert_hours: Permission to notify the receiving of the upsert hours menu event, after being requested by a webhook event.
+            orders.create: Permission to create new order for a given store.
+            orders.read: Permission to read orders and connected data.
+            orders.update: Permission to create and update new orders for a given store.
+            ping: Permission to ping the system.
+            reports.generate_report: Permission to request reports for given store(s) and period of time.
+            reviews.reply: Permission to reply to reviews.
+            storefront.store_pause_unpause: Permission to notify the result of a pause/unpause operation, after being requested by a webhook event.
+            storefront.store_availability: Permission to send the current state of store.
+            storefront.store_hours_configuration: Permission to send the current store hours configuration.
+            stores.manage: Permission to onboard stores and update the identifier.
+            callback.error.write: Token has permission to send failed webhook event results.
+            manager.loyalty: Permission to interact with loyalty services.
+            direct.orders: Permission to interact with direct order services.
+            store.read: Permission to query store information.
+        authorizationCode:
+          authorizationUrl: /v1/auth/oauth2/authorize
+          tokenUrl: /v1/auth/token
+          scopes:
+            organization.read: Permission to read data for organization/brands/stores on behalf of a user.
+            organization.service_integration: Permission to manage the your integration with a given store on behalf of a user.
+x-tagGroups:
+- name: Endpoints
+  tags:
+  - account_pairing_endpoints
+  - auth_endpoints
+  - callback_endpoints
+  - delivery_endpoints
+  - finance_endpoints
+  - inventory_endpoints
+  - manager_menu_endpoints
+  - manager_order_endpoints
+  - manager_storefront_endpoints
+  - menus_endpoints
+  - orders_endpoints
+  - organization_endpoints
+  - ping_endpoints
+  - reports_endpoints
+  - reviews_endpoints
+  - storefront_endpoints
+  - manager_loyalty_endpoints
+  - direct_orders_endpoints
+  - store_endpoints
+- name: Webhooks
+  tags:
+  - account_pairing_webhooks
+  - delivery_webhooks
+  - manager_orders_webhooks
+  - menus_webhooks
+  - orders_webhooks
+  - ping_webhooks
+  - reports_webhooks
+  - storefront_webhooks

@@ -1,0 +1,912 @@
+openapi: 3.2.0
+info:
+  title: Public Manager Loyalty Endpoints API
+  description: "# Overview\n\nThe API endpoints are developed around [RESTful](https://en.wikipedia.org/wiki/Representational_state_transfer) principles secure via the OAuth2.0 protocol.\n\nBeyond the entry points, the API also provides a line of communication into your system via [webhooks](https://en.wikipedia.org/wiki/Webhook).\n\nFor testing purposes, we offer a staging environment. Also, more detailed information about the business rules and workflows can be found on the [**Documentation Section**](/docs/)\n\n## Versioning\nEach API is versioned individually, but we follow these rules:\n- Non breaking changes (eg: adding new fields) are added in the current version without previous communication\n- Breaking changes (fields removal, semantic changed or schema update) have the version incremented\n- Users will be notified about new versions and will be given time to migrate (the time will be set on a case by case basis)\n- Once users migrate to the new version, we will deprecate the old ones\n- Once there is a new version for an API, we won't accept new integrations targeting old versions\n\n## API General Definitions\nThe APIs use resource-oriented URLs communicating, primarily, via JSON and leveraging the HTTP headers, [response status codes](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status), and verbs.\n\nTo exemplify how the API is to be consumed, consider a fake GET resource endpoint invocation below:\n\n```\ncurl --request GET 'https://{{public-api-url}}/v1/resource/123' \\\n--header 'Authorization: Bearer 34fdabeeafds=' --header 'X-Store-Id: 321'\n```\n\n|      Header      | Description |\n| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |\n|`Authorization`   | Standard HTTP header is used to associate the request with the originating invoker. The content of this header is a `Bearer` token generated from you client_secret, defined in the [API Auth](#/section/Guides/API-Auth) guide.|\n|`X-Store-Id`      | The ID of the store in your system this call acts on behalf of. |\n\n_All resource endpoints expect the `Authorization` header, the remaining headers are explicitly stated in the individual endpoint documentation section._\n\nWith these headers, the system will:\n - Validate the client token, making sure the call is originating from a trusted source.\n - Validate that the Application has the permission to access the `v1/resource/{id}` resource via the Application's pre-configured scopes.\n - Translate your X-Store-Id to our internal store ID (e.g. `AAA`).\n - Validate and retrieve resource `AAA`, that is associated to your Application via store id `321`.\n\nPOST/PUT methods will look similar to the GET calls, but they'll take in a body in the HTTP request (default to the application/json content-type).\n\n```\ncurl --location --request POST 'https://{{public-api-url}}/v1/resource' \\\n--header 'Authorization: Bearer 34fdabeeafds=' --header 'X-Store-Id: 321'\n--data '{\"foo\": \"bar\"}'\n```\n\n## API Authentication/Authorization\n\n<SecurityDefinitions />\n\n## Webhook\n\nThe Public API is able to send notifications to your system via HTTP POST requests.\n\nEvery webhook is signed using HMAC-SHA256 that is present in the header `X-HMAC-SHA256`, and you can also authenticate the requests using Basic Auth, Bearer Token or HMAC-SHA1 (legacy). Please, refer to [**Webhook Authentication Guide**](/docs/guides-webhook-authentication/) for more details.\n\n_Please work with your Account Representative to setup your Application's Webhook configurations._\n\n```\nExample Base-URL = https://{{your-server-url}}/webhook\n```\n\n### Notification Schema\n\n| **Name**                | **Type** | **Description**                                                      |\n| ------------------------| ---------| -------------------------------------------------------------------- |\n| eventId                 | string   | Unique id of the event.                                              |\n| eventTime               | string   | The time the event occurred.                                         |\n| eventType               | string   | The type of event (e.g. create_order).                               |\n| metadata.storeId        | string   | Id of the store for which the event is being published.              |\n| metadata.applicationId  | string   | Id of the application for which the event is being published.        |\n| metadata.resourceId     | string   | The external identifier of the resource that this event refers to.   |\n| metadata.resourceHref   | string   | The endpoint to fetch the details of the resource.                   |\n| metadata.payload        | object   | The event object which will be detailed in each Webhook description. |\n\n### Notification Request Example\n\n```\ncurl --location --request POST 'https://{{your-server-url}}/webhook' \\\n--header 'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.142 Safari/537.36' \\\n--header 'Authorization: MAC <hash signature>' \\\n--header 'Content-Type: application/json' \\\n--data-raw '{\n   \"eventId\": \"123456\",\n   \"eventTime\": \"2020-10-10T20:06:02:123Z\",\n   \"eventType\": \"orders.new_order\",\n   \"metadata\": {\n      \"storeId\": \"755fd19a-7562-487a-b615-171a9f89d669\",\n      \"applicationId\": \"e22f94b3-967c-4e26-bf39-9e364066b68b\",\n      \"resourceHref\": \"https://{{public-api-url}}/v1/orders/bf9f1d81-f213-496e-a026-91b6af44996c\",\n      \"resourceId\": \"bf9f1d81-f213-496e-a026-91b6af44996c\",\n      \"payload\": {}\n   }\n}\n```\n\n### Expected Response\n\nThe partner application should return an HTTP 200 response code with an empty response body to acknowledge receipt of the webhook event.\n## Rate Limiting\nPlease, refer to [**Rate Limiting Guide**](/docs/guides-rate-limiting/) for more details.\n\n## Error codes\nThe APIs use standard HTTP status codes to indicate the success or failure of a request. Error codes are divided into two categories: 4XX codes for client-side errors and 5xx codes for server-side errors.\n### 4XX Client-Side Errors\nClient-side errors are indicated by status codes in the 4xx range. These errors are typically the result of a problem with the request made by your application.\nIf a client-side error occurs, our API will return a response that includes an appropriate error message. This message will provide information about the cause of the error. The aim of these messages is to assist you in identifying and resolving the issue.\nFor example, if you submit a request with missing or invalid parameters, you might receive a 400 Bad Request error with a message indicating which parameters were missing or incorrect.\n### 5XX Server-Side Errors\nServer-side errors are represented by status codes in the 5xx range. These errors suggest a problem with our server, not with your application's request.\nServer-side errors are typically transient, meaning they are temporary. If a server-side error occurs, we recommend that the client retries the same request with the exact same parameters.\nFor example, if you get a 500 Internal Server Error, it's possible that our server is suffering a temporary problem. In such cases, retrying the request after a short delay is often successful.\nIf you continually receive server-side errors, reach out to our support team for further assistance."
+  version: v1
+  license:
+    name: Proprietary
+servers:
+- url: https://{{public-api-url}}
+  description: Staging server url
+tags:
+- name: manager_loyalty_endpoints
+  description: Endpoints to manage loyalty.
+  x-displayName: Loyalty Manager
+paths:
+  /manager/loyalty/v1/{source}/user/enrollment-config:
+    get:
+      tags:
+      - manager_loyalty_endpoints
+      summary: Get enrollment config for a loyalty provider
+      description: '`RATE LIMIT: 8 per minute`
+
+        '
+      operationId: getEnrollmentConfig
+      parameters:
+      - $ref: '#/components/parameters/storeIdHeader'
+      - $ref: '#/components/parameters/source-2'
+      responses:
+        '200':
+          description: Enrollment config for the loyalty provider.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetEnrollmentConfigResponse'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '422':
+          $ref: '#/components/responses/422'
+      security:
+      - OAuth2.0:
+        - manager.loyalty
+  /manager/loyalty/v1/{source}/user:
+    get:
+      tags:
+      - manager_loyalty_endpoints
+      summary: Get user by id
+      description: '`RATE LIMIT: 8 per minute`
+
+        '
+      operationId: getUser
+      parameters:
+      - $ref: '#/components/parameters/storeIdHeader'
+      - $ref: '#/components/parameters/source-2'
+      - $ref: '#/components/parameters/id'
+      responses:
+        '200':
+          description: Get user response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetUserResponse'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+      security:
+      - OAuth2.0:
+        - manager.loyalty
+    post:
+      tags:
+      - manager_loyalty_endpoints
+      summary: Create a loyalty user
+      description: '`RATE LIMIT: 8 per minute`
+
+        '
+      operationId: createUser
+      parameters:
+      - $ref: '#/components/parameters/storeIdHeader'
+      - $ref: '#/components/parameters/source-2'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateUserRequest'
+        required: true
+      responses:
+        '200':
+          description: Create user response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateUserResponse'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '422':
+          $ref: '#/components/responses/422'
+      security:
+      - OAuth2.0:
+        - manager.loyalty
+  /manager/loyalty/v1/{source}/user/search:
+    get:
+      tags:
+      - manager_loyalty_endpoints
+      summary: Search loyalty users
+      description: '`RATE LIMIT: 8 per minute`
+
+        '
+      operationId: searchUsers
+      parameters:
+      - $ref: '#/components/parameters/storeIdHeader'
+      - $ref: '#/components/parameters/opaquePaginationToken'
+      - $ref: '#/components/parameters/limit-3'
+      - $ref: '#/components/parameters/source-2'
+      - $ref: '#/components/parameters/term'
+      responses:
+        '200':
+          description: Search users response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SearchUsersResponse'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '422':
+          $ref: '#/components/responses/422'
+      security:
+      - OAuth2.0:
+        - manager.loyalty
+  /manager/loyalty/v1/{source}/rewards/evaluate:
+    post:
+      tags:
+      - manager_loyalty_endpoints
+      summary: Compute applicable rewards
+      description: '`Supply both userId and order to get a list of applicable rewards for an order. Supply only userId to get a list of rewards the user can redeem` `RATE LIMIT: 8 per minute`
+
+        '
+      operationId: computeApplicableRewards
+      parameters:
+      - $ref: '#/components/parameters/storeIdHeader'
+      - $ref: '#/components/parameters/source-2'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ComputeApplicableRewardsRequest'
+        required: true
+      responses:
+        '200':
+          description: Compute applicable rewards response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ComputeApplicableRewardsResponse'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '422':
+          $ref: '#/components/responses/422'
+      security:
+      - OAuth2.0:
+        - manager.loyalty
+  /manager/loyalty/v1/{source}/rewards/simulate:
+    post:
+      tags:
+      - manager_loyalty_endpoints
+      summary: Simulate rewards
+      description: '`Show what the effects will be after applying the selected rewards, and start the rewards transaction, only call this when user selected some reward, otherwise skip this call and use redeemAndAccumulateRewards API call.` `RATE LIMIT: 8 per minute`
+
+        '
+      operationId: simulateRewards
+      parameters:
+      - $ref: '#/components/parameters/storeIdHeader'
+      - $ref: '#/components/parameters/source-2'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SimulateRewardsRequest'
+        required: true
+      responses:
+        '200':
+          description: Simulate rewards response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SimulateRewardsResponse'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '422':
+          $ref: '#/components/responses/422'
+      security:
+      - OAuth2.0:
+        - manager.loyalty
+  /manager/loyalty/v1/{source}/rewards/redeem-and-accumulate:
+    post:
+      tags:
+      - manager_loyalty_endpoints
+      summary: Redeem and accumulate rewards
+      description: '`Redeem existing rewards and accumulate new rewards` `RATE LIMIT: 8 per minute`
+
+        '
+      operationId: redeemAndAccumulateRewards
+      parameters:
+      - $ref: '#/components/parameters/storeIdHeader'
+      - $ref: '#/components/parameters/source-2'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RedeemAndAccumulateRewardsRequest'
+        required: true
+      responses:
+        '200':
+          description: Redeem and accumulate response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RedeemAndAccumulateRewardsResponse'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '422':
+          $ref: '#/components/responses/422'
+      security:
+      - OAuth2.0:
+        - manager.loyalty
+  /manager/loyalty/v1/{source}/rewards/refund:
+    post:
+      tags:
+      - manager_loyalty_endpoints
+      summary: Refund rewards
+      description: '`RATE LIMIT: 8 per minute`
+
+        '
+      operationId: refundRewards
+      parameters:
+      - $ref: '#/components/parameters/storeIdHeader'
+      - $ref: '#/components/parameters/source-2'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefundRewardsRequest'
+        required: true
+      responses:
+        '200':
+          description: Refund rewards response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RefundRewardsResponse'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '422':
+          $ref: '#/components/responses/422'
+      security:
+      - OAuth2.0:
+        - manager.loyalty
+components:
+  schemas:
+    CreateUserRequest:
+      required:
+      - userFields
+      type: object
+      properties:
+        userFields:
+          type: array
+          description: The user info fields for the new user.
+          items:
+            $ref: '#/components/schemas/UserField'
+      description: Request body for CreateUser API call.
+    RewardEffect:
+      type: object
+      properties:
+        subtotal:
+          $ref: '#/components/schemas/Subtotal'
+      description: Shows how much is deducted from total.
+    SubtotalReward:
+      type: object
+      properties:
+        amount:
+          type: number
+          description: Discount amount, if it's percentage discount, the percentage amount shown is in basis points, ie 1000 = 10% discount.
+          example: 20
+        type:
+          type: string
+          description: The type of discount, absolute or percentage.
+          example: ABSOLUTE_DISCOUNT
+          enum:
+          - ABSOLUTE_DISCOUNT
+          - PERCENT_DISCOUNT
+    ComputeApplicableRewardsRequest:
+      required:
+      - userId
+      type: object
+      properties:
+        userId:
+          type: string
+          description: The id of the user.
+          example: someidstring
+        order:
+          oneOf:
+          - $ref: '#/components/schemas/Order-2'
+          - type: 'null'
+      description: Request body for ComputeApplicableRewards API call.
+    SimulateRewardsResponse:
+      type: object
+      properties:
+        transactionId:
+          type: string
+          description: The id of the transaction.
+          example: someidstring
+        rewardEffect:
+          type: object
+          description: Effect after applying the reward.
+          $ref: '#/components/schemas/RewardEffect'
+      description: Response body for SimulateRewards API call.
+    ErrorDetail:
+      type: object
+      properties:
+        attribute:
+          type: string
+          description: The error attribute.
+          example: Order Currency Code
+        message:
+          type: string
+          description: The error detail description.
+          example: Order Currency Code must be exactly 3 characters
+      description: The error detail response object.
+    MenusReward:
+      type: object
+      properties:
+        entityId:
+          type: string
+          description: The id of the entity, currently it's the item id.
+          example: someidstring
+        amount:
+          type: number
+          description: Discount amount, if it's percentage discount, the percentage amount shown is in basis points, ie 1000 = 10% discount.
+          example: 20
+        type:
+          type: string
+          description: The type of discount, absolute or percentage.
+          example: ABSOLUTE_DISCOUNT
+          enum:
+          - ABSOLUTE_DISCOUNT
+          - PERCENT_DISCOUNT
+    Item-2:
+      type: object
+      properties:
+        id:
+          type: string
+          description: The id of the item in the partner's system.
+          example: someidstring
+        displayName:
+          type: string
+          description: Name of the item.
+          example: Cheese Burger
+        quantity:
+          type: number
+          description: Quantity of item ordered.
+          example: 1
+        price:
+          type: number
+          description: Price of item.
+          example: 19.07
+        modifiers:
+          oneOf:
+          - type: array
+            description: The modifiers of an item, such as size(small, medium, large), modifier share the same model as item, just in case we have nested modifiers.
+            items:
+              $ref: '#/components/schemas/Item-2'
+          - type: 'null'
+    ComputeApplicableRewardsResponse:
+      type: object
+      properties:
+        rewards:
+          type: array
+          description: List of rewards the user can redeem, depending on the reward type, only one of subtotal/menus will be present.
+          items:
+            $ref: '#/components/schemas/Reward'
+      description: Response body for ComputeApplicableRewards API call.
+    RefundRewardsRequest:
+      required:
+      - userId
+      - orderId
+      type: object
+      properties:
+        userId:
+          type: string
+          description: The id of the user.
+          example: someidstring
+        orderId:
+          type: string
+          description: The id of the order.
+          example: someidstring
+      description: Request body for RefundRewards API call.
+    ErrorMessage:
+      type: object
+      properties:
+        message:
+          type: string
+          description: The error description.
+          example: The request body is invalid.
+        details:
+          type: array
+          description: The error details.
+          items:
+            $ref: '#/components/schemas/ErrorDetail'
+      description: The error response object.
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          description: The user identifier.
+          example: somestring
+        userFields:
+          type: array
+          description: The user info fields.
+          items:
+            $ref: '#/components/schemas/UserField'
+    CreateUserResponse:
+      type: object
+      properties:
+        user:
+          $ref: '#/components/schemas/User'
+      description: Response body for CreateUser API call.
+    Trigger:
+      type: object
+      properties:
+        menus:
+          type: array
+          description: The item/category preconditions to redeem this reward, for example, buy any drinks to get a free Burger.
+          items:
+            $ref: '#/components/schemas/TriggerMenu'
+      description: The preconditions to redeem this reward, for example, buy Fries to get a free Burger. Nullable, if null, this reward can be unconditionally redeemed.
+    SelectedMenuReward:
+      type: object
+      properties:
+        entityId:
+          type: string
+          description: The id of the selected item.
+          example: someidstring
+      description: Indicates the item the user want to redeem, if reward type is MENUS, this should be present.
+    GetUserResponse:
+      type: object
+      properties:
+        userAccount:
+          $ref: '#/components/schemas/UserAccount'
+      description: Response body for GetUser API call.
+    Subtotal:
+      type: object
+      properties:
+        amount:
+          type: number
+          description: The amount that was discounted.
+          example: 19.07
+    UserAccount:
+      type: object
+      properties:
+        id:
+          type: string
+          description: The user identifier.
+          example: somestring
+        userFields:
+          type: array
+          description: The user info fields.
+          items:
+            $ref: '#/components/schemas/UserField'
+        balances:
+          type: array
+          description: The user's current balances.
+          items:
+            $ref: '#/components/schemas/UserBalance'
+    GetEnrollmentConfigResponse:
+      type: object
+      properties:
+        enrollmentFields:
+          type: array
+          description: The fields that can be passed into when creating a new loyalty user.
+          items:
+            $ref: '#/components/schemas/EnrollmentField'
+      description: Response body for GetEnrollmentConfig API call.
+    SimulateRewardsRequest:
+      required:
+      - userId
+      - order
+      - selectedRewards
+      type: object
+      properties:
+        userId:
+          type: string
+          description: The id of the user.
+          example: someidstring
+        order:
+          $ref: '#/components/schemas/Order-2'
+        selectedRewards:
+          type: array
+          description: Selected rewards, currently only support one reward, if multiple rewards are passed it will throw an error.
+          items:
+            $ref: '#/components/schemas/SelectedReward'
+      description: Request body for SimulateRewards API call.
+    SearchUsersResponse:
+      type: object
+      properties:
+        users:
+          type: array
+          description: The users that matches the search condition.
+          items:
+            $ref: '#/components/schemas/User'
+        offsetToken:
+          type: string
+          description: Opaque token used to fetch the following page. If not set, no more results are available.
+          example: H12MAF2fFaFFFa
+      description: Response body for SearchUsers API call.
+    Reward:
+      type: object
+      properties:
+        id:
+          type: string
+          description: The id of the reward.
+          example: someidstring
+        type:
+          type: string
+          description: The type of reward.
+          example: SUBTOTAL
+          enum:
+          - SUBTOTAL
+          - MENUS
+        cost:
+          oneOf:
+          - type: number
+            description: Cost of the reward, nullable, if null this reward can only be redeem once.
+            example: 20
+          - type: 'null'
+        costType:
+          oneOf:
+          - type: string
+            description: The type of cost, nullable, if null this reward can only be redeem once.
+            example: POINT
+            enum:
+            - POINT
+            - DOLLAR
+          - type: 'null'
+        trigger:
+          oneOf:
+          - $ref: '#/components/schemas/Trigger'
+          - type: 'null'
+        subtotal:
+          oneOf:
+          - $ref: '#/components/schemas/SubtotalReward'
+          - type: 'null'
+        menus:
+          oneOf:
+          - type: array
+            description: Item rewards, user can select from one of the items.
+            items:
+              $ref: '#/components/schemas/MenusReward'
+          - type: 'null'
+    Totals:
+      type: object
+      properties:
+        subTotal:
+          type: number
+          description: Order subtotal.
+          example: 29.07
+        tax:
+          type: number
+          description: Order tax.
+          example: 10
+        discount:
+          type: number
+          description: Order discount.
+          example: 9.07
+        total:
+          type: number
+          description: Order total.
+          example: 30
+    TriggerMenu:
+      type: object
+      properties:
+        entityId:
+          type: string
+          description: The id of the entity.
+          example: someidstring
+        entityType:
+          type: string
+          description: The type of entity.
+          example: ITEM
+          enum:
+          - ITEM
+          - CATEGORY
+        minimumPurchaseQuantity:
+          type: number
+          description: Minimum quantity need to be purchased to activate the trigger.
+          example: 1
+    EnrollmentField:
+      type: object
+      properties:
+        key:
+          type: string
+          description: The key of field, will be used in the Create User API.
+          example: full_name
+        required:
+          type: boolean
+          description: Whether this field is required when creating a user.
+          example: true
+        type:
+          type: string
+          description: The type of field, frontend can use type to decide which input to use. i.e. use a date picker for DATE type, use a text input for EMAIL/FULL_NAME type.
+          example: FULL_NAME
+          enum:
+          - TEXT
+          - NUMBER
+          - EMAIL
+          - PASSWORD
+          - PHONE
+          - DATE
+          - DATE_TIME
+          - URL
+          - FULL_NAME
+          - ADDRESS
+        label:
+          type: string
+          description: This can be used as the field input's label on the frontend.
+          example: First Name and Last Name
+    SelectedReward:
+      type: object
+      properties:
+        id:
+          type: string
+          description: The ID of reward.
+          example: someidstring
+        amount:
+          type: number
+          description: The amount that was deducted.
+          example: 19.07
+        menus:
+          oneOf:
+          - $ref: '#/components/schemas/SelectedMenuReward'
+          - type: 'null'
+    StoreId:
+      type: string
+      description: The unique identifier of the store in the partner application. This ID, along with the `Application ID`, will be used to match the correct store when performing operations. It cannot be longer than 255 characters and must only contain printable ASCII characters. During on-boarding, this ID will be similar to `onboarding:905bb725-b141-4a9b-832a-1f254f772c94` (where the UUID is the Internal Store ID). During off-boarding, this field will be filled with the last known Store ID, or with an empty string, in case none is found. In that case, please fall back to the provided `internalStoreId` (a.k.a. Sku-Sku ID).
+      example: partner-store-unique-identifier
+    RedeemAndAccumulateRewardsRequest:
+      required:
+      - userId
+      - order
+      - selectedRewards
+      type: object
+      properties:
+        userId:
+          type: string
+          description: The id of the user.
+          example: someidstring
+        order:
+          $ref: '#/components/schemas/Order-2'
+        selectedRewards:
+          type: array
+          description: Selected rewards, currently only support one reward, if multiple rewards are passed it will throw an error.
+          items:
+            $ref: '#/components/schemas/SelectedReward'
+      description: Request body for RedeemAndAccumulateRewards API call.
+    UserBalance:
+      type: object
+      properties:
+        amount:
+          type: number
+          description: Balance amount.
+          example: 19.07
+        type:
+          type: string
+          description: The type of balance.
+          example: POINT
+          enum:
+          - POINT
+          - DOLLAR
+    RedeemAndAccumulateRewardsResponse:
+      type: object
+      properties:
+        transactionId:
+          type: string
+          description: The id of the transaction.
+          example: someidstring
+        rewardEffect:
+          $ref: '#/components/schemas/RewardEffect'
+        accumulatedRewards:
+          type: array
+          description: List of rewards accumulated.
+          items:
+            $ref: '#/components/schemas/UserBalance'
+      description: Response body for RedeemAndAccumulateRewards API call.
+    RefundRewardsResponse:
+      type: object
+      properties:
+        transactionId:
+          type: string
+          description: The transaction id of the refund.
+          example: someidstring
+      description: Response body for RefundRewardsResponse API call.
+    UserField:
+      type: object
+      properties:
+        key:
+          type: string
+          description: The key of field, this is retrieved from GetEnrollmentConfig API call.
+          example: full_name
+        value:
+          type: string
+          description: The value of the field.
+          example: john doe
+    Order-2:
+      type: object
+      properties:
+        id:
+          type: string
+          description: The id of the order in the partner's system.
+          example: someidstring
+        currencyCode:
+          type: string
+          description: Currency code.
+          example: USD
+        items:
+          type: array
+          description: The ordered items in the order.
+          items:
+            $ref: '#/components/schemas/Item-2'
+        totals:
+          $ref: '#/components/schemas/Totals'
+  responses:
+    '422':
+      description: The request body is not valid.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorMessage'
+    '403':
+      description: Authorization not valid for the requested resource.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorMessage'
+    '404':
+      description: Resource not found.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorMessage'
+    '400':
+      description: The request is malformed.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorMessage'
+    '401':
+      description: Invalid authorization.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorMessage'
+  parameters:
+    limit-3:
+      name: limit
+      in: query
+      required: true
+      schema:
+        type: string
+        description: Max number of items to retrieve (minimum 1, maximum is 10, anything smaller/larger than min/max resets to min/max)
+        example: 5
+    storeIdHeader:
+      name: X-Store-Id
+      in: header
+      required: true
+      schema:
+        $ref: '#/components/schemas/StoreId'
+    term:
+      name: term
+      in: query
+      required: true
+      schema:
+        type: string
+        description: Used to search for users in the loyalty program. The search is case-sensitive and will match any part of the user's fields.
+        example: john
+    id:
+      name: id
+      in: query
+      required: true
+      schema:
+        type: string
+        description: User's id
+        example: somestring
+    opaquePaginationToken:
+      name: token
+      in: query
+      required: false
+      schema:
+        type: string
+        description: Opaque token used for paging. Query parameters must be URL encoded.
+        example: CgwI09+kjQYQwOvF2AM=/(urlencoded:CgwI09%2BkjQYQwOvF2AM%3D)
+    source-2:
+      name: source
+      in: path
+      required: true
+      schema:
+        type: string
+        description: Loyalty provider source
+        example: css-loyalty
+  securitySchemes:
+    OAuth2.0:
+      type: oauth2
+      description: "The **Authorization API** is based on the [OAuth2.0 protocol](https://tools.ietf.org/html/rfc6749), supporting the (Client Credentials)[https://datatracker.ietf.org/doc/html/rfc6749#section-4.4] and the (Authorization Code)[https://datatracker.ietf.org/doc/html/rfc6749#section-4.1] flows. Resources expect a valid token sent as a `Bearer` token in the HTTP `Authorization` header.\n### Scopes\nScopes must be configured by our internal team to be enabled for an app. Once the scopes are configured they can be enabled on the Application Settings Page in Developer Portal. Each endpoint requires a given scope that can be verified on each endpoint documentation. When generating an OAuth2.0 token multiple scopes can be requested.\n\n### Authorization Code Flow\nTo perform this flow, the authorization code flow must be enabled in the Application Settings Page in Developer Portal. When enabling the flow it is mandatory to provide a redirect URI pointing to your application. Once the flow is complete we will redirect the user to this URI passing the 'code' and 'state' parameters.\nThe Authorization Code flow provides a temporary code that the client application can exchange for an access token. To start the flow the application must request the user authorization. This is done by sending a request to https://{{public-api-url}}/v1/auth/oauth2/authorize.\nExample\n```\ncurl --location 'https://{{public-api-url}}/v1/auth/oauth2/authorize?client_id=[CLIENT_ID]&redirect_uri=[REDIRECT_URI]&response_type=code&scope=organization.read&state=8A9D16B4C3E25F6A'\n```\nThis call will return a 302 redirecting the user to our authorization page. If the user approves the application, we will redirect to configured URI passing the authorization code in the query parameter 'code'. The 'state' parameter is also sent to ensure the source of the data.\nWith the authorization code, the client application can generate the token.\n### Client Credentials Flow\nThe client_credentials flow does not require any steps before generating the token. Once your application is ready, and the client_id and client_secret are available, the token can be generated by following the instructions in the next section.\n\n### Generate Token\nTo generate the token, use the `Client ID` and `Client Secret` (provided during onboarding), and optionally the authorization code obtained after performing the Authorization Code flow, to the [Token Auth endpoint](#operation/requestToken) endpoint. The result of this invocation is a token that is valid for a pre-determined time or until it is manually revoked.\n\nThe access token obtained will be sent as a `Bearer` value of the `Authorization` HTTP header.\n\nClient credentials in the request-body and HTTP Basic Auth are supported.\n\n#### Request Example for client_credentials\n```\ncurl --location --request POST 'https://{{public-api-url}}/v1/auth/token' \\\n  --header 'Content-Type: application/x-www-form-urlencoded' \\\n  --data-urlencode 'scope=ping' \\\n  --data-urlencode 'grant_type=client_credentials' \\\n  --data-urlencode 'client_id=[APPLICATION_ID]' \\\n  --data-urlencode 'client_secret=[CLIENT_SECRET]'\n\n```\n#### Request Example for authorization_code\n```\ncurl --location --request POST 'https://{{public-api-url}}/v1/auth/token' \\\n  --header 'Content-Type: application/x-www-form-urlencoded' \\\n  --data-urlencode 'scope=ping' \\\n  --data-urlencode 'grant_type=authorization_code' \\\n  --data-urlencode 'client_id=[APPLICATION_ID]' \\\n  --data-urlencode 'client_secret=[CLIENT_SECRET]' \\\n  --data-urlencode 'code=[code]' \\\n  --data-urlencode 'redirect_uri=[redirect_uri]'\n\n```\n#### Response Example\n```\n{\n  \"access_token\": \"oMahtBwBbnZeh4Q66mSuLFmk2V0_CLCKVt0aYcNJlcg.yditzjwCP7yp0PgR6AzQR3wQ1rTdCjkcPeAMuyfK-NU\",\n  \"expires_in\": 2627999,\n  \"scope\": \"ping orders.create\",\n  \"token_type\": \"bearer\"\n}\n```\n\n### Token Usage\n\nThe token provided in field `access_token` is used to authenticate when consuming the API endpoints. Send the token value in the `Authorization` header of every request. The token expiration time is represented in the field `expired_in`, in seconds. Currently, all tokens are valid for 30 days and should be stored and re-used while still valid.\n\nNote that occasionally, a 401 error may be returned for a valid token due to an internal service issue. Such occurrences should be rare. To prevent exposing potential vulnerabilities to attackers, the Public API does not disclose other types of errors in the authentication flow if for any reason the token can't be validated (when it's a valid token then it's ok to return 5XX or other 4XX though - such as 403). In such scenarios, although the internal auth flow avoids retries to prevent attacks, if the token is known to be valid and not expired, a retry with a backoff interval by the client is advised. Another option is to request a new token.\n\n#### Example\n\n```\ncurl --location --request GET 'https://{{public-api-url}}/v1/ping' \\\n  --header 'Authorization: Bearer <access_token>' \\\n  --header 'X-Store-Id: <storeId>'\n\n```\n"
+      flows:
+        clientCredentials:
+          tokenUrl: /v1/auth/token
+          scopes:
+            catalog: Permission to interact with product inventory for existing stores.
+            delivery.provider: Permission to provide delivery services for existing orders.
+            finance: Permission to provide financial data for orders/stores.
+            manager.menus: Permission to manage menus.
+            manager.orders: Permission to manage orders.
+            manager.storefront: Permission to manage storefront.
+            menus.async_job.read: Permission to read the status of a menu upsert job.
+            menus.entity_suspension: Permission to notify the result of a menu entity availability update, after being requested by a webhook event.
+            menus.get_current: Permission to send the current state of a menu, after being requested by a webhook event.
+            menus.publish: Permission to notify the result of a publish menus operation for a given store.
+            menus.read: Permission to read the current menus for a given store.
+            menus.upsert: Permission to create/update menus for a given store.
+            menus.upsert_hours: Permission to notify the receiving of the upsert hours menu event, after being requested by a webhook event.
+            orders.create: Permission to create new order for a given store.
+            orders.read: Permission to read orders and connected data.
+            orders.update: Permission to create and update new orders for a given store.
+            ping: Permission to ping the system.
+            reports.generate_report: Permission to request reports for given store(s) and period of time.
+            reviews.reply: Permission to reply to reviews.
+            storefront.store_pause_unpause: Permission to notify the result of a pause/unpause operation, after being requested by a webhook event.
+            storefront.store_availability: Permission to send the current state of store.
+            storefront.store_hours_configuration: Permission to send the current store hours configuration.
+            stores.manage: Permission to onboard stores and update the identifier.
+            callback.error.write: Token has permission to send failed webhook event results.
+            manager.loyalty: Permission to interact with loyalty services.
+            direct.orders: Permission to interact with direct order services.
+            store.read: Permission to query store information.
+        authorizationCode:
+          authorizationUrl: /v1/auth/oauth2/authorize
+          tokenUrl: /v1/auth/token
+          scopes:
+            organization.read: Permission to read data for organization/brands/stores on behalf of a user.
+            organization.service_integration: Permission to manage the your integration with a given store on behalf of a user.
+x-tagGroups:
+- name: Endpoints
+  tags:
+  - account_pairing_endpoints
+  - auth_endpoints
+  - callback_endpoints
+  - delivery_endpoints
+  - finance_endpoints
+  - inventory_endpoints
+  - manager_menu_endpoints
+  - manager_order_endpoints
+  - manager_storefront_endpoints
+  - menus_endpoints
+  - orders_endpoints
+  - organization_endpoints
+  - ping_endpoints
+  - reports_endpoints
+  - reviews_endpoints
+  - storefront_endpoints
+  - manager_loyalty_endpoints
+  - direct_orders_endpoints
+  - store_endpoints
+- name: Webhooks
+  tags:
+  - account_pairing_webhooks
+  - delivery_webhooks
+  - manager_orders_webhooks
+  - menus_webhooks
+  - orders_webhooks
+  - ping_webhooks
+  - reports_webhooks
+  - storefront_webhooks

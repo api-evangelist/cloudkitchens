@@ -1,0 +1,798 @@
+openapi: 3.2.0
+info:
+  title: Public Delivery Endpoints API
+  description: "# Overview\n\nThe API endpoints are developed around [RESTful](https://en.wikipedia.org/wiki/Representational_state_transfer) principles secure via the OAuth2.0 protocol.\n\nBeyond the entry points, the API also provides a line of communication into your system via [webhooks](https://en.wikipedia.org/wiki/Webhook).\n\nFor testing purposes, we offer a staging environment. Also, more detailed information about the business rules and workflows can be found on the [**Documentation Section**](/docs/)\n\n## Versioning\nEach API is versioned individually, but we follow these rules:\n- Non breaking changes (eg: adding new fields) are added in the current version without previous communication\n- Breaking changes (fields removal, semantic changed or schema update) have the version incremented\n- Users will be notified about new versions and will be given time to migrate (the time will be set on a case by case basis)\n- Once users migrate to the new version, we will deprecate the old ones\n- Once there is a new version for an API, we won't accept new integrations targeting old versions\n\n## API General Definitions\nThe APIs use resource-oriented URLs communicating, primarily, via JSON and leveraging the HTTP headers, [response status codes](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status), and verbs.\n\nTo exemplify how the API is to be consumed, consider a fake GET resource endpoint invocation below:\n\n```\ncurl --request GET 'https://{{public-api-url}}/v1/resource/123' \\\n--header 'Authorization: Bearer 34fdabeeafds=' --header 'X-Store-Id: 321'\n```\n\n|      Header      | Description |\n| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |\n|`Authorization`   | Standard HTTP header is used to associate the request with the originating invoker. The content of this header is a `Bearer` token generated from you client_secret, defined in the [API Auth](#/section/Guides/API-Auth) guide.|\n|`X-Store-Id`      | The ID of the store in your system this call acts on behalf of. |\n\n_All resource endpoints expect the `Authorization` header, the remaining headers are explicitly stated in the individual endpoint documentation section._\n\nWith these headers, the system will:\n - Validate the client token, making sure the call is originating from a trusted source.\n - Validate that the Application has the permission to access the `v1/resource/{id}` resource via the Application's pre-configured scopes.\n - Translate your X-Store-Id to our internal store ID (e.g. `AAA`).\n - Validate and retrieve resource `AAA`, that is associated to your Application via store id `321`.\n\nPOST/PUT methods will look similar to the GET calls, but they'll take in a body in the HTTP request (default to the application/json content-type).\n\n```\ncurl --location --request POST 'https://{{public-api-url}}/v1/resource' \\\n--header 'Authorization: Bearer 34fdabeeafds=' --header 'X-Store-Id: 321'\n--data '{\"foo\": \"bar\"}'\n```\n\n## API Authentication/Authorization\n\n<SecurityDefinitions />\n\n## Webhook\n\nThe Public API is able to send notifications to your system via HTTP POST requests.\n\nEvery webhook is signed using HMAC-SHA256 that is present in the header `X-HMAC-SHA256`, and you can also authenticate the requests using Basic Auth, Bearer Token or HMAC-SHA1 (legacy). Please, refer to [**Webhook Authentication Guide**](/docs/guides-webhook-authentication/) for more details.\n\n_Please work with your Account Representative to setup your Application's Webhook configurations._\n\n```\nExample Base-URL = https://{{your-server-url}}/webhook\n```\n\n### Notification Schema\n\n| **Name**                | **Type** | **Description**                                                      |\n| ------------------------| ---------| -------------------------------------------------------------------- |\n| eventId                 | string   | Unique id of the event.                                              |\n| eventTime               | string   | The time the event occurred.                                         |\n| eventType               | string   | The type of event (e.g. create_order).                               |\n| metadata.storeId        | string   | Id of the store for which the event is being published.              |\n| metadata.applicationId  | string   | Id of the application for which the event is being published.        |\n| metadata.resourceId     | string   | The external identifier of the resource that this event refers to.   |\n| metadata.resourceHref   | string   | The endpoint to fetch the details of the resource.                   |\n| metadata.payload        | object   | The event object which will be detailed in each Webhook description. |\n\n### Notification Request Example\n\n```\ncurl --location --request POST 'https://{{your-server-url}}/webhook' \\\n--header 'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.142 Safari/537.36' \\\n--header 'Authorization: MAC <hash signature>' \\\n--header 'Content-Type: application/json' \\\n--data-raw '{\n   \"eventId\": \"123456\",\n   \"eventTime\": \"2020-10-10T20:06:02:123Z\",\n   \"eventType\": \"orders.new_order\",\n   \"metadata\": {\n      \"storeId\": \"755fd19a-7562-487a-b615-171a9f89d669\",\n      \"applicationId\": \"e22f94b3-967c-4e26-bf39-9e364066b68b\",\n      \"resourceHref\": \"https://{{public-api-url}}/v1/orders/bf9f1d81-f213-496e-a026-91b6af44996c\",\n      \"resourceId\": \"bf9f1d81-f213-496e-a026-91b6af44996c\",\n      \"payload\": {}\n   }\n}\n```\n\n### Expected Response\n\nThe partner application should return an HTTP 200 response code with an empty response body to acknowledge receipt of the webhook event.\n## Rate Limiting\nPlease, refer to [**Rate Limiting Guide**](/docs/guides-rate-limiting/) for more details.\n\n## Error codes\nThe APIs use standard HTTP status codes to indicate the success or failure of a request. Error codes are divided into two categories: 4XX codes for client-side errors and 5xx codes for server-side errors.\n### 4XX Client-Side Errors\nClient-side errors are indicated by status codes in the 4xx range. These errors are typically the result of a problem with the request made by your application.\nIf a client-side error occurs, our API will return a response that includes an appropriate error message. This message will provide information about the cause of the error. The aim of these messages is to assist you in identifying and resolving the issue.\nFor example, if you submit a request with missing or invalid parameters, you might receive a 400 Bad Request error with a message indicating which parameters were missing or incorrect.\n### 5XX Server-Side Errors\nServer-side errors are represented by status codes in the 5xx range. These errors suggest a problem with our server, not with your application's request.\nServer-side errors are typically transient, meaning they are temporary. If a server-side error occurs, we recommend that the client retries the same request with the exact same parameters.\nFor example, if you get a 500 Internal Server Error, it's possible that our server is suffering a temporary problem. In such cases, retrying the request after a short delay is often successful.\nIf you continually receive server-side errors, reach out to our support team for further assistance."
+  version: v1
+  license:
+    name: Proprietary
+servers:
+- url: https://{{public-api-url}}
+  description: Staging server url
+tags:
+- name: delivery_endpoints
+  description: Endpoints to manage delivery.
+  x-displayName: Delivery
+paths:
+  /v1/delivery/{deliveryReferenceId}/status:
+    put:
+      tags:
+      - delivery_endpoints
+      summary: Update delivery status
+      description: '`RATE LIMIT: 8 per minute`
+
+        '
+      operationId: updateDeliveryStatus
+      parameters:
+      - $ref: '#/components/parameters/deliveryReferenceId'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeliveryStatusUpdateRequest'
+        required: true
+      responses:
+        '204':
+          description: The event callback was successfully accepted.
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+      security:
+      - OAuth2.0:
+        - delivery.provider
+  /v1/delivery/{deliveryReferenceId}/quotes:
+    post:
+      tags:
+      - delivery_endpoints
+      summary: Notify the result of a request delivery quote event
+      description: '`RATE LIMIT: 8 per minute`
+
+        '
+      operationId: requestDeliveryQuoteCallback
+      parameters:
+      - $ref: '#/components/parameters/storeIdHeader'
+      - $ref: '#/components/parameters/eventIdHeader'
+      - $ref: '#/components/parameters/deliveryReferenceId'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RequestDeliveryQuoteCallbackRequest'
+        required: true
+      responses:
+        '204':
+          description: The event callback was successfully accepted.
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+      security:
+      - OAuth2.0:
+        - delivery.provider
+  /v1/delivery/{deliveryReferenceId}/accept:
+    post:
+      tags:
+      - delivery_endpoints
+      summary: Notify the result of an accept delivery event
+      description: '`RATE LIMIT: 8 per minute`
+
+        '
+      operationId: acceptDeliveryCallback
+      parameters:
+      - $ref: '#/components/parameters/storeIdHeader'
+      - $ref: '#/components/parameters/eventIdHeader'
+      - $ref: '#/components/parameters/deliveryReferenceId'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AcceptDeliveryCallbackRequest'
+        required: true
+      responses:
+        '204':
+          description: The event callback was successfully accepted.
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+      security:
+      - OAuth2.0:
+        - delivery.provider
+  /v1/delivery/{deliveryReferenceId}/cancel:
+    post:
+      tags:
+      - delivery_endpoints
+      summary: Notify the result of a cancel delivery event
+      description: '`RATE LIMIT: 8 per minute`
+
+        '
+      operationId: cancelDeliveryCallback
+      parameters:
+      - $ref: '#/components/parameters/storeIdHeader'
+      - $ref: '#/components/parameters/eventIdHeader'
+      - $ref: '#/components/parameters/deliveryReferenceId'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CancelDeliveryCallbackRequest'
+        required: true
+      responses:
+        '204':
+          description: The event callback was successfully accepted.
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+      security:
+      - OAuth2.0:
+        - delivery.provider
+  /v1/delivery/callback/error:
+    post:
+      tags:
+      - delivery_endpoints
+      summary: Publish delivery callback error
+      description: '`RATE LIMIT: 16 per minute`
+
+        '
+      operationId: deliveryCallbackError
+      parameters:
+      - $ref: '#/components/parameters/storeIdHeader'
+      - $ref: '#/components/parameters/eventIdHeader'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EventCallbackError'
+        required: true
+      responses:
+        '200':
+          description: The callback error was successfully accepted.
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+      security:
+      - OAuth2.0:
+        - callback.error.write
+  /v1/delivery/{deliveryReferenceId}/update:
+    post:
+      tags:
+      - delivery_endpoints
+      summary: Notify the result of an update delivery request event
+      description: '`RATE LIMIT: 8 per minute`
+
+        '
+      operationId: updateDeliveryRequestCallback
+      parameters:
+      - $ref: '#/components/parameters/storeIdHeader'
+      - $ref: '#/components/parameters/eventIdHeader'
+      - $ref: '#/components/parameters/deliveryReferenceId'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateDeliveryRequestCallbackRequest'
+        required: true
+      responses:
+        '204':
+          description: The event callback was successfully accepted.
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+      security:
+      - OAuth2.0:
+        - delivery.provider
+components:
+  schemas:
+    PictureProof:
+      type:
+      - object
+      - 'null'
+      properties:
+        pictureUrl:
+          type: string
+          description: Image url.
+      description: Picture info captured.
+    FulfillmentPathEntity:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          description: Describes the entity name.
+          example: rappi
+        type:
+          type: string
+          description: Type of entities in the fulfillment path.
+          enum:
+          - FULFILLMENT_PROCESSOR
+          - INTERMEDIARY
+      description: Delivery distance.
+    DropoffInfo:
+      type:
+      - object
+      - 'null'
+      properties:
+        courierNote:
+          type:
+          - string
+          - 'null'
+          description: Courier supplied dropoff note.
+        proofOfDelivery:
+          $ref: '#/components/schemas/VerificationProof'
+          description: Proof of delivery.
+      description: Delivery dropoff details.
+    CancelDeliveryCallbackRequest:
+      type: object
+      properties:
+        canceledAt:
+          type: string
+          description: The time that the request was cancelled.
+          format: date-time
+          example: '2007-12-03T10:15:30+01:00'
+      description: Cancellation result callback request.
+    ErrorDetail:
+      type: object
+      properties:
+        attribute:
+          type: string
+          description: The error attribute.
+          example: Order Currency Code
+        message:
+          type: string
+          description: The error detail description.
+          example: Order Currency Code must be exactly 3 characters
+      description: The error detail response object.
+    ErrorMessage:
+      type: object
+      properties:
+        message:
+          type: string
+          description: The error description.
+          example: The request body is invalid.
+        details:
+          type: array
+          description: The error details.
+          items:
+            $ref: '#/components/schemas/ErrorDetail'
+      description: The error response object.
+    VehicleInformation:
+      type:
+      - object
+      - 'null'
+      properties:
+        vehicleType:
+          type: string
+          description: The type of vehicle used to fulfill the delivery.
+          enum:
+          - WALKER
+          - MOTORCYCLE
+          - BICYCLE
+          - CAR
+          - VAN
+        licensePlate:
+          type:
+          - string
+          - 'null'
+          description: The license plate of the vehicle used to fulfill the delivery.
+          example: ABCD 123
+        makeModel:
+          type:
+          - string
+          - 'null'
+          description: The make and model of the vehicle used to fulfill the delivery.
+          example: Honda Civic
+    Location:
+      required:
+      - latitude
+      - longitude
+      type:
+      - object
+      - 'null'
+      properties:
+        latitude:
+          type: number
+          description: The latitude of the location.
+          format: double
+          example: 38.8977
+        longitude:
+          type: number
+          description: The longitude of the location.
+          format: double
+          example: 77.0365
+      description: Latitude and longitude of the address.
+    AcceptDeliveryCallbackRequest:
+      type: object
+      properties:
+        deliveryDistance:
+          $ref: '#/components/schemas/Distance'
+        currencyCode:
+          type: string
+          minLength: 3
+          maxLength: 3
+          description: The 3-letter currency code (ISO 4217) to use for all monetary values.
+          example: EUR
+        cost:
+          $ref: '#/components/schemas/DeliveryCost'
+        fulfillmentPath:
+          type:
+          - array
+          - 'null'
+          description: List of entities involved in the fulfillment processing path.
+          items:
+            $ref: '#/components/schemas/FulfillmentPathEntity'
+        estimatedDeliveryTime:
+          type:
+          - string
+          - 'null'
+          description: The expected delivery time.
+          format: date-time
+          example: '2007-12-03T10:15:30+01:00'
+        estimatedPickupTime:
+          type:
+          - string
+          - 'null'
+          description: The expected pickup time.
+          format: date-time
+          example: '2007-12-03T10:15:30+01:00'
+        confirmedAt:
+          type: string
+          description: The time that the request was accepted.
+          format: date-time
+          example: '2007-12-03T10:15:30+01:00'
+        deliveryTrackingUrl:
+          type:
+          - string
+          - 'null'
+          description: URL to a web page that tracks the delivery.
+          example: www.example.com
+        providerDeliveryId:
+          type:
+          - string
+          - 'null'
+          description: The provider's internal identifier for the delivery used for tracking purposes.
+      description: Delivery information.
+    RequestDeliveryQuoteCallbackRequest:
+      type: object
+      properties:
+        minPickupDuration:
+          type: integer
+          minimum: 0
+          format: int32
+          description: Minimum time required for courier to arrive at pickup location in minutes It is an estimation.
+          example: 5
+        maxPickupDuration:
+          type:
+          - integer
+          - 'null'
+          description: Maximum time that the courier's arrival at pick up location can be delayed. If not provided, it will default to 60 minutes or minPickUpDuration, whichever is greater. This value is an estimation and expressed in minutes.
+          format: int32
+          example: 10
+        deliveryDistance:
+          $ref: '#/components/schemas/Distance'
+        currencyCode:
+          type: string
+          minLength: 3
+          maxLength: 3
+          description: The 3-letter currency code (ISO 4217) to use for all monetary values.
+          example: EUR
+        cost:
+          $ref: '#/components/schemas/DeliveryCost'
+        provider:
+          type:
+          - string
+          - 'null'
+          description: Delivery Service Provider Slug.
+          example: doordash
+        fulfillmentPath:
+          type:
+          - array
+          - 'null'
+          description: List of entities involved in the fulfillment processing path.
+          items:
+            $ref: '#/components/schemas/FulfillmentPathEntity'
+        createdAt:
+          type: string
+          description: The time that the quote was created.
+          format: date-time
+          example: '2007-12-03T10:15:30+01:00'
+        accountBalance:
+          type:
+          - number
+          - 'null'
+          description: The remaining account balance of the requester for the delivery provider.
+          example: 1068.32
+      description: Delivery quote information.
+    Distance:
+      type:
+      - object
+      - 'null'
+      properties:
+        unit:
+          type: string
+          description: Distance unit value.
+          enum:
+          - KILOMETERS
+          - MILES
+        value:
+          type: number
+          description: Distance value.
+      description: Delivery distance.
+    DeliveryStatusUpdateRequest:
+      type: object
+      properties:
+        deliveryStatus:
+          $ref: '#/components/schemas/DeliveryStatus'
+        estimatedDeliveryTime:
+          type:
+          - string
+          - 'null'
+          description: The expected delivery time.
+          format: date-time
+          example: '2007-12-03T10:15:30+01:00'
+        estimatedPickupTime:
+          type:
+          - string
+          - 'null'
+          description: The expected pickup time.
+          format: date-time
+          example: '2007-12-03T10:15:30+01:00'
+        courier:
+          $ref: '#/components/schemas/Person'
+        location:
+          $ref: '#/components/schemas/Location'
+        createdAt:
+          type: string
+          description: The time that the update was created.
+          format: date-time
+          example: '2007-12-03T10:15:30+01:00'
+        vehicleInformation:
+          $ref: '#/components/schemas/VehicleInformation'
+        currencyCode:
+          type:
+          - string
+          - 'null'
+          minLength: 3
+          maxLength: 3
+          description: The 3-letter currency code (ISO 4217) to use for all monetary values.
+          example: EUR
+        cost:
+          $ref: '#/components/schemas/DeliveryCost'
+        providerDeliveryId:
+          type:
+          - string
+          - 'null'
+          description: The provider's internal identifier for the delivery used for tracking purposes.
+        dropoffInfo:
+          $ref: '#/components/schemas/DropoffInfo'
+          description: Details on delivery dropoff.
+        deliveryTrackingUrl:
+          type:
+          - string
+          - 'null'
+          description: Delivery tracking url.
+      description: Update delivery status request.
+    EventCallbackError:
+      type: object
+      properties:
+        errorCode:
+          type: string
+          description: 'Errors that occur processing the webhook, modeled after Google''s gRPC error codes.
+
+            For callback errors responding to menu-related webhooks, any error with status code in:  "INVALID_ARGUMENT", "FAILED_PRECONDITION", "NOT_FOUND", "PERMISSION_DENIED", "ALREADY_EXISTS", "UNIMPLEMENTED", "DATA_LOSS", "UNAUTHENTICATED" will be considered fatal and will fail the operation without retrying.'
+          enum:
+          - CANCELLED
+          - UNKNOWN
+          - INVALID_ARGUMENT
+          - FAILED_PRECONDITION
+          - DEADLINE_EXCEEDED
+          - NOT_FOUND
+          - PERMISSION_DENIED
+          - ALREADY_EXISTS
+          - RESOURCE_EXHAUSTED
+          - ABORTED
+          - OUT_OF_RANGE
+          - UNIMPLEMENTED
+          - INTERNAL
+          - UNAVAILABLE
+          - DATA_LOSS
+          - UNAUTHENTICATED
+          example: NOT_FOUND
+        errorMessage:
+          type:
+          - string
+          - 'null'
+          description: Additional information about the error. This message will be displayed to the user, so ideally it should be friendly.
+          example: The store was not found.
+      description: The error container for a processed callback.
+    Person:
+      type:
+      - object
+      - 'null'
+      properties:
+        name:
+          type:
+          - string
+          - 'null'
+          description: The person's name as it should be displayed.
+          example: Jane Doe
+          maxLength: 255
+        phone:
+          type:
+          - string
+          - 'null'
+          description: The person's phone number.
+          example: +1-555-555-5555
+          maxLength: 25
+        phoneCode:
+          type:
+          - string
+          - 'null'
+          description: A code or extension of the phone number.
+          example: 111 11 111
+          maxLength: 25
+        email:
+          type:
+          - string
+          - 'null'
+          description: The person's email address.
+          example: email@email.com
+        personalIdentifiers:
+          $ref: '#/components/schemas/PersonalIdentifiers'
+      description: The recipient information.
+    SignatureProof:
+      type:
+      - object
+      - 'null'
+      properties:
+        signatureImageUrl:
+          type: string
+          description: Signature image url.
+        signerName:
+          type:
+          - string
+          - 'null'
+          description: The name of the signer.
+        signerRelationship:
+          type:
+          - string
+          - 'null'
+          description: The relationship of signer to the intended recipient.
+      description: Signature info captured.
+    UpdateDeliveryRequestCallbackRequest:
+      type: object
+      properties:
+        currencyCode:
+          type:
+          - string
+          - 'null'
+          minLength: 3
+          maxLength: 3
+          description: The 3-letter currency code (ISO 4217) to use for all monetary values.
+          example: EUR
+        cost:
+          $ref: '#/components/schemas/DeliveryCost'
+          description: Updated delivery cost.
+      description: Updated Delivery information.
+    DeliveryStatus:
+      type: string
+      description: The status of the delivery.
+      enum:
+      - REQUESTED
+      - ALLOCATED
+      - PICKED_UP
+      - COMPLETED
+      - CANCELED
+      - ARRIVED_AT_PICKUP
+      - ARRIVED_AT_DROP_OFF
+    StoreId:
+      type: string
+      description: The unique identifier of the store in the partner application. This ID, along with the `Application ID`, will be used to match the correct store when performing operations. It cannot be longer than 255 characters and must only contain printable ASCII characters. During on-boarding, this ID will be similar to `onboarding:905bb725-b141-4a9b-832a-1f254f772c94` (where the UUID is the Internal Store ID). During off-boarding, this field will be filled with the last known Store ID, or with an empty string, in case none is found. In that case, please fall back to the provided `internalStoreId` (a.k.a. Sku-Sku ID).
+      example: partner-store-unique-identifier
+    PersonalIdentifiers:
+      type:
+      - object
+      - 'null'
+      properties:
+        taxIdentificationNumber:
+          type:
+          - string
+          - 'null'
+          description: Person tax identification number.
+          example: 1234567890
+        serviceProviderId:
+          type:
+          - string
+          - 'null'
+          description: External service provider ID i.e. Courier Id.
+          example: 12345ba6-789e-123f-4e56-d78db90d123b
+      description: The person's personal identifiers (e.g. tax identification number).
+    DeliveryCost:
+      type: object
+      properties:
+        baseCost:
+          type: number
+          format: double
+          description: Base delivery cost value.
+          example: 4.99
+        extraCost:
+          type: number
+          format: double
+          description: Extra delivery cost value.
+          example: 0.99
+      description: Delivery cost details.
+    VerificationProof:
+      type:
+      - object
+      - 'null'
+      properties:
+        signatureProof:
+          $ref: '#/components/schemas/SignatureProof'
+        pictureProof:
+          $ref: '#/components/schemas/PictureProof'
+      description: Verification details.
+  parameters:
+    deliveryReferenceId:
+      name: deliveryReferenceId
+      in: path
+      required: true
+      schema:
+        type: string
+        description: A unique identifier of the delivery in a UUID format.
+        example: 295f76b4-5725-4bf5-a8ab-97943dbdc3b4
+    eventIdHeader:
+      name: X-Event-Id
+      in: header
+      required: true
+      schema:
+        type: string
+        description: Unique identifier of the event that this callback refers to.
+        example: cf0ce51b-d74e-40d3-b177-1925ab4edc0c
+    storeIdHeader:
+      name: X-Store-Id
+      in: header
+      required: true
+      schema:
+        $ref: '#/components/schemas/StoreId'
+  responses:
+    '422':
+      description: The request body is not valid.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorMessage'
+    '403':
+      description: Authorization not valid for the requested resource.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorMessage'
+    '404':
+      description: Resource not found.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorMessage'
+    '400':
+      description: The request is malformed.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorMessage'
+    '401':
+      description: Invalid authorization.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorMessage'
+  securitySchemes:
+    OAuth2.0:
+      type: oauth2
+      description: "The **Authorization API** is based on the [OAuth2.0 protocol](https://tools.ietf.org/html/rfc6749), supporting the (Client Credentials)[https://datatracker.ietf.org/doc/html/rfc6749#section-4.4] and the (Authorization Code)[https://datatracker.ietf.org/doc/html/rfc6749#section-4.1] flows. Resources expect a valid token sent as a `Bearer` token in the HTTP `Authorization` header.\n### Scopes\nScopes must be configured by our internal team to be enabled for an app. Once the scopes are configured they can be enabled on the Application Settings Page in Developer Portal. Each endpoint requires a given scope that can be verified on each endpoint documentation. When generating an OAuth2.0 token multiple scopes can be requested.\n\n### Authorization Code Flow\nTo perform this flow, the authorization code flow must be enabled in the Application Settings Page in Developer Portal. When enabling the flow it is mandatory to provide a redirect URI pointing to your application. Once the flow is complete we will redirect the user to this URI passing the 'code' and 'state' parameters.\nThe Authorization Code flow provides a temporary code that the client application can exchange for an access token. To start the flow the application must request the user authorization. This is done by sending a request to https://{{public-api-url}}/v1/auth/oauth2/authorize.\nExample\n```\ncurl --location 'https://{{public-api-url}}/v1/auth/oauth2/authorize?client_id=[CLIENT_ID]&redirect_uri=[REDIRECT_URI]&response_type=code&scope=organization.read&state=8A9D16B4C3E25F6A'\n```\nThis call will return a 302 redirecting the user to our authorization page. If the user approves the application, we will redirect to configured URI passing the authorization code in the query parameter 'code'. The 'state' parameter is also sent to ensure the source of the data.\nWith the authorization code, the client application can generate the token.\n### Client Credentials Flow\nThe client_credentials flow does not require any steps before generating the token. Once your application is ready, and the client_id and client_secret are available, the token can be generated by following the instructions in the next section.\n\n### Generate Token\nTo generate the token, use the `Client ID` and `Client Secret` (provided during onboarding), and optionally the authorization code obtained after performing the Authorization Code flow, to the [Token Auth endpoint](#operation/requestToken) endpoint. The result of this invocation is a token that is valid for a pre-determined time or until it is manually revoked.\n\nThe access token obtained will be sent as a `Bearer` value of the `Authorization` HTTP header.\n\nClient credentials in the request-body and HTTP Basic Auth are supported.\n\n#### Request Example for client_credentials\n```\ncurl --location --request POST 'https://{{public-api-url}}/v1/auth/token' \\\n  --header 'Content-Type: application/x-www-form-urlencoded' \\\n  --data-urlencode 'scope=ping' \\\n  --data-urlencode 'grant_type=client_credentials' \\\n  --data-urlencode 'client_id=[APPLICATION_ID]' \\\n  --data-urlencode 'client_secret=[CLIENT_SECRET]'\n\n```\n#### Request Example for authorization_code\n```\ncurl --location --request POST 'https://{{public-api-url}}/v1/auth/token' \\\n  --header 'Content-Type: application/x-www-form-urlencoded' \\\n  --data-urlencode 'scope=ping' \\\n  --data-urlencode 'grant_type=authorization_code' \\\n  --data-urlencode 'client_id=[APPLICATION_ID]' \\\n  --data-urlencode 'client_secret=[CLIENT_SECRET]' \\\n  --data-urlencode 'code=[code]' \\\n  --data-urlencode 'redirect_uri=[redirect_uri]'\n\n```\n#### Response Example\n```\n{\n  \"access_token\": \"oMahtBwBbnZeh4Q66mSuLFmk2V0_CLCKVt0aYcNJlcg.yditzjwCP7yp0PgR6AzQR3wQ1rTdCjkcPeAMuyfK-NU\",\n  \"expires_in\": 2627999,\n  \"scope\": \"ping orders.create\",\n  \"token_type\": \"bearer\"\n}\n```\n\n### Token Usage\n\nThe token provided in field `access_token` is used to authenticate when consuming the API endpoints. Send the token value in the `Authorization` header of every request. The token expiration time is represented in the field `expired_in`, in seconds. Currently, all tokens are valid for 30 days and should be stored and re-used while still valid.\n\nNote that occasionally, a 401 error may be returned for a valid token due to an internal service issue. Such occurrences should be rare. To prevent exposing potential vulnerabilities to attackers, the Public API does not disclose other types of errors in the authentication flow if for any reason the token can't be validated (when it's a valid token then it's ok to return 5XX or other 4XX though - such as 403). In such scenarios, although the internal auth flow avoids retries to prevent attacks, if the token is known to be valid and not expired, a retry with a backoff interval by the client is advised. Another option is to request a new token.\n\n#### Example\n\n```\ncurl --location --request GET 'https://{{public-api-url}}/v1/ping' \\\n  --header 'Authorization: Bearer <access_token>' \\\n  --header 'X-Store-Id: <storeId>'\n\n```\n"
+      flows:
+        clientCredentials:
+          tokenUrl: /v1/auth/token
+          scopes:
+            catalog: Permission to interact with product inventory for existing stores.
+            delivery.provider: Permission to provide delivery services for existing orders.
+            finance: Permission to provide financial data for orders/stores.
+            manager.menus: Permission to manage menus.
+            manager.orders: Permission to manage orders.
+            manager.storefront: Permission to manage storefront.
+            menus.async_job.read: Permission to read the status of a menu upsert job.
+            menus.entity_suspension: Permission to notify the result of a menu entity availability update, after being requested by a webhook event.
+            menus.get_current: Permission to send the current state of a menu, after being requested by a webhook event.
+            menus.publish: Permission to notify the result of a publish menus operation for a given store.
+            menus.read: Permission to read the current menus for a given store.
+            menus.upsert: Permission to create/update menus for a given store.
+            menus.upsert_hours: Permission to notify the receiving of the upsert hours menu event, after being requested by a webhook event.
+            orders.create: Permission to create new order for a given store.
+            orders.read: Permission to read orders and connected data.
+            orders.update: Permission to create and update new orders for a given store.
+            ping: Permission to ping the system.
+            reports.generate_report: Permission to request reports for given store(s) and period of time.
+            reviews.reply: Permission to reply to reviews.
+            storefront.store_pause_unpause: Permission to notify the result of a pause/unpause operation, after being requested by a webhook event.
+            storefront.store_availability: Permission to send the current state of store.
+            storefront.store_hours_configuration: Permission to send the current store hours configuration.
+            stores.manage: Permission to onboard stores and update the identifier.
+            callback.error.write: Token has permission to send failed webhook event results.
+            manager.loyalty: Permission to interact with loyalty services.
+            direct.orders: Permission to interact with direct order services.
+            store.read: Permission to query store information.
+        authorizationCode:
+          authorizationUrl: /v1/auth/oauth2/authorize
+          tokenUrl: /v1/auth/token
+          scopes:
+            organization.read: Permission to read data for organization/brands/stores on behalf of a user.
+            organization.service_integration: Permission to manage the your integration with a given store on behalf of a user.
+x-tagGroups:
+- name: Endpoints
+  tags:
+  - account_pairing_endpoints
+  - auth_endpoints
+  - callback_endpoints
+  - delivery_endpoints
+  - finance_endpoints
+  - inventory_endpoints
+  - manager_menu_endpoints
+  - manager_order_endpoints
+  - manager_storefront_endpoints
+  - menus_endpoints
+  - orders_endpoints
+  - organization_endpoints
+  - ping_endpoints
+  - reports_endpoints
+  - reviews_endpoints
+  - storefront_endpoints
+  - manager_loyalty_endpoints
+  - direct_orders_endpoints
+  - store_endpoints
+- name: Webhooks
+  tags:
+  - account_pairing_webhooks
+  - delivery_webhooks
+  - manager_orders_webhooks
+  - menus_webhooks
+  - orders_webhooks
+  - ping_webhooks
+  - reports_webhooks
+  - storefront_webhooks
