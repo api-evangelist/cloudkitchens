@@ -69,7 +69,8 @@ edges:
     supplies; kept at L1 as the mix of stock visibility and shipment creation spans stock level and replenishment
     sub-capabilities.
 - tag: marketintel_endpoints
-  spec_file: cloudkitchens-marketintel-endpoints-api-openapi.yml
+  spec_file: cloudkitchens-market-intel-endpoints-api-openapi.yml
+  reanchored_from: cloudkitchens-marketintel-endpoints-api-openapi.yml
   capability_id: BC-400.30
   capability_id_l1: BC-400
   capability_name: Market Intelligence Management
