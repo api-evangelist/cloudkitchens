@@ -11,7 +11,7 @@ capability_model:
   attribution: Turbo EA Capabilities by Vincent Verdet — Turbo EA, https://github.com/vincentmakes/turbo-ea-capabilities,
     CC BY 4.0
   notice: NOTICE
-edge_count: 6
+edge_count: 8
 edges:
 - tag: manager_loyalty_endpoints
   spec_file: cloudkitchens-manager-loyalty-endpoints-api-openapi.yml
@@ -57,6 +57,17 @@ edges:
   reason: Operations orchestrate courier delivery quoting, acceptance, cancellation and status/proof-of-delivery
     for orders — last-mile logistics execution. Some of the surface is callback notification, which tempers
     confidence.
+- tag: finance_endpoints
+  spec_file: cloudkitchens-finance-endpoints-api-openapi.yml
+  capability_id: BC-200
+  capability_id_l1: BC-200
+  capability_name: Financial Management
+  confidence: 0.72
+  evidence: POST /finance/v1/financial-transactions "Post financial transactions"; POST /finance/v1/financial-invoices
+    "Post a financial invoice"; schemas FinancialTransaction, FinancialInvoice, PayoutInfo
+  reason: Posting financial transactions and invoices with payout information is accounting/financial
+    record-keeping; evidence does not clearly single out payables, receivables or GL, so L1 only.
+  recovered_from: vertical-automotive-mobility-edges.json
 - tag: inventory_endpoints
   spec_file: cloudkitchens-inventory-endpoints-api-openapi.yml
   capability_id: BC-530
@@ -80,3 +91,14 @@ edges:
   reason: The surface reports competitor stores discovered at given geolocations along with their ratings,
     sales, price level and chain — competitive/market intelligence gathering. Single operation keeps confidence
     moderate.
+- tag: reviews_endpoints
+  spec_file: cloudkitchens-reviews-endpoints-api-openapi.yml
+  capability_id: BC-430.50
+  capability_id_l1: BC-430
+  capability_name: Customer Feedback Management
+  confidence: 0.7
+  evidence: POST /v1/reviews/reply  reviewReply  Reply or schedule a reply to a review
+  reason: Responding to customer reviews is voice-of-customer/feedback handling under Customer Service
+    Management. Only one operation, so moderate confidence; could alternatively be seen as reputation
+    management.
+  recovered_from: vertical-agriculture-food-production-edges.json
