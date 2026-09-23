@@ -1,7 +1,10 @@
 openapi: 3.2.0
 info:
   title: Public Manager Menu Endpoints API
-  description: "# Overview\n\nThe API endpoints are developed around [RESTful](https://en.wikipedia.org/wiki/Representational_state_transfer) principles secure via the OAuth2.0 protocol.\n\nBeyond the entry points, the API also provides a line of communication into your system via [webhooks](https://en.wikipedia.org/wiki/Webhook).\n\nFor testing purposes, we offer a staging environment. Also, more detailed information about the business rules and workflows can be found on the [**Documentation Section**](/docs/)\n\n## Versioning\nEach API is versioned individually, but we follow these rules:\n- Non breaking changes (eg: adding new fields) are added in the current version without previous communication\n- Breaking changes (fields removal, semantic changed or schema update) have the version incremented\n- Users will be notified about new versions and will be given time to migrate (the time will be set on a case by case basis)\n- Once users migrate to the new version, we will deprecate the old ones\n- Once there is a new version for an API, we won't accept new integrations targeting old versions\n\n## API General Definitions\nThe APIs use resource-oriented URLs communicating, primarily, via JSON and leveraging the HTTP headers, [response status codes](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status), and verbs.\n\nTo exemplify how the API is to be consumed, consider a fake GET resource endpoint invocation below:\n\n```\ncurl --request GET 'https://{{public-api-url}}/v1/resource/123' \\\n--header 'Authorization: Bearer 34fdabeeafds=' --header 'X-Store-Id: 321'\n```\n\n|      Header      | Description |\n| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |\n|`Authorization`   | Standard HTTP header is used to associate the request with the originating invoker. The content of this header is a `Bearer` token generated from you client_secret, defined in the [API Auth](#/section/Guides/API-Auth) guide.|\n|`X-Store-Id`      | The ID of the store in your system this call acts on behalf of. |\n\n_All resource endpoints expect the `Authorization` header, the remaining headers are explicitly stated in the individual endpoint documentation section._\n\nWith these headers, the system will:\n - Validate the client token, making sure the call is originating from a trusted source.\n - Validate that the Application has the permission to access the `v1/resource/{id}` resource via the Application's pre-configured scopes.\n - Translate your X-Store-Id to our internal store ID (e.g. `AAA`).\n - Validate and retrieve resource `AAA`, that is associated to your Application via store id `321`.\n\nPOST/PUT methods will look similar to the GET calls, but they'll take in a body in the HTTP request (default to the application/json content-type).\n\n```\ncurl --location --request POST 'https://{{public-api-url}}/v1/resource' \\\n--header 'Authorization: Bearer 34fdabeeafds=' --header 'X-Store-Id: 321'\n--data '{\"foo\": \"bar\"}'\n```\n\n## API Authentication/Authorization\n\n<SecurityDefinitions />\n\n## Webhook\n\nThe Public API is able to send notifications to your system via HTTP POST requests.\n\nEvery webhook is signed using HMAC-SHA256 that is present in the header `X-HMAC-SHA256`, and you can also authenticate the requests using Basic Auth, Bearer Token or HMAC-SHA1 (legacy). Please, refer to [**Webhook Authentication Guide**](/docs/guides-webhook-authentication/) for more details.\n\n_Please work with your Account Representative to setup your Application's Webhook configurations._\n\n```\nExample Base-URL = https://{{your-server-url}}/webhook\n```\n\n### Notification Schema\n\n| **Name**                | **Type** | **Description**                                                      |\n| ------------------------| ---------| -------------------------------------------------------------------- |\n| eventId                 | string   | Unique id of the event.                                              |\n| eventTime               | string   | The time the event occurred.                                         |\n| eventType               | string   | The type of event (e.g. create_order).                               |\n| metadata.storeId        | string   | Id of the store for which the event is being published.              |\n| metadata.applicationId  | string   | Id of the application for which the event is being published.        |\n| metadata.resourceId     | string   | The external identifier of the resource that this event refers to.   |\n| metadata.resourceHref   | string   | The endpoint to fetch the details of the resource.                   |\n| metadata.payload        | object   | The event object which will be detailed in each Webhook description. |\n\n### Notification Request Example\n\n```\ncurl --location --request POST 'https://{{your-server-url}}/webhook' \\\n--header 'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.142 Safari/537.36' \\\n--header 'Authorization: MAC <hash signature>' \\\n--header 'Content-Type: application/json' \\\n--data-raw '{\n   \"eventId\": \"123456\",\n   \"eventTime\": \"2020-10-10T20:06:02:123Z\",\n   \"eventType\": \"orders.new_order\",\n   \"metadata\": {\n      \"storeId\": \"755fd19a-7562-487a-b615-171a9f89d669\",\n      \"applicationId\": \"e22f94b3-967c-4e26-bf39-9e364066b68b\",\n      \"resourceHref\": \"https://{{public-api-url}}/v1/orders/bf9f1d81-f213-496e-a026-91b6af44996c\",\n      \"resourceId\": \"bf9f1d81-f213-496e-a026-91b6af44996c\",\n      \"payload\": {}\n   }\n}\n```\n\n### Expected Response\n\nThe partner application should return an HTTP 200 response code with an empty response body to acknowledge receipt of the webhook event.\n## Rate Limiting\nPlease, refer to [**Rate Limiting Guide**](/docs/guides-rate-limiting/) for more details.\n\n## Error codes\nThe APIs use standard HTTP status codes to indicate the success or failure of a request. Error codes are divided into two categories: 4XX codes for client-side errors and 5xx codes for server-side errors.\n### 4XX Client-Side Errors\nClient-side errors are indicated by status codes in the 4xx range. These errors are typically the result of a problem with the request made by your application.\nIf a client-side error occurs, our API will return a response that includes an appropriate error message. This message will provide information about the cause of the error. The aim of these messages is to assist you in identifying and resolving the issue.\nFor example, if you submit a request with missing or invalid parameters, you might receive a 400 Bad Request error with a message indicating which parameters were missing or incorrect.\n### 5XX Server-Side Errors\nServer-side errors are represented by status codes in the 5xx range. These errors suggest a problem with our server, not with your application's request.\nServer-side errors are typically transient, meaning they are temporary. If a server-side error occurs, we recommend that the client retries the same request with the exact same parameters.\nFor example, if you get a 500 Internal Server Error, it's possible that our server is suffering a temporary problem. In such cases, retrying the request after a short delay is often successful.\nIf you continually receive server-side errors, reach out to our support team for further assistance."
+  description: '# Overview
+
+
+    The API endpoints are developed around RESTful principles secure via the OAuth2.0 protocol.'
   version: v1
   license:
     name: Proprietary
@@ -9,18 +12,16 @@ servers:
 - url: https://{{public-api-url}}
   description: Staging server url
 tags:
-- name: manager_menu_endpoints
+- name: Manager Menu Endpoints
   description: Endpoints for applications managing menus related data and operations.
   x-displayName: Menus Manager
 paths:
   /v1/menus:
     get:
       tags:
-      - manager_menu_endpoints
+      - Manager Menu Endpoints
       summary: Get the menus for a store
-      description: '`RATE LIMIT: 8 per minute`
-
-        '
+      description: '`RATE LIMIT: 8 per minute`'
       operationId: getMenu
       parameters:
       - $ref: '#/components/parameters/storeIdHeader'
@@ -47,11 +48,9 @@ paths:
   /v1/menus/jobs/{jobId}:
     get:
       tags:
-      - manager_menu_endpoints
+      - Manager Menu Endpoints
       summary: Get the async menu job status
-      description: '`RATE LIMIT: 8 per minute`
-
-        '
+      description: '`RATE LIMIT: 8 per minute`'
       operationId: getAsyncJobStatus
       parameters:
       - $ref: '#/components/parameters/storeIdHeader'
@@ -85,11 +84,9 @@ paths:
   /manager/menu/v1/menus/publish-targets:
     get:
       tags:
-      - manager_menu_endpoints
+      - Manager Menu Endpoints
       summary: Get the publish-targets for a store
-      description: '`RATE LIMIT: 2 per minute`
-
-        '
+      description: '`RATE LIMIT: 2 per minute`'
       operationId: managerGetMenuPublishTargets
       parameters:
       - $ref: '#/components/parameters/storeIdHeader'
@@ -116,11 +113,9 @@ paths:
   /manager/menu/v1/menus/publish:
     post:
       tags:
-      - manager_menu_endpoints
+      - Manager Menu Endpoints
       summary: Publish menus to targets for a store
-      description: '`RATE LIMIT: 2 per minute`
-
-        '
+      description: '`RATE LIMIT: 2 per minute`'
       operationId: managerPublishMenu
       parameters:
       - $ref: '#/components/parameters/storeIdHeader'
@@ -159,11 +154,9 @@ paths:
   /manager/menu/v1/menus/menu-sync:
     post:
       tags:
-      - manager_menu_endpoints
+      - Manager Menu Endpoints
       summary: Synchronize store menu with POS menu
-      description: '`RATE LIMIT: 2 per minute`
-
-        '
+      description: '`RATE LIMIT: 2 per minute`'
       operationId: menuSync
       parameters:
       - $ref: '#/components/parameters/storeIdHeader'
@@ -196,11 +189,9 @@ paths:
   /manager/menu/v1/menus/entities/availability/suspend:
     post:
       tags:
-      - manager_menu_endpoints
+      - Manager Menu Endpoints
       summary: Suspend menu entities targets for a store
-      description: '`RATE LIMIT: 16 per minute`
-
-        '
+      description: '`RATE LIMIT: 16 per minute`'
       operationId: managerSuspendMenuEntities
       parameters:
       - $ref: '#/components/parameters/storeIdHeader'
@@ -233,11 +224,9 @@ paths:
   /manager/menu/v1/menus/entities/availability/unsuspend:
     post:
       tags:
-      - manager_menu_endpoints
+      - Manager Menu Endpoints
       summary: Unsuspend menu entities targets for a store
-      description: '`RATE LIMIT: 16 per minute`
-
-        '
+      description: '`RATE LIMIT: 16 per minute`'
       operationId: managerUnsuspendMenuEntities
       parameters:
       - $ref: '#/components/parameters/storeIdHeader'
@@ -270,11 +259,9 @@ paths:
   /manager/menu/v1/bootstrap:
     post:
       tags:
-      - manager_menu_endpoints
+      - Manager Menu Endpoints
       summary: Bootstrap menus for a store
-      description: '`RATE LIMIT: 2 per minute`
-
-        '
+      description: '`RATE LIMIT: 2 per minute`'
       operationId: managerBootstrap
       parameters:
       - $ref: '#/components/parameters/storeIdHeader'
@@ -306,144 +293,93 @@ paths:
         - manager.menus
 components:
   schemas:
-    Menu_POS:
-      title: All Menus for the store, indexed by ID
+    Money:
+      required:
+      - amount
+      - currencyCode
+      type: object
+      properties:
+        currencyCode:
+          maxLength: 3
+          minLength: 3
+          type: string
+          description: The 3-letter currency code (ISO 4217) to use for all monetary values.
+          example: EUR
+        amount:
+          minimum: 0
+          type: number
+          description: Amount value.
+          example: 25.21
+      description: Money amount.
+      example: 25.21
+    MenuItem_POS:
+      title: All Items for the store, indexed by ID
       required:
       - id
       - name
+      - photoIds
+      - price
+      - status
       type: object
       properties:
         id:
           type: string
-          description: Internal identifier for Menu.
-          example: ff6dd693-5e55-4a92-a359-ea61b23ed423
+          minLength: 1
+          description: Internal identifier of this Item.
+          example: faa4c79f-480d-4de1-bc34-5fb74ef082ef
         name:
           type: string
-          description: Name of the Menu.
-          example: Tasty BBQ
-        categoryIds:
+          description: Name of this Item
+          example: Bagel
+        photoIds:
           type: array
-          default: []
-          description: Identifiers of the categories within this Menu.
+          description: A list of Photo references associated with the Item.
           items:
             type: string
-        fulfillmentModes:
-          type: array
-          default: []
-          description: The ways in which this menu may be fulfilled. If no values are specified, it is assumed that all fulfillment types are allowed.
-          items:
-            type: string
-            description: How an item from a menu is allowed to be fulfilled when ordered by a user.
-            enum:
-            - DELIVERY
-            - PICK_UP
-            - DINE_IN
+        price:
+          $ref: '#/components/schemas/Money'
+        status:
+          $ref: '#/components/schemas/ItemStatus'
         description:
           type: string
-          description: Description of the Menu.
-          example: Cooking up BBQ deliciousness from around the globe!
-        hours:
-          $ref: '#/components/schemas/Hours'
+          description: Description of this Item
+          example: Delicious bagel!
+        modifierGroupIds:
+          type: array
+          default: []
+          description: Identifiers of each ModifierGroup within this Item.
+          items:
+            type: string
+            example: 7152ee6e-e941-45c1-9008-2e306b479114
+        priceOverrides:
+          type:
+          - array
+          - 'null'
+          description: Specify price overrides for different service slugs.
+          items:
+            $ref: '#/components/schemas/ItemPriceOverride'
+        skuDetails:
+          $ref: '#/components/schemas/SkuDetails'
         additionalCharges:
           type:
           - array
           - 'null'
-          description: Additional charges to apply for this menu. All additional charges specified on a menu will only be applied once per order.
+          description: Additional charges to apply for this item. Additional charges will be applied for every instance of this item within an order.
           items:
             $ref: '#/components/schemas/AdditionalCharge'
-      description: A menu for a store.
-    JobReference:
+        tax:
+          $ref: '#/components/schemas/ItemTax'
+          description: The tax configuration for the menu item.
+      description: Items are sold on the Menu. Modifiers to items are items themselves and their relationship is defined by ModifierGroup.
+    PosMenuSyncResponse:
       type: object
       properties:
-        id:
-          type: string
-          description: Unique identifier of the job.
+        jobId:
+          type:
+          - string
+          - 'null'
+          description: Only present if the request succeeds. Job ID to check on the status with the MenuAsyncJob endpoint.
           format: uuid
-        status:
-          type: string
-          description: The status of the job.
-          enum:
-          - PENDING
-          - FAILED
-          - SUCCESS
-          - UNKNOWN
-      description: The job reference.
-    CustomBulkResolutionOptions:
-      type:
-      - object
-      - 'null'
-      properties:
-        updateNames:
-          type: boolean
-          description: Update the linked entity's names to match the linked external entity's.
-        updatePrices:
-          type: boolean
-          description: Update the linked entity's price to match the linked external entity's.
-        updateDescriptions:
-          type: boolean
-          description: Update the linked entity's description to match the linked external entity's.
-        createUnmatchedEntities:
-          type: boolean
-          description: Create unmatched external entities in the menu.
-        deleteMissingEntities:
-          type: boolean
-          description: Delete entities that are missing external links.
-        bootstrapPhotosToEntities:
-          type: boolean
-          description: Bootstrap linked item photos.
-        copyEntityPaths:
-          type: boolean
-          description: Copies the entity paths from the external menu.
-        updateItemSuspensionStatus:
-          type: boolean
-          description: Update Item suspension status.
-        updateHours:
-          type: boolean
-          description: Update menu hours.
-        assignItemsToLocations:
-          type: boolean
-          description: If an item exists at a location in the POS, it will automatically be assigned to that location.
-        unassignItemsFromLocations:
-          type: boolean
-          description: If an item is removed from a location in the POS, it will automatically be unassigned from that location.
-        updateMenuOrganization:
-          type: boolean
-          description: The organization of modifiers into modifier groups, modifier groups into items and items into categories will be replicated from the POS menu.
-        updateItemArrangement:
-          type: boolean
-          description: The arrangement of menu products as displayed in your POS will be replicated.
-        updateModifierGroupRules:
-          type: boolean
-          description: Update modifier group selection rules.
-        updateTaxes:
-          type: boolean
-          description: Update taxes.
-    PosMenuSyncRequest:
-      type: object
-      properties:
-        shouldPublishChanges:
-          type:
-          - boolean
-          - 'null'
-          description: Whether or not to publish changes to external services after bulk resolution.
-        useCustomOptions:
-          type:
-          - boolean
-          - 'null'
-          description: If true, use `customBulkResolutionOptions` instead of menu configuration.
-        customBulkResolutionOptions:
-          $ref: '#/components/schemas/CustomBulkResolutionOptions'
-    MenuPublishTarget:
-      type: object
-      properties:
-        status:
-          type: string
-          description: The status of a menu publish target.
-          enum:
-          - READY
-          - PUBLISH_IN_PROGRESS
-          - ERROR
-      description: Information about the target.
     Menus:
       required:
       - categories
@@ -619,598 +555,10 @@ components:
               status:
                 saleStatus: FOR_SALE
       description: All menus associated with a store.
-    ItemTax:
-      required:
-      - percentageValue
-      - isValueAddedTax
-      type: object
-      properties:
-        percentageValue:
-          $ref: '#/components/schemas/PercentageValue'
-          description: Specify the percentage value of the tax.
-        isValueAddedTax:
-          type: boolean
-          description: Whether this tax is a value-added tax.
-      description: The tax configuration.
-    MenuPublishRequest:
-      type: object
-      properties:
-        menuPublishTargets:
-          type: array
-          description: MenuPublishTargets to publish to.
-          example:
-          - doordash
-          - ubereats
-          items:
-            type: string
-            description: MenuPublishTargets to publish to.
-            example: '["doordash","ubereats"]'
-    ItemPriceOverride:
-      required:
-      - amount
-      - currencyCode
-      - rules
-      type: object
-      properties:
-        rules:
-          type: array
-          minItems: 1
-          description: Override rules for when this price override should be applied.
-          items:
-            $ref: '#/components/schemas/OverrideRule'
-        currencyCode:
-          maxLength: 3
-          minLength: 3
-          type: string
-          description: The 3-letter currency code (ISO 4217) to use for all monetary values.
-          example: EUR
-        amount:
-          type: number
-          description: Amount the Item costs
-          example: 25.21
-      description: Price override for an item
-    ErrorDetail:
-      type: object
-      properties:
-        attribute:
-          type: string
-          description: The error attribute.
-          example: Order Currency Code
-        message:
-          type: string
-          description: The error detail description.
-          example: Order Currency Code must be exactly 3 characters
-      description: The error detail response object.
-    DefaultModifierSelectionData:
-      required:
-      - defaultModifierSelections
-      type: object
-      properties:
-        defaultModifierSelections:
-          type: array
-          description: The default modifier selections for this modifier group.
-          items:
-            $ref: '#/components/schemas/DefaultModifierSelection'
-      description: The default modifiers selections for a modifier group.
-    UnitPriceAndCount:
-      required:
-      - unitPrice
-      - count
-      type: object
-      properties:
-        unitPrice:
-          $ref: '#/components/schemas/Money'
-        count:
-          minimum: 1
-          type: integer
-          description: The count for the additional charge.
-          example: 3
-      description: Unit price and count for additional charges.
-      example: 3 x $25.21
-    ModifierGroup:
-      title: All ModifierGroups for the Store, indexed by ID
-      required:
-      - id
-      - name
-      type: object
-      properties:
-        id:
-          type: string
-          description: The identifier that exists in the third party system. During a menu publish event, uuidV4 ids will be generated for new entities that do not yet exist in the internal menu.
-          example: da0e4e94-5670-4175-897a-3b7dde45bed5
-        name:
-          type: string
-          description: Name of ModifierGroup.
-          example: Choose your type of bagel
-        minimumSelections:
-          minimum: 0
-          type: integer
-          description: Minimum number of selections customers can make in this ModifierGroup. 0 means no min limits.
-          format: int32
-        maximumSelections:
-          minimum: 0
-          type: integer
-          description: Maximum number of selections customers can make in this ModifierGroup. 0 means no max limits.
-          format: int32
-        maxPerModifierSelectionQuantity:
-          minimum: 0
-          default: 1
-          type: integer
-          description: Maximum number of selections customers can make for each modifier item in this ModifierGroup. 0 means there is no limit to how many times they can select a single modifier item. If not specified, a value of 1 will be used as the default value.
-          format: int32
-        defaultModifierSelectionData:
-          $ref: '#/components/schemas/DefaultModifierSelectionData'
-        itemIds:
-          type: array
-          default: []
-          description: Identifiers of each Item within this ModifierGroup.
-          items:
-            type: string
-        description:
-          type: string
-          description: The description for this modifier group.
-          example: Choose any of these delicious types of bagels
-        type:
-          type: string
-          description: 'Experimental: The type of this modifier group, for informative purposes. It can be one of the following values: `DEFAULT`, `UPSELL`, `INGREDIENT_REMOVAL`, `INGREDIENT_ADD`, `PREPARE_INSTRUCTIONS`, `SIZE_MODIFICATION`, `PACKAGING_INSTRUCTION` and `CONDIMENT`.'
-          example: DEFAULT
-        exposedThirdPartyInfos:
-          type: array
-          default: []
-          description: Additional information about the menu that should be exposed to third party
-          items:
-            $ref: '#/components/schemas/ExposedThirdPartyInfo'
-      description: Items are sold on the menu. Modifiers to items are items themselves and their relationship is defined by ModifierGroup.
-    ExposedThirdPartyInfo:
-      required:
-      - externalId
-      - externalServiceSlug
-      type: object
-      properties:
-        externalId:
-          type: string
-          description: 'The identifier that exists in the third party system. '
-          example: da0e4e94-5670-4175-897a-3b7dde45bed5
-        externalServiceSlug:
-          type: string
-          description: The slug of the third party service.
-          example: tasty-bbq
-      description: Information about a third party service that is exposed to the another service. Usually, this is used to expose an POS ID to an OFO.
-    ErrorMessage:
-      type: object
-      properties:
-        message:
-          type: string
-          description: The error description.
-          example: The request body is invalid.
-        details:
-          type: array
-          description: The error details.
-          items:
-            $ref: '#/components/schemas/ErrorDetail'
-      description: The error response object.
-    SkuBarcode:
-      type: object
-      properties:
-        barcodeType:
-          type: string
-          description: The type of the barcode.
-          enum:
-          - UPC
-          - GTIN
-          - ASIN
-          - INTERNAL
-        value:
-          type: string
-          description: The value of the barcode.
-          example: 049000028904 (UPC)
-      description: A barcode for the product which may be common types like UPC, GTIN, ASIN or an internal type.
-    DietaryClassification:
-      type: object
-      properties:
-        tag:
-          type: string
-          description: The type of dietary classification.
-          enum:
-          - VEGAN
-          - VEGETARIAN
-          - NON_VEGETARIAN
-          - EGG
-          - KOSHER
-          - HALAL
-          - PLANT_BASED
-          - PALEO
-          - KETO
-      description: Dietary classification information.
-    BootstrapMenuRequest:
-      required:
-      - templateName
-      - externalServiceSlug
-      type: object
-      properties:
-        templateName:
-          type: string
-          description: Name for the bootstrapped template menu
-          example: My Store's Menu
-        externalServiceSlug:
-          type: string
-          description: The external service from which to bootstrap menu data
-          example: ubereats-api
-        enableTemplate:
-          type:
-          - boolean
-          - 'null'
-          description: Whether or not to enable the template at the bootstrapped store
-        stationId:
-          type:
-          - string
-          - 'null'
-          description: The id of the station to which to assign bootstrapped items, unnecessary for brick and mortar
-          example: 9cc4bb5e-bc97-40d9-af28-c02ef1483610
-        posSlug:
-          type:
-          - string
-          - 'null'
-          description: The slug for the POS to connect to
-          example: pos-slug
-    PercentageValue:
-      required:
-      - decimalValue
-      type: object
-      properties:
-        decimalValue:
-          minimum: 0
-          type: number
-          description: Percentage value in decimal format.
-          example: 0.513
-      description: Percentage value in decimal format.
-      example: A decimalValue of 0.513 will equate to 51.3%
-    HourInterval:
-      type: object
-      properties:
-        day:
-          type: string
-          description: Day of the week.
-          example: Monday
-          enum:
-          - MONDAY
-          - TUESDAY
-          - WEDNESDAY
-          - THURSDAY
-          - FRIDAY
-          - SATURDAY
-          - SUNDAY
-        fromHour:
-          maximum: 23
-          minimum: 0
-          type: integer
-          description: Beginning hour of interval.
-          format: int32
-          example: 8
-        fromMinute:
-          maximum: 59
-          minimum: 0
-          type: integer
-          description: Beginning minute of interval.
-          format: int32
-          example: 0
-        toHour:
-          maximum: 23
-          minimum: 0
-          type: integer
-          description: Ending hour of interval.
-          format: int32
-          example: 20
-        toMinute:
-          maximum: 59
-          minimum: 0
-          type: integer
-          description: Ending minute of interval.
-          format: int32
-          example: 45
-      description: Represents the beginning and ending of operating time for a menu specific to a Day.
-    Money:
-      required:
-      - amount
-      - currencyCode
-      type: object
-      properties:
-        currencyCode:
-          maxLength: 3
-          minLength: 3
-          type: string
-          description: The 3-letter currency code (ISO 4217) to use for all monetary values.
-          example: EUR
-        amount:
-          minimum: 0
-          type: number
-          description: Amount value.
-          example: 25.21
-      description: Money amount.
-      example: 25.21
-    MenuPublishTargets:
-      type: object
-      properties:
-        menuPublishTargets:
-          type: object
-          additionalProperties:
-            x-additionalPropertiesName: menuPublishTargetName
-            $ref: '#/components/schemas/MenuPublishTarget'
-          example:
-            rappi:
-              status: PUBLISH_IN_PROGRESS
-          description: Map of MenuPublishTarget names to their targets. The target can only be published to if the status is READY.
-    SuspendItemsRequest:
-      required:
-      - entityIds
-      - note
-      - status
-      type: object
-      properties:
-        entityIds:
-          type: array
-          description: Entity IDs to suspend. These should be the IDs as you represent them in your system.
-          example:
-          - 9cc4bb5e-bc97-40d9-af28-c02ef1483610
-          items:
-            type: string
-            description: Entity IDs to suspend.
-            example: '["9cc4bb5e-bc97-40d9-af28-c02ef1483610","9929290d-31eb-425d-8732-17c4074ac75e"]'
-        note:
-          type: string
-          description: The reason you are suspending the items.
-          example: Out of item
-        status:
-          $ref: '#/components/schemas/SuspensionStatus'
-    ItemStatus:
-      required:
-      - saleStatus
-      type: object
-      properties:
-        saleStatus:
-          type: string
-          description: The sale status of the item.
-          example: TEMPORARILY_NOT_FOR_SALE
-          enum:
-          - FOR_SALE
-          - INDEFINITELY_NOT_FOR_SALE
-          - TEMPORARILY_NOT_FOR_SALE
-        suspendedUntil:
-          type:
-          - string
-          - 'null'
-          description: 'ISO-8601 timestamp representing the time the saleStatus value is supposed to change to FOR_SALE. Set only when current saleStatus value is TEMPORARILY_NOT_FOR_SALE. E.g.: 2020-11-23T21:33:51Z, 2007-12-03T10:15:30+01:00'
-          format: date-time
-          example: '2007-12-03T10:15:30+01:00'
-      description: Represents whether an Item is for sale, indefinitely not for sale, or not for sale until a specific time.
-    MenuJobPublishState:
-      type:
-      - object
-      - 'null'
-      additionalProperties:
-        x-additionalPropertiesName: menuPublishTarget
-        $ref: '#/components/schemas/MenuPublishJobState'
-      description: Only present if the MenuJobType is PUBLISH. Contains a map of MenuPublishTarget services to their corresponding statuses.
-      example:
-        rappi:
-          status: FAILED
-          message: Failed to publish menu due to error ...
-    Servings:
-      type: object
-      properties:
-        min:
-          type: integer
-          description: The minimum value of servings.
-          example: 1
-        max:
-          type: integer
-          description: The maximum value of servings.
-          example: 2
-      description: The number of people an item serves. If only one serving value is known, set both min and max to that value.
-    MenuJobType:
+    StoreId:
       type: string
-      description: Type of job.
-      enum:
-      - UPSERT
-      - PUBLISH
-      - UPDATE_AVAILABILITY
-      - SYNC
-      - UNKNOWN
-      example: PUBLISH
-    Photo:
-      title: All photos for the store, indexed by ID
-      required:
-      - contentType
-      - fileName
-      - id
-      - url
-      type: object
-      properties:
-        url:
-          type: string
-          description: URL of the photo.
-          example: https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_272x92dp.png
-        fileName:
-          type: string
-          description: File name
-          example: image.jpg
-        id:
-          type: string
-          description: Identifier of the Photo.
-          example: e9174f75-a293-4908-bba7-9db69871ad81
-        contentType:
-          type: string
-          description: 'The media type of the file. Deprecated: Use the media type served from the photo URL instead.'
-          example: image/jpeg, image/png
-          deprecated: true
-      description: All data required to represent a Photo for an entity in menus.
-    OverrideRule:
-      required:
-      - externalServiceSlug
-      type: object
-      properties:
-        externalServiceSlug:
-          type: string
-          description: 'The service slug for which this rule should apply. E.g.: If externalServiceSlug is UberEats, then the priceOverride should be applied to UberEats.'
-          example: ubereats
-      description: Override rule for when to apply price overrides
-    MenuItem_POS:
-      title: All Items for the store, indexed by ID
-      required:
-      - id
-      - name
-      - photoIds
-      - price
-      - status
-      type: object
-      properties:
-        id:
-          type: string
-          minLength: 1
-          description: Internal identifier of this Item.
-          example: faa4c79f-480d-4de1-bc34-5fb74ef082ef
-        name:
-          type: string
-          description: Name of this Item
-          example: Bagel
-        photoIds:
-          type: array
-          description: A list of Photo references associated with the Item.
-          items:
-            type: string
-        price:
-          $ref: '#/components/schemas/Money'
-        status:
-          $ref: '#/components/schemas/ItemStatus'
-        description:
-          type: string
-          description: Description of this Item
-          example: Delicious bagel!
-        modifierGroupIds:
-          type: array
-          default: []
-          description: Identifiers of each ModifierGroup within this Item.
-          items:
-            type: string
-            example: 7152ee6e-e941-45c1-9008-2e306b479114
-        priceOverrides:
-          type:
-          - array
-          - 'null'
-          description: Specify price overrides for different service slugs.
-          items:
-            $ref: '#/components/schemas/ItemPriceOverride'
-        skuDetails:
-          $ref: '#/components/schemas/SkuDetails'
-        additionalCharges:
-          type:
-          - array
-          - 'null'
-          description: Additional charges to apply for this item. Additional charges will be applied for every instance of this item within an order.
-          items:
-            $ref: '#/components/schemas/AdditionalCharge'
-        tax:
-          $ref: '#/components/schemas/ItemTax'
-          description: The tax configuration for the menu item.
-      description: Items are sold on the Menu. Modifiers to items are items themselves and their relationship is defined by ModifierGroup.
-    UnsuspendItemsRequest:
-      type: object
-      properties:
-        entityIds:
-          type: array
-          description: Entity IDs to unsuspend. These should be the IDs as you represent them in your system.
-          example:
-          - 9cc4bb5e-bc97-40d9-af28-c02ef1483610
-          items:
-            type: string
-            description: Entity IDs to unsuspend.
-            example: '["9cc4bb5e-bc97-40d9-af28-c02ef1483610","9929290d-31eb-425d-8732-17c4074ac75e"]'
-        note:
-          type: string
-          description: The reason you are unsuspending the items.
-          example: Item back in stock
-    EnergyKcal:
-      type: object
-      properties:
-        low:
-          type: number
-          description: The minimum calorie value for an item.
-          example: 1
-        high:
-          type: number
-          description: The maximum calorie value for an item.
-          example: 100
-      description: The calorie range of the item. If only one calorie value is known, set both low and high to that value.
-    AllergenClassification:
-      type: object
-      properties:
-        tag:
-          type: string
-          description: The type of allergen classification.
-          enum:
-          - GLUTEN
-          - DAIRY
-          - WHEAT
-          - RYE
-          - BARLEY
-          - OAT
-          - SPELT
-          - KAMUT
-          - CRUSTACEAN
-          - MOLLUSK
-          - EGG
-          - FISH
-          - PEANUT
-          - SOYBEAN
-          - NUT
-          - ALMOND
-          - HAZELNUT
-          - WALNUT
-          - CASHEW
-          - PECAN
-          - BRAZIL_NUT
-          - PISTACHIO
-          - MACADAMIA_NUT
-          - QUEENSLAND_NUT
-          - LUPIN
-          - CELERY
-          - MUSTARD
-          - SESAME_SEED
-          - SULFITE
-          - CAFFEINE
-          - PHENYLALANINE
-        containsAllergen:
-          type: boolean
-          description: Indication of whether or not the product contains this allergen. If the status of the allergen is unknown, a classification should not be provided for this product.
-      description: Allergen classification information.
-    MenuAsynchronousJob:
-      type: object
-      properties:
-        jobReference:
-          $ref: '#/components/schemas/JobReference'
-        jobType:
-          $ref: '#/components/schemas/MenuJobType'
-        publishJobState:
-          $ref: '#/components/schemas/MenuJobPublishState'
-      description: The job created to process the menu request.
-    AdditionalCharge:
-      required:
-      - chargeType
-      type: object
-      properties:
-        chargeType:
-          type: string
-          description: The type of the additional charge.
-          enum:
-          - PACKAGING_CHARGE
-          - CONTAINER_DEPOSIT
-        flatCharge:
-          $ref: '#/components/schemas/Money'
-        percentageCharge:
-          $ref: '#/components/schemas/PercentageValue'
-        unitPriceAndCount:
-          $ref: '#/components/schemas/UnitPriceAndCount'
-      description: Additional charge to apply. Exactly one of either flatCharge or percentageCharge should be provided.
+      description: The unique identifier of the store in the partner application. This ID, along with the `Application ID`, will be used to match the correct store when performing operations. It cannot be longer than 255 characters and must only contain printable ASCII characters. During on-boarding, this ID will be similar to `onboarding:905bb725-b141-4a9b-832a-1f254f772c94` (where the UUID is the Internal Store ID). During off-boarding, this field will be filled with the last known Store ID, or with an empty string, in case none is found. In that case, please fall back to the provided `internalStoreId` (a.k.a. Sku-Sku ID).
+      example: partner-store-unique-identifier
     NutritionContent:
       type: object
       properties:
@@ -1303,43 +651,62 @@ components:
           description: The energy in kcal per serving size.
           example: 991.3
       description: The nutrition content of the item.
-    MenuPublishResponseMenuPublishTargets:
-      type:
-      - object
-      - 'null'
+    DietaryClassification:
+      type: object
+      properties:
+        tag:
+          type: string
+          description: The type of dietary classification.
+          enum:
+          - VEGAN
+          - VEGETARIAN
+          - NON_VEGETARIAN
+          - EGG
+          - KOSHER
+          - HALAL
+          - PLANT_BASED
+          - PALEO
+          - KETO
+      description: Dietary classification information.
+    Photo:
+      title: All photos for the store, indexed by ID
+      required:
+      - contentType
+      - fileName
+      - id
+      - url
+      type: object
+      properties:
+        url:
+          type: string
+          description: URL of the photo.
+          example: https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_272x92dp.png
+        fileName:
+          type: string
+          description: File name
+          example: image.jpg
+        id:
+          type: string
+          description: Identifier of the Photo.
+          example: e9174f75-a293-4908-bba7-9db69871ad81
+        contentType:
+          type: string
+          description: 'The media type of the file. Deprecated: Use the media type served from the photo URL instead.'
+          example: image/jpeg, image/png
+          deprecated: true
+      description: All data required to represent a Photo for an entity in menus.
+    MenuPublishTargets:
+      type: object
       properties:
         menuPublishTargets:
           type: object
           additionalProperties:
             x-additionalPropertiesName: menuPublishTargetName
             $ref: '#/components/schemas/MenuPublishTarget'
-          description: Map of MenuPublishTarget names to their targets. The target can only be published to if the status is READY.
           example:
             rappi:
               status: PUBLISH_IN_PROGRESS
-      description: Only present if the request fails. Meant to help debugging why the request failed.
-    NutritionalInfo:
-      type: object
-      properties:
-        energyKcal:
-          $ref: '#/components/schemas/EnergyKcal'
-        nutritionContent:
-          $ref: '#/components/schemas/NutritionContent'
-      description: The nutritional information of an item.
-    MenuPublishResponse:
-      type: object
-      properties:
-        requestSubmitted:
-          type: boolean
-          description: Whether the request was submitted or not.
-        jobId:
-          type:
-          - string
-          - 'null'
-          description: Only present if the request succeeds. Job ID to check on the status with the MenuAsyncJob endpoint.
-          format: uuid
-        menuPublishTargets:
-          $ref: '#/components/schemas/MenuPublishResponseMenuPublishTargets'
+          description: Map of MenuPublishTarget names to their targets. The target can only be published to if the status is READY.
     DefaultModifierSelection:
       required:
       - itemId
@@ -1356,61 +723,87 @@ components:
           description: The default quantity of the modifier item to be selected.
           format: int32
       description: A default modifier selection consists of a reference to the modifier and the default selected quantity of that modifier.
-    StorageRequirement:
+    PosMenuSyncRequest:
       type: object
       properties:
-        tag:
-          type: string
-          description: Storage requirements for the product.
-          enum:
-          - FROZEN
-          - COLD
-          - DRY
-          - ROOM_TEMPERATURE
-          - AVOID_SUNLIGHT
-      description: Storage requirements for the product.
-    PosMenuSyncResponse:
-      type: object
-      properties:
-        jobId:
+        shouldPublishChanges:
           type:
-          - string
+          - boolean
           - 'null'
-          description: Only present if the request succeeds. Job ID to check on the status with the MenuAsyncJob endpoint.
-          format: uuid
-    StoreId:
-      type: string
-      description: The unique identifier of the store in the partner application. This ID, along with the `Application ID`, will be used to match the correct store when performing operations. It cannot be longer than 255 characters and must only contain printable ASCII characters. During on-boarding, this ID will be similar to `onboarding:905bb725-b141-4a9b-832a-1f254f772c94` (where the UUID is the Internal Store ID). During off-boarding, this field will be filled with the last known Store ID, or with an empty string, in case none is found. In that case, please fall back to the provided `internalStoreId` (a.k.a. Sku-Sku ID).
-      example: partner-store-unique-identifier
-    MenuPublishJobState:
-      type: object
-      properties:
-        status:
-          type: string
-          description: Status of the menu publish.
-          enum:
-          - PENDING
-          - FAILED
-          - SUCCESS
-          - UNKNOWN
-        message:
+          description: Whether or not to publish changes to external services after bulk resolution.
+        useCustomOptions:
           type:
-          - string
+          - boolean
           - 'null'
-          description: Only present if status is FAILED. Contains the error message returned by our menu systems.
-      description: Information about the menu publish target.
-    Hours:
-      required:
-      - intervals
+          description: If true, use `customBulkResolutionOptions` instead of menu configuration.
+        customBulkResolutionOptions:
+          $ref: '#/components/schemas/CustomBulkResolutionOptions'
+    SkuBarcode:
       type: object
       properties:
-        intervals:
-          type: array
-          minItems: 1
-          description: List of HourIntervals.
-          items:
-            $ref: '#/components/schemas/HourInterval'
-      description: Hours are represented as a list of HourIntervals.
+        barcodeType:
+          type: string
+          description: The type of the barcode.
+          enum:
+          - UPC
+          - GTIN
+          - ASIN
+          - INTERNAL
+        value:
+          type: string
+          description: The value of the barcode.
+          example: 049000028904 (UPC)
+      description: A barcode for the product which may be common types like UPC, GTIN, ASIN or an internal type.
+    CustomBulkResolutionOptions:
+      type:
+      - object
+      - 'null'
+      properties:
+        updateNames:
+          type: boolean
+          description: Update the linked entity's names to match the linked external entity's.
+        updatePrices:
+          type: boolean
+          description: Update the linked entity's price to match the linked external entity's.
+        updateDescriptions:
+          type: boolean
+          description: Update the linked entity's description to match the linked external entity's.
+        createUnmatchedEntities:
+          type: boolean
+          description: Create unmatched external entities in the menu.
+        deleteMissingEntities:
+          type: boolean
+          description: Delete entities that are missing external links.
+        bootstrapPhotosToEntities:
+          type: boolean
+          description: Bootstrap linked item photos.
+        copyEntityPaths:
+          type: boolean
+          description: Copies the entity paths from the external menu.
+        updateItemSuspensionStatus:
+          type: boolean
+          description: Update Item suspension status.
+        updateHours:
+          type: boolean
+          description: Update menu hours.
+        assignItemsToLocations:
+          type: boolean
+          description: If an item exists at a location in the POS, it will automatically be assigned to that location.
+        unassignItemsFromLocations:
+          type: boolean
+          description: If an item is removed from a location in the POS, it will automatically be unassigned from that location.
+        updateMenuOrganization:
+          type: boolean
+          description: The organization of modifiers into modifier groups, modifier groups into items and items into categories will be replicated from the POS menu.
+        updateItemArrangement:
+          type: boolean
+          description: The arrangement of menu products as displayed in your POS will be replicated.
+        updateModifierGroupRules:
+          type: boolean
+          description: Update modifier group selection rules.
+        updateTaxes:
+          type: boolean
+          description: Update taxes.
     SkuDetails:
       type: object
       properties:
@@ -1479,6 +872,388 @@ components:
           description: Information about the distributor of this product. May or may not be the same as the producer.
           example: The Coca-Cola Company
       description: Details of the product being prepared or a pre-packaged good being sold. Includes information such as UPC barcode, unique identifiers, or classification information.
+    AdditionalCharge:
+      required:
+      - chargeType
+      type: object
+      properties:
+        chargeType:
+          type: string
+          description: The type of the additional charge.
+          enum:
+          - PACKAGING_CHARGE
+          - CONTAINER_DEPOSIT
+        flatCharge:
+          $ref: '#/components/schemas/Money'
+        percentageCharge:
+          $ref: '#/components/schemas/PercentageValue'
+        unitPriceAndCount:
+          $ref: '#/components/schemas/UnitPriceAndCount'
+      description: Additional charge to apply. Exactly one of either flatCharge or percentageCharge should be provided.
+    UnitPriceAndCount:
+      required:
+      - unitPrice
+      - count
+      type: object
+      properties:
+        unitPrice:
+          $ref: '#/components/schemas/Money'
+        count:
+          minimum: 1
+          type: integer
+          description: The count for the additional charge.
+          example: 3
+      description: Unit price and count for additional charges.
+      example: 3 x $25.21
+    HourInterval:
+      type: object
+      properties:
+        day:
+          type: string
+          description: Day of the week.
+          example: Monday
+          enum:
+          - MONDAY
+          - TUESDAY
+          - WEDNESDAY
+          - THURSDAY
+          - FRIDAY
+          - SATURDAY
+          - SUNDAY
+        fromHour:
+          maximum: 23
+          minimum: 0
+          type: integer
+          description: Beginning hour of interval.
+          format: int32
+          example: 8
+        fromMinute:
+          maximum: 59
+          minimum: 0
+          type: integer
+          description: Beginning minute of interval.
+          format: int32
+          example: 0
+        toHour:
+          maximum: 23
+          minimum: 0
+          type: integer
+          description: Ending hour of interval.
+          format: int32
+          example: 20
+        toMinute:
+          maximum: 59
+          minimum: 0
+          type: integer
+          description: Ending minute of interval.
+          format: int32
+          example: 45
+      description: Represents the beginning and ending of operating time for a menu specific to a Day.
+    BootstrapMenuRequest:
+      required:
+      - templateName
+      - externalServiceSlug
+      type: object
+      properties:
+        templateName:
+          type: string
+          description: Name for the bootstrapped template menu
+          example: My Store's Menu
+        externalServiceSlug:
+          type: string
+          description: The external service from which to bootstrap menu data
+          example: ubereats-api
+        enableTemplate:
+          type:
+          - boolean
+          - 'null'
+          description: Whether or not to enable the template at the bootstrapped store
+        stationId:
+          type:
+          - string
+          - 'null'
+          description: The id of the station to which to assign bootstrapped items, unnecessary for brick and mortar
+          example: 9cc4bb5e-bc97-40d9-af28-c02ef1483610
+        posSlug:
+          type:
+          - string
+          - 'null'
+          description: The slug for the POS to connect to
+          example: pos-slug
+    Hours:
+      required:
+      - intervals
+      type: object
+      properties:
+        intervals:
+          type: array
+          minItems: 1
+          description: List of HourIntervals.
+          items:
+            $ref: '#/components/schemas/HourInterval'
+      description: Hours are represented as a list of HourIntervals.
+    ErrorMessage:
+      type: object
+      properties:
+        message:
+          type: string
+          description: The error description.
+          example: The request body is invalid.
+        details:
+          type: array
+          description: The error details.
+          items:
+            $ref: '#/components/schemas/ErrorDetail'
+      description: The error response object.
+    MenuJobPublishState:
+      type:
+      - object
+      - 'null'
+      additionalProperties:
+        x-additionalPropertiesName: menuPublishTarget
+        $ref: '#/components/schemas/MenuPublishJobState'
+      description: Only present if the MenuJobType is PUBLISH. Contains a map of MenuPublishTarget services to their corresponding statuses.
+      example:
+        rappi:
+          status: FAILED
+          message: Failed to publish menu due to error ...
+    MenuJobType:
+      type: string
+      description: Type of job.
+      enum:
+      - UPSERT
+      - PUBLISH
+      - UPDATE_AVAILABILITY
+      - SYNC
+      - UNKNOWN
+      example: PUBLISH
+    MenuPublishJobState:
+      type: object
+      properties:
+        status:
+          type: string
+          description: Status of the menu publish.
+          enum:
+          - PENDING
+          - FAILED
+          - SUCCESS
+          - UNKNOWN
+        message:
+          type:
+          - string
+          - 'null'
+          description: Only present if status is FAILED. Contains the error message returned by our menu systems.
+      description: Information about the menu publish target.
+    MenuPublishRequest:
+      type: object
+      properties:
+        menuPublishTargets:
+          type: array
+          description: MenuPublishTargets to publish to.
+          example:
+          - doordash
+          - ubereats
+          items:
+            type: string
+            description: MenuPublishTargets to publish to.
+            example: '["doordash","ubereats"]'
+    MenuAsynchronousJob:
+      type: object
+      properties:
+        jobReference:
+          $ref: '#/components/schemas/JobReference'
+        jobType:
+          $ref: '#/components/schemas/MenuJobType'
+        publishJobState:
+          $ref: '#/components/schemas/MenuJobPublishState'
+      description: The job created to process the menu request.
+    DefaultModifierSelectionData:
+      required:
+      - defaultModifierSelections
+      type: object
+      properties:
+        defaultModifierSelections:
+          type: array
+          description: The default modifier selections for this modifier group.
+          items:
+            $ref: '#/components/schemas/DefaultModifierSelection'
+      description: The default modifiers selections for a modifier group.
+    PercentageValue:
+      required:
+      - decimalValue
+      type: object
+      properties:
+        decimalValue:
+          minimum: 0
+          type: number
+          description: Percentage value in decimal format.
+          example: 0.513
+      description: Percentage value in decimal format.
+      example: A decimalValue of 0.513 will equate to 51.3%
+    MenuPublishResponseMenuPublishTargets:
+      type:
+      - object
+      - 'null'
+      properties:
+        menuPublishTargets:
+          type: object
+          additionalProperties:
+            x-additionalPropertiesName: menuPublishTargetName
+            $ref: '#/components/schemas/MenuPublishTarget'
+          description: Map of MenuPublishTarget names to their targets. The target can only be published to if the status is READY.
+          example:
+            rappi:
+              status: PUBLISH_IN_PROGRESS
+      description: Only present if the request fails. Meant to help debugging why the request failed.
+    ItemPriceOverride:
+      required:
+      - amount
+      - currencyCode
+      - rules
+      type: object
+      properties:
+        rules:
+          type: array
+          minItems: 1
+          description: Override rules for when this price override should be applied.
+          items:
+            $ref: '#/components/schemas/OverrideRule'
+        currencyCode:
+          maxLength: 3
+          minLength: 3
+          type: string
+          description: The 3-letter currency code (ISO 4217) to use for all monetary values.
+          example: EUR
+        amount:
+          type: number
+          description: Amount the Item costs
+          example: 25.21
+      description: Price override for an item
+    MenuPublishTarget:
+      type: object
+      properties:
+        status:
+          type: string
+          description: The status of a menu publish target.
+          enum:
+          - READY
+          - PUBLISH_IN_PROGRESS
+          - ERROR
+      description: Information about the target.
+    AllergenClassification:
+      type: object
+      properties:
+        tag:
+          type: string
+          description: The type of allergen classification.
+          enum:
+          - GLUTEN
+          - DAIRY
+          - WHEAT
+          - RYE
+          - BARLEY
+          - OAT
+          - SPELT
+          - KAMUT
+          - CRUSTACEAN
+          - MOLLUSK
+          - EGG
+          - FISH
+          - PEANUT
+          - SOYBEAN
+          - NUT
+          - ALMOND
+          - HAZELNUT
+          - WALNUT
+          - CASHEW
+          - PECAN
+          - BRAZIL_NUT
+          - PISTACHIO
+          - MACADAMIA_NUT
+          - QUEENSLAND_NUT
+          - LUPIN
+          - CELERY
+          - MUSTARD
+          - SESAME_SEED
+          - SULFITE
+          - CAFFEINE
+          - PHENYLALANINE
+        containsAllergen:
+          type: boolean
+          description: Indication of whether or not the product contains this allergen. If the status of the allergen is unknown, a classification should not be provided for this product.
+      description: Allergen classification information.
+    StorageRequirement:
+      type: object
+      properties:
+        tag:
+          type: string
+          description: Storage requirements for the product.
+          enum:
+          - FROZEN
+          - COLD
+          - DRY
+          - ROOM_TEMPERATURE
+          - AVOID_SUNLIGHT
+      description: Storage requirements for the product.
+    ItemStatus:
+      required:
+      - saleStatus
+      type: object
+      properties:
+        saleStatus:
+          type: string
+          description: The sale status of the item.
+          example: TEMPORARILY_NOT_FOR_SALE
+          enum:
+          - FOR_SALE
+          - INDEFINITELY_NOT_FOR_SALE
+          - TEMPORARILY_NOT_FOR_SALE
+        suspendedUntil:
+          type:
+          - string
+          - 'null'
+          description: 'ISO-8601 timestamp representing the time the saleStatus value is supposed to change to FOR_SALE. Set only when current saleStatus value is TEMPORARILY_NOT_FOR_SALE. E.g.: 2020-11-23T21:33:51Z, 2007-12-03T10:15:30+01:00'
+          format: date-time
+          example: '2007-12-03T10:15:30+01:00'
+      description: Represents whether an Item is for sale, indefinitely not for sale, or not for sale until a specific time.
+    SuspendItemsRequest:
+      required:
+      - entityIds
+      - note
+      - status
+      type: object
+      properties:
+        entityIds:
+          type: array
+          description: Entity IDs to suspend. These should be the IDs as you represent them in your system.
+          example:
+          - 9cc4bb5e-bc97-40d9-af28-c02ef1483610
+          items:
+            type: string
+            description: Entity IDs to suspend.
+            example: '["9cc4bb5e-bc97-40d9-af28-c02ef1483610","9929290d-31eb-425d-8732-17c4074ac75e"]'
+        note:
+          type: string
+          description: The reason you are suspending the items.
+          example: Out of item
+        status:
+          $ref: '#/components/schemas/SuspensionStatus'
+    UnsuspendItemsRequest:
+      type: object
+      properties:
+        entityIds:
+          type: array
+          description: Entity IDs to unsuspend. These should be the IDs as you represent them in your system.
+          example:
+          - 9cc4bb5e-bc97-40d9-af28-c02ef1483610
+          items:
+            type: string
+            description: Entity IDs to unsuspend.
+            example: '["9cc4bb5e-bc97-40d9-af28-c02ef1483610","9929290d-31eb-425d-8732-17c4074ac75e"]'
+        note:
+          type: string
+          description: The reason you are unsuspending the items.
+          example: Item back in stock
     SuspensionStatus:
       required:
       - isIndefinite
@@ -1495,6 +1270,18 @@ components:
           format: date-time
           example: '2007-12-03T10:15:30+01:00'
       description: The type of suspension this will be.
+    EnergyKcal:
+      type: object
+      properties:
+        low:
+          type: number
+          description: The minimum calorie value for an item.
+          example: 1
+        high:
+          type: number
+          description: The maximum calorie value for an item.
+          example: 100
+      description: The calorie range of the item. If only one calorie value is known, set both low and high to that value.
     Category:
       required:
       - id
@@ -1534,21 +1321,209 @@ components:
           items:
             $ref: '#/components/schemas/ExposedThirdPartyInfo'
       description: Categories contain a list of Item references.
+    MenuPublishResponse:
+      type: object
+      properties:
+        requestSubmitted:
+          type: boolean
+          description: Whether the request was submitted or not.
+        jobId:
+          type:
+          - string
+          - 'null'
+          description: Only present if the request succeeds. Job ID to check on the status with the MenuAsyncJob endpoint.
+          format: uuid
+        menuPublishTargets:
+          $ref: '#/components/schemas/MenuPublishResponseMenuPublishTargets'
+    Menu_POS:
+      title: All Menus for the store, indexed by ID
+      required:
+      - id
+      - name
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal identifier for Menu.
+          example: ff6dd693-5e55-4a92-a359-ea61b23ed423
+        name:
+          type: string
+          description: Name of the Menu.
+          example: Tasty BBQ
+        categoryIds:
+          type: array
+          default: []
+          description: Identifiers of the categories within this Menu.
+          items:
+            type: string
+        fulfillmentModes:
+          type: array
+          default: []
+          description: The ways in which this menu may be fulfilled. If no values are specified, it is assumed that all fulfillment types are allowed.
+          items:
+            type: string
+            description: How an item from a menu is allowed to be fulfilled when ordered by a user.
+            enum:
+            - DELIVERY
+            - PICK_UP
+            - DINE_IN
+        description:
+          type: string
+          description: Description of the Menu.
+          example: Cooking up BBQ deliciousness from around the globe!
+        hours:
+          $ref: '#/components/schemas/Hours'
+        additionalCharges:
+          type:
+          - array
+          - 'null'
+          description: Additional charges to apply for this menu. All additional charges specified on a menu will only be applied once per order.
+          items:
+            $ref: '#/components/schemas/AdditionalCharge'
+      description: A menu for a store.
+    ErrorDetail:
+      type: object
+      properties:
+        attribute:
+          type: string
+          description: The error attribute.
+          example: Order Currency Code
+        message:
+          type: string
+          description: The error detail description.
+          example: Order Currency Code must be exactly 3 characters
+      description: The error detail response object.
+    Servings:
+      type: object
+      properties:
+        min:
+          type: integer
+          description: The minimum value of servings.
+          example: 1
+        max:
+          type: integer
+          description: The maximum value of servings.
+          example: 2
+      description: The number of people an item serves. If only one serving value is known, set both min and max to that value.
+    JobReference:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique identifier of the job.
+          format: uuid
+        status:
+          type: string
+          description: The status of the job.
+          enum:
+          - PENDING
+          - FAILED
+          - SUCCESS
+          - UNKNOWN
+      description: The job reference.
+    ItemTax:
+      required:
+      - percentageValue
+      - isValueAddedTax
+      type: object
+      properties:
+        percentageValue:
+          $ref: '#/components/schemas/PercentageValue'
+          description: Specify the percentage value of the tax.
+        isValueAddedTax:
+          type: boolean
+          description: Whether this tax is a value-added tax.
+      description: The tax configuration.
+    NutritionalInfo:
+      type: object
+      properties:
+        energyKcal:
+          $ref: '#/components/schemas/EnergyKcal'
+        nutritionContent:
+          $ref: '#/components/schemas/NutritionContent'
+      description: The nutritional information of an item.
+    ModifierGroup:
+      title: All ModifierGroups for the Store, indexed by ID
+      required:
+      - id
+      - name
+      type: object
+      properties:
+        id:
+          type: string
+          description: The identifier that exists in the third party system. During a menu publish event, uuidV4 ids will be generated for new entities that do not yet exist in the internal menu.
+          example: da0e4e94-5670-4175-897a-3b7dde45bed5
+        name:
+          type: string
+          description: Name of ModifierGroup.
+          example: Choose your type of bagel
+        minimumSelections:
+          minimum: 0
+          type: integer
+          description: Minimum number of selections customers can make in this ModifierGroup. 0 means no min limits.
+          format: int32
+        maximumSelections:
+          minimum: 0
+          type: integer
+          description: Maximum number of selections customers can make in this ModifierGroup. 0 means no max limits.
+          format: int32
+        maxPerModifierSelectionQuantity:
+          minimum: 0
+          default: 1
+          type: integer
+          description: Maximum number of selections customers can make for each modifier item in this ModifierGroup. 0 means there is no limit to how many times they can select a single modifier item. If not specified, a value of 1 will be used as the default value.
+          format: int32
+        defaultModifierSelectionData:
+          $ref: '#/components/schemas/DefaultModifierSelectionData'
+        itemIds:
+          type: array
+          default: []
+          description: Identifiers of each Item within this ModifierGroup.
+          items:
+            type: string
+        description:
+          type: string
+          description: The description for this modifier group.
+          example: Choose any of these delicious types of bagels
+        type:
+          type: string
+          description: 'Experimental: The type of this modifier group, for informative purposes. It can be one of the following values: `DEFAULT`, `UPSELL`, `INGREDIENT_REMOVAL`, `INGREDIENT_ADD`, `PREPARE_INSTRUCTIONS`, `SIZE_MODIFICATION`, `PACKAGING_INSTRUCTION` and `CONDIMENT`.'
+          example: DEFAULT
+        exposedThirdPartyInfos:
+          type: array
+          default: []
+          description: Additional information about the menu that should be exposed to third party
+          items:
+            $ref: '#/components/schemas/ExposedThirdPartyInfo'
+      description: Items are sold on the menu. Modifiers to items are items themselves and their relationship is defined by ModifierGroup.
+    OverrideRule:
+      required:
+      - externalServiceSlug
+      type: object
+      properties:
+        externalServiceSlug:
+          type: string
+          description: 'The service slug for which this rule should apply. E.g.: If externalServiceSlug is UberEats, then the priceOverride should be applied to UberEats.'
+          example: ubereats
+      description: Override rule for when to apply price overrides
+    ExposedThirdPartyInfo:
+      required:
+      - externalId
+      - externalServiceSlug
+      type: object
+      properties:
+        externalId:
+          type: string
+          description: 'The identifier that exists in the third party system. '
+          example: da0e4e94-5670-4175-897a-3b7dde45bed5
+        externalServiceSlug:
+          type: string
+          description: The slug of the third party service.
+          example: tasty-bbq
+      description: Information about a third party service that is exposed to the another service. Usually, this is used to expose an POS ID to an OFO.
   responses:
-    '422':
-      description: The request body is not valid.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorMessage'
-    '403':
-      description: Authorization not valid for the requested resource.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorMessage'
-    '404':
-      description: Resource not found.
+    '401':
+      description: Invalid authorization.
       content:
         application/json:
           schema:
@@ -1559,8 +1534,20 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/ErrorMessage'
-    '401':
-      description: Invalid authorization.
+    '404':
+      description: Resource not found.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorMessage'
+    '422':
+      description: The request body is not valid.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorMessage'
+    '403':
+      description: Authorization not valid for the requested resource.
       content:
         application/json:
           schema:

@@ -1,6 +1,6 @@
 openapi: 3.2.0
 info:
-  title: Public Storefront Endpoints API
+  title: Public Marketintel Endpoints API
   description: '# Overview
 
 
@@ -12,219 +12,25 @@ servers:
 - url: https://{{public-api-url}}
   description: Staging server url
 tags:
-- name: Storefront Endpoints
-  description: Endpoints to manage storefront state
-  x-displayName: Storefront
+- name: Market Intel Endpoints
 paths:
-  /v1/storefront/availability:
+  /v1/market-intel/discovered-stores:
     post:
       tags:
-      - Storefront Endpoints
-      summary: Notify about store availability change
-      description: '`RATE LIMIT: 16 per minute`'
-      operationId: postStoreAvailabilityChange
-      parameters:
-      - $ref: '#/components/parameters/storeIdHeader'
-      - $ref: '#/components/parameters/eventIdOptionalHeader'
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/StoreAvailabilityEventResult'
-        required: true
-      responses:
-        '204':
-          description: The store availability change was successfully processed
-        '400':
-          $ref: '#/components/responses/400'
-        '401':
-          $ref: '#/components/responses/401'
-        '403':
-          $ref: '#/components/responses/403'
-        '404':
-          $ref: '#/components/responses/404'
-        '422':
-          $ref: '#/components/responses/422'
-      security:
-      - OAuth2.0:
-        - storefront.store_availability
-  /v1/storefront/hours:
-    post:
-      tags:
-      - Storefront Endpoints
-      summary: Notify about store hours configuration change
-      description: '`RATE LIMIT: 16 per minute`'
-      operationId: postStoreHoursConfigurationChange
-      parameters:
-      - $ref: '#/components/parameters/storeIdHeader'
-      - $ref: '#/components/parameters/eventIdOptionalHeader'
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/StoreHoursConfigurationEventResult'
-        required: true
-      responses:
-        '204':
-          description: The store hours configuration change was successfully processed.
-        '400':
-          $ref: '#/components/responses/400'
-        '401':
-          $ref: '#/components/responses/401'
-        '403':
-          $ref: '#/components/responses/403'
-        '404':
-          $ref: '#/components/responses/404'
-        '422':
-          $ref: '#/components/responses/422'
-      security:
-      - OAuth2.0:
-        - storefront.store_hours_configuration
-  /v1/storefront/pause:
-    post:
-      tags:
-      - Storefront Endpoints
-      summary: Notify the result of a pause request event
-      description: '`RATE LIMIT: 8 per minute`'
-      operationId: postPauseStoreEventResult
-      parameters:
-      - $ref: '#/components/parameters/storeIdHeader'
-      - $ref: '#/components/parameters/eventIdHeader'
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PauseStoreEventResult'
-        required: true
-      responses:
-        '204':
-          description: The pause store event result was successfully processed
-        '400':
-          $ref: '#/components/responses/400'
-        '401':
-          $ref: '#/components/responses/401'
-        '403':
-          $ref: '#/components/responses/403'
-        '404':
-          $ref: '#/components/responses/404'
-        '422':
-          $ref: '#/components/responses/422'
-      security:
-      - OAuth2.0:
-        - storefront.store_pause_unpause
-  /v1/storefront/unpause:
-    post:
-      tags:
-      - Storefront Endpoints
-      summary: Notify the result of an unpause request event
-      description: '`RATE LIMIT: 8 per minute`'
-      operationId: postUnpauseStoreEventResult
-      parameters:
-      - $ref: '#/components/parameters/storeIdHeader'
-      - $ref: '#/components/parameters/eventIdHeader'
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/UnpauseStoreEventResult'
-        required: true
-      responses:
-        '204':
-          description: The unpause store event result was successfully processed
-        '400':
-          $ref: '#/components/responses/400'
-        '401':
-          $ref: '#/components/responses/401'
-        '403':
-          $ref: '#/components/responses/403'
-        '404':
-          $ref: '#/components/responses/404'
-        '422':
-          $ref: '#/components/responses/422'
-      security:
-      - OAuth2.0:
-        - storefront.store_pause_unpause
-  /v1/storefront/eater-side/status:
-    post:
-      tags:
-      - Storefront Endpoints
-      summary: Notify about store availability change from the eater side
-      description: '`RATE LIMIT: 16 per minute`'
-      operationId: postEaterSideStoreAvailabilityChange
-      parameters:
-      - $ref: '#/components/parameters/storeIdHeader'
-      - $ref: '#/components/parameters/eventIdOptionalHeader'
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/StoreAvailabilityEventResult'
-        required: true
-      responses:
-        '204':
-          description: The store availability change was successfully processed
-        '400':
-          $ref: '#/components/responses/400'
-        '401':
-          $ref: '#/components/responses/401'
-        '403':
-          $ref: '#/components/responses/403'
-        '404':
-          $ref: '#/components/responses/404'
-        '422':
-          $ref: '#/components/responses/422'
-      security:
-      - OAuth2.0:
-        - storefront.store_availability
-  /v1/storefront/eater-side/hours:
-    post:
-      tags:
-      - Storefront Endpoints
-      summary: Notify about store hours configuration change on eater side
-      description: '`RATE LIMIT: 16 per minute`'
-      operationId: postEaterSideStoreHoursConfigurationChange
-      parameters:
-      - $ref: '#/components/parameters/storeIdHeader'
-      - $ref: '#/components/parameters/eventIdOptionalHeader'
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/StoreHoursConfigurationEventResult'
-        required: true
-      responses:
-        '204':
-          description: The store hours configuration change was successfully processed.
-        '400':
-          $ref: '#/components/responses/400'
-        '401':
-          $ref: '#/components/responses/401'
-        '403':
-          $ref: '#/components/responses/403'
-        '404':
-          $ref: '#/components/responses/404'
-        '422':
-          $ref: '#/components/responses/422'
-      security:
-      - OAuth2.0:
-        - storefront.store_hours_configuration
-  /v1/market-intel/store-details:
-    post:
-      tags:
-      - Storefront Endpoints
-      summary: Notify about store details update
-      operationId: postGetStoreDetailsResult
+      - Market Intel Endpoints
+      summary: Notify stores discovered at the geolocations
+      operationId: postDiscoverStoresResult
       parameters:
       - $ref: '#/components/parameters/eventIdOptionalHeader'
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/GetStoreDetailsEventResult'
+              $ref: '#/components/schemas/DiscoverStoresEventResult'
         required: true
       responses:
         '204':
-          description: The store details updates were successfully processed
+          description: The stores discovered updates are successfully processed
         '400':
           $ref: '#/components/responses/400'
         '401':
@@ -259,32 +65,6 @@ components:
           example: 25.21
       description: Money amount.
       example: 25.21
-    Storefront_TimeRange:
-      type: object
-      properties:
-        startTime:
-          type: string
-          description: Start time of the range in 24 hour format.
-          example: 08:00
-        endTime:
-          type: string
-          description: End time of the range in 24 hour format.
-          example: 08:00
-      description: Time range in a given date.
-    StoreHoursConfiguration:
-      required:
-      - timezone
-      type: object
-      properties:
-        deliveryHours:
-          $ref: '#/components/schemas/StoreHours'
-        pickupHours:
-          $ref: '#/components/schemas/StoreHours'
-        timezone:
-          type: string
-          description: The store time zone identifier. (e.g. America/New_York)
-          example: America/Los_Angeles
-      description: The current store hours configuration of a store.
     Marketintel_StoreDeliveryInformation:
       type: object
       properties:
@@ -356,42 +136,6 @@ components:
           description: The external promotion id.
           example: 12345
       description: The Store Promotion information. At least one of the displayName, promotionType, campaignType or promotionId need to be present.
-    StoreId:
-      type: string
-      description: The unique identifier of the store in the partner application. This ID, along with the `Application ID`, will be used to match the correct store when performing operations. It cannot be longer than 255 characters and must only contain printable ASCII characters. During on-boarding, this ID will be similar to `onboarding:905bb725-b141-4a9b-832a-1f254f772c94` (where the UUID is the Internal Store ID). During off-boarding, this field will be filled with the last known Store ID, or with an empty string, in case none is found. In that case, please fall back to the provided `internalStoreId` (a.k.a. Sku-Sku ID).
-      example: partner-store-unique-identifier
-    GetStoreDetailsEventResult:
-      type: object
-      properties:
-        superRegion:
-          type: string
-          description: Represents a super region geographical mapping.
-          example: LATAM
-        storeDetails:
-          type: array
-          minItems: 0
-          description: Represents a list of stores
-          items:
-            $ref: '#/components/schemas/Marketintel_StoreDetails'
-      description: The result of an event that request to store details.
-    StoreHours:
-      type:
-      - object
-      - 'null'
-      properties:
-        regularHours:
-          type: array
-          description: List of regular hours configuration.
-          items:
-            $ref: '#/components/schemas/Storefront_RegularHours'
-        specialHours:
-          type:
-          - array
-          - 'null'
-          description: List of special hours configuration.
-          items:
-            $ref: '#/components/schemas/Storefront_SpecialHours'
-      description: Represents store hours configuration with regular hours and special hours.
     Marketintel_StoreMenu:
       type: object
       properties:
@@ -426,31 +170,20 @@ components:
           description: The longitude and latitude of a location.
           $ref: '#/components/schemas/Location'
       description: The geographical coordinates of a location.
-    Storefront_SpecialHours:
-      required:
-      - date
-      - timeRanges
-      - specialHourType
+    DiscoveredStore:
       type: object
       properties:
-        date:
-          type: string
-          description: Date the special hour configuration applies.
-          format: date
-          example: '2021-10-01'
-        timeRanges:
-          type: array
-          minItems: 1
-          description: Hours range applied to configured date.
-          items:
-            $ref: '#/components/schemas/Storefront_TimeRange'
-        specialHourType:
-          type: string
-          description: Store state that should be applied during the configured special hour.
-          enum:
-          - OPEN
-          - CLOSED
-      description: Describes the configuration of special store hours.
+        storeDetails:
+          type: object
+          description: The store details.
+          $ref: '#/components/schemas/Marketintel_StoreDetails'
+        locationBasedInformation:
+          type:
+          - object
+          - 'null'
+          description: The location information of the store.
+          $ref: '#/components/schemas/Marketintel_LocationBasedInformation'
+      description: The discovered store information.
     Location:
       required:
       - latitude
@@ -470,35 +203,22 @@ components:
           format: double
           example: 77.0365
       description: Latitude and longitude of the address.
-    RequiredEventResultMetadata:
+    Marketintel_LocationBasedInformation:
       type: object
       properties:
-        operationStatus:
-          type: string
-          description: Status of the operation requested by an event.
-          enum:
-          - SUCCEEDED
-          - INTERNAL_ERROR
-          - AUTHENTICATION_FAILURE
-          - AUTHORIZATION_FAILURE
-          - UNKNOWN_FAILURE
-          - INVALID_STORE_STATE
-          - INVALID_STORE_CONFIGURATION
-          - OPERATION_NOT_SUPPORTED
-          - IGNORED_ALREADY_IN_REQUESTED_STATE
-          - INVALID_REQUEST
-        additionalInformation:
+        estimatedDeliveryTimeInSeconds:
           type:
-          - string
+          - integer
           - 'null'
-          description: Additional details about the event result, if available.
-          example: Completed without problems.
-        operationFinishedAt:
-          type: string
-          description: Time when the processing of the event finished.
-          format: date-time
-          example: '2007-12-03T10:15:30+01:00'
-      description: Information about the result of a storefront event.
+          description: The estimated delivery time in seconds
+          example: 1200
+        distanceInMeters:
+          type:
+          - integer
+          - 'null'
+          description: The distance in meters
+          example: 3000
+      description: The estimated delivery time of the store and delivery distance from the store. At least one of the attributes need to be set.
     ErrorMessage:
       type: object
       properties:
@@ -577,30 +297,22 @@ components:
           - 20+
           - 20
       description: The Store rating information. At least one of the ratingScore, estimatedRatingCount or displayRatingCount need to be present.
-    Storefront_RegularHours:
-      required:
-      - dayOfWeek
-      - timeRanges
+    DiscoverStoresEventResult:
       type: object
       properties:
-        dayOfWeek:
-          type: string
-          description: Day of the week.
-          enum:
-          - MONDAY
-          - TUESDAY
-          - WEDNESDAY
-          - THURSDAY
-          - FRIDAY
-          - SATURDAY
-          - SUNDAY
-        timeRanges:
+        storesDiscovered:
           type: array
-          minItems: 1
-          description: Hours range applied to the provided day of the week
+          minItems: 0
+          description: Represents a list of discovered stores.
           items:
-            $ref: '#/components/schemas/Storefront_TimeRange'
-      description: Describes the configuration of regular hours.
+            $ref: '#/components/schemas/DiscoveredStore'
+        storeRankings:
+          type: array
+          minItems: 0
+          description: Represents the store rankings.
+          items:
+            $ref: '#/components/schemas/Marketintel_StoreListing'
+      description: The result of an event that request to find stores at the provided geolocations.
     Marketintel_HoursData:
       required:
       - regularHours
@@ -624,37 +336,6 @@ components:
           items:
             $ref: '#/components/schemas/Marketintel_SpecialHours'
       description: Represents hours configuration with regular hours and special hours.
-    EventResultMetadata:
-      type:
-      - object
-      - 'null'
-      properties:
-        operationStatus:
-          type: string
-          description: Status of the operation requested by an event.
-          enum:
-          - SUCCEEDED
-          - INTERNAL_ERROR
-          - AUTHENTICATION_FAILURE
-          - AUTHORIZATION_FAILURE
-          - UNKNOWN_FAILURE
-          - INVALID_STORE_STATE
-          - INVALID_STORE_CONFIGURATION
-          - OPERATION_NOT_SUPPORTED
-          - IGNORED_ALREADY_IN_REQUESTED_STATE
-          - INVALID_REQUEST
-        additionalInformation:
-          type:
-          - string
-          - 'null'
-          description: Additional details about the event result, if available.
-          example: Completed without problems.
-        operationFinishedAt:
-          type: string
-          description: Time when the processing of the event finished.
-          format: date-time
-          example: '2007-12-03T10:15:30+01:00'
-      description: Information about the result of a storefront event.
     Marketintel_GeoLocationInformation:
       type: object
       properties:
@@ -736,12 +417,26 @@ components:
         location:
           $ref: '#/components/schemas/Location'
       description: Order delivery address.
-    UnpauseStoreEventResult:
+    Marketintel_StoreListing:
       type: object
       properties:
-        eventResultMetadata:
-          $ref: '#/components/schemas/RequiredEventResultMetadata'
-      description: Result of an event that requested to unpause a store.
+        category:
+          type:
+          - string
+          - 'null'
+          description: The grouping category name.
+          example: Fast Food
+        ids:
+          type: array
+          description: The list of external store ids in the list in rank order.
+          items:
+            type: string
+            description: The external id the store
+            example: 123456
+        location:
+          type: object
+          description: The geographic location of the stores that was searched from.
+      description: The Store listing in ranking order based on category.
     ErrorDetail:
       type: object
       properties:
@@ -904,47 +599,6 @@ components:
           description: The estimated delivery time in minutes.
           $ref: '#/components/schemas/Marketintel_StorePriceLevel'
       description: The Store delivery information.
-    PauseStoreEventResult:
-      type: object
-      properties:
-        closureId:
-          type: string
-          description: ID required to unpause a store, if available
-          example: 4109d2c9-8bc5-413c-af3e-1c92aa381e41
-        eventResultMetadata:
-          $ref: '#/components/schemas/RequiredEventResultMetadata'
-      description: Result of an event that requested to pause a store.
-    StoreAvailabilityEventResult:
-      type: object
-      properties:
-        storeState:
-          type:
-          - string
-          - 'null'
-          description: Represents the current state of a store.
-          enum:
-          - OPEN
-          - OFF_HOUR
-          - SERVICE_PROVIDER_PAUSED
-          - OPERATOR_PAUSED
-          - SERVICE_PROVIDER_PAUSED_COURIERS_UNAVAILABLE
-          - STORE_UNAVAILABLE
-          - HOLIDAY_HOUR
-          - MENU_UNAVAILABLE
-          - SERVICE_PROVIDER_PAUSED_MISCONFIGURED
-          - OPEN_FOR_PICKUP_ONLY
-          - OPEN_FOR_DELIVERY_ONLY
-          - CLOSED_FOR_UNDETERMINED_REASON
-        statusChangedAt:
-          type:
-          - string
-          - 'null'
-          description: The time when the store changed to the current state.
-          format: date-time
-          example: '2007-12-03T10:15:30+01:00'
-        eventResultMetadata:
-          $ref: '#/components/schemas/EventResultMetadata'
-      description: The current state of a store.
     Marketintel_StoreSales:
       type: object
       properties:
@@ -985,28 +639,7 @@ components:
           description: The price level of the store in text.
           example: $$$
       description: The Store Price Level information. At least one of the price level or price level name need to be present.
-    StoreHoursConfigurationEventResult:
-      type: object
-      properties:
-        storeHoursConfiguration:
-          $ref: '#/components/schemas/StoreHoursConfiguration'
-        statusChangedAt:
-          type: string
-          description: The time when the store hours configuration changed.
-          format: date-time
-          example: '2007-12-03T10:15:30+01:00'
-        eventResultMetadata:
-          $ref: '#/components/schemas/EventResultMetadata'
-      description: The current store hours configuration.
   parameters:
-    eventIdHeader:
-      name: X-Event-Id
-      in: header
-      required: true
-      schema:
-        type: string
-        description: Unique identifier of the event that this callback refers to.
-        example: cf0ce51b-d74e-40d3-b177-1925ab4edc0c
     eventIdOptionalHeader:
       name: X-Event-Id
       in: header
@@ -1015,12 +648,6 @@ components:
         type: string
         description: Optional unique identifier of the event that this callback refers to.
         example: cf0ce51b-d74e-40d3-b177-1925ab4edc0c
-    storeIdHeader:
-      name: X-Store-Id
-      in: header
-      required: true
-      schema:
-        $ref: '#/components/schemas/StoreId'
   responses:
     '401':
       description: Invalid authorization.

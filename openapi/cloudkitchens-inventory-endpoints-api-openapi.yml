@@ -1,7 +1,10 @@
 openapi: 3.2.0
 info:
   title: Public Inventory Endpoints API
-  description: "# Overview\n\nThe API endpoints are developed around [RESTful](https://en.wikipedia.org/wiki/Representational_state_transfer) principles secure via the OAuth2.0 protocol.\n\nBeyond the entry points, the API also provides a line of communication into your system via [webhooks](https://en.wikipedia.org/wiki/Webhook).\n\nFor testing purposes, we offer a staging environment. Also, more detailed information about the business rules and workflows can be found on the [**Documentation Section**](/docs/)\n\n## Versioning\nEach API is versioned individually, but we follow these rules:\n- Non breaking changes (eg: adding new fields) are added in the current version without previous communication\n- Breaking changes (fields removal, semantic changed or schema update) have the version incremented\n- Users will be notified about new versions and will be given time to migrate (the time will be set on a case by case basis)\n- Once users migrate to the new version, we will deprecate the old ones\n- Once there is a new version for an API, we won't accept new integrations targeting old versions\n\n## API General Definitions\nThe APIs use resource-oriented URLs communicating, primarily, via JSON and leveraging the HTTP headers, [response status codes](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status), and verbs.\n\nTo exemplify how the API is to be consumed, consider a fake GET resource endpoint invocation below:\n\n```\ncurl --request GET 'https://{{public-api-url}}/v1/resource/123' \\\n--header 'Authorization: Bearer 34fdabeeafds=' --header 'X-Store-Id: 321'\n```\n\n|      Header      | Description |\n| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |\n|`Authorization`   | Standard HTTP header is used to associate the request with the originating invoker. The content of this header is a `Bearer` token generated from you client_secret, defined in the [API Auth](#/section/Guides/API-Auth) guide.|\n|`X-Store-Id`      | The ID of the store in your system this call acts on behalf of. |\n\n_All resource endpoints expect the `Authorization` header, the remaining headers are explicitly stated in the individual endpoint documentation section._\n\nWith these headers, the system will:\n - Validate the client token, making sure the call is originating from a trusted source.\n - Validate that the Application has the permission to access the `v1/resource/{id}` resource via the Application's pre-configured scopes.\n - Translate your X-Store-Id to our internal store ID (e.g. `AAA`).\n - Validate and retrieve resource `AAA`, that is associated to your Application via store id `321`.\n\nPOST/PUT methods will look similar to the GET calls, but they'll take in a body in the HTTP request (default to the application/json content-type).\n\n```\ncurl --location --request POST 'https://{{public-api-url}}/v1/resource' \\\n--header 'Authorization: Bearer 34fdabeeafds=' --header 'X-Store-Id: 321'\n--data '{\"foo\": \"bar\"}'\n```\n\n## API Authentication/Authorization\n\n<SecurityDefinitions />\n\n## Webhook\n\nThe Public API is able to send notifications to your system via HTTP POST requests.\n\nEvery webhook is signed using HMAC-SHA256 that is present in the header `X-HMAC-SHA256`, and you can also authenticate the requests using Basic Auth, Bearer Token or HMAC-SHA1 (legacy). Please, refer to [**Webhook Authentication Guide**](/docs/guides-webhook-authentication/) for more details.\n\n_Please work with your Account Representative to setup your Application's Webhook configurations._\n\n```\nExample Base-URL = https://{{your-server-url}}/webhook\n```\n\n### Notification Schema\n\n| **Name**                | **Type** | **Description**                                                      |\n| ------------------------| ---------| -------------------------------------------------------------------- |\n| eventId                 | string   | Unique id of the event.                                              |\n| eventTime               | string   | The time the event occurred.                                         |\n| eventType               | string   | The type of event (e.g. create_order).                               |\n| metadata.storeId        | string   | Id of the store for which the event is being published.              |\n| metadata.applicationId  | string   | Id of the application for which the event is being published.        |\n| metadata.resourceId     | string   | The external identifier of the resource that this event refers to.   |\n| metadata.resourceHref   | string   | The endpoint to fetch the details of the resource.                   |\n| metadata.payload        | object   | The event object which will be detailed in each Webhook description. |\n\n### Notification Request Example\n\n```\ncurl --location --request POST 'https://{{your-server-url}}/webhook' \\\n--header 'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.142 Safari/537.36' \\\n--header 'Authorization: MAC <hash signature>' \\\n--header 'Content-Type: application/json' \\\n--data-raw '{\n   \"eventId\": \"123456\",\n   \"eventTime\": \"2020-10-10T20:06:02:123Z\",\n   \"eventType\": \"orders.new_order\",\n   \"metadata\": {\n      \"storeId\": \"755fd19a-7562-487a-b615-171a9f89d669\",\n      \"applicationId\": \"e22f94b3-967c-4e26-bf39-9e364066b68b\",\n      \"resourceHref\": \"https://{{public-api-url}}/v1/orders/bf9f1d81-f213-496e-a026-91b6af44996c\",\n      \"resourceId\": \"bf9f1d81-f213-496e-a026-91b6af44996c\",\n      \"payload\": {}\n   }\n}\n```\n\n### Expected Response\n\nThe partner application should return an HTTP 200 response code with an empty response body to acknowledge receipt of the webhook event.\n## Rate Limiting\nPlease, refer to [**Rate Limiting Guide**](/docs/guides-rate-limiting/) for more details.\n\n## Error codes\nThe APIs use standard HTTP status codes to indicate the success or failure of a request. Error codes are divided into two categories: 4XX codes for client-side errors and 5xx codes for server-side errors.\n### 4XX Client-Side Errors\nClient-side errors are indicated by status codes in the 4xx range. These errors are typically the result of a problem with the request made by your application.\nIf a client-side error occurs, our API will return a response that includes an appropriate error message. This message will provide information about the cause of the error. The aim of these messages is to assist you in identifying and resolving the issue.\nFor example, if you submit a request with missing or invalid parameters, you might receive a 400 Bad Request error with a message indicating which parameters were missing or incorrect.\n### 5XX Server-Side Errors\nServer-side errors are represented by status codes in the 5xx range. These errors suggest a problem with our server, not with your application's request.\nServer-side errors are typically transient, meaning they are temporary. If a server-side error occurs, we recommend that the client retries the same request with the exact same parameters.\nFor example, if you get a 500 Internal Server Error, it's possible that our server is suffering a temporary problem. In such cases, retrying the request after a short delay is often successful.\nIf you continually receive server-side errors, reach out to our support team for further assistance."
+  description: '# Overview
+
+
+    The API endpoints are developed around RESTful principles secure via the OAuth2.0 protocol.'
   version: v1
   license:
     name: Proprietary
@@ -9,22 +12,20 @@ servers:
 - url: https://{{public-api-url}}
   description: Staging server url
 tags:
-- name: inventory_endpoints
+- name: Inventory Endpoints
   description: Endpoints to interact with product inventory.
   x-displayName: Inventory
 paths:
   /inventories/v1/summaries:
     get:
       tags:
-      - inventory_endpoints
+      - Inventory Endpoints
       summary: List inventory summaries
       operationId: listInventorySummaries
       description: '`RATE LIMIT: 32 per minute`
 
 
-        List inventory summaries by the requested parameters.
-
-        '
+        List inventory summaries by the requested parameters.'
       parameters:
       - $ref: '#/components/parameters/inventory-summary-limit'
       - $ref: '#/components/parameters/opaquePaginationToken'
@@ -52,15 +53,13 @@ paths:
   /inventories/v1/shipments:
     get:
       tags:
-      - inventory_endpoints
+      - Inventory Endpoints
       summary: List shipments
       operationId: listInventoryShipments
       description: '`RATE LIMIT: 8 per minute`
 
 
-        List shipments by the requested parameters.
-
-        '
+        List shipments by the requested parameters.'
       parameters:
       - $ref: '#/components/parameters/inventory-limit'
       - $ref: '#/components/parameters/opaquePaginationToken'
@@ -87,15 +86,13 @@ paths:
         - catalog
     post:
       tags:
-      - inventory_endpoints
+      - Inventory Endpoints
       summary: Create shipment
       operationId: createShipment
       description: '`RATE LIMIT: 32 per minute`
 
 
-        Create a new shipment.
-
-        '
+        Create a new shipment.'
       parameters:
       - $ref: '#/components/parameters/storeIdHeader'
       requestBody:
@@ -126,52 +123,87 @@ paths:
         - catalog
 components:
   schemas:
-    Gtin:
+    SelfDropDeliveryInfo:
+      allOf:
+      - $ref: '#/components/schemas/DeliveryMetadata'
+      - required:
+        - delivererName
+        type: object
+        description: Detailed delivery information for self-delivered shipments.
+        properties:
+          delivererName:
+            type: string
+            description: The name of the deliverer.
+            example: Local Delivery Service
+          delivererEmailAddress:
+            type: string
+            description: The email address of the deliverer.
+            example: foo.bar@deliver.com
+        additionalProperties: true
+    InventorySummary:
+      required:
+      - id
+      - name
+      - sellableQuantity
+      type: object
+      properties:
+        id:
+          type: string
+          description: A unique identifier for the product.
+          example: ZDlhYTc1NjUtMzU3Z
+        gtin:
+          $ref: '#/components/schemas/Gtin'
+        name:
+          type: string
+          description: The name of the product.
+          example: Coca-Cola Classic Coke Soft Drink 12 oz. can
+        slug:
+          type: string
+          description: short, unique human-readable id for the product
+          example: coca-cola-classic-soft-drink-12-oz-can
+        externalId:
+          type: string
+          description: id of the product provided by the seller
+          example: some-id-from-a-vendor-123
+        sellableQuantity:
+          type: integer
+          description: The total quantity of the product ready to be sold. Does not include pending or in-progress shipments.
+          example: 42
+        unsellableQuantity:
+          type: integer
+          description: The total quantity of the product that is in the facility but unable to be sold. This will include inventory that is damaged, expired or otherwise unsellable.
+          example: 42
+        inboundQuantity:
+          type: integer
+          description: The total quantity of the product inbound to the facility or waiting at the facility to be processed.
+          example: 8
+      description: The inventory summary for a specific product.
+    StoreId:
       type: string
-      description: A 14 digit Global Trade Item Number (GTIN). For GTIN values that are shorter than 14 digits, value will be padded with leading zeroes.
-      example: 00049000608779
-    DeliveryWindow:
-      required:
-      - start
-      - end
+      description: The unique identifier of the store in the partner application. This ID, along with the `Application ID`, will be used to match the correct store when performing operations. It cannot be longer than 255 characters and must only contain printable ASCII characters. During on-boarding, this ID will be similar to `onboarding:905bb725-b141-4a9b-832a-1f254f772c94` (where the UUID is the Internal Store ID). During off-boarding, this field will be filled with the last known Store ID, or with an empty string, in case none is found. In that case, please fall back to the provided `internalStoreId` (a.k.a. Sku-Sku ID).
+      example: partner-store-unique-identifier
+    ShipmentState:
+      type: string
+      description: The state of the shipment.
+      enum:
+      - SCHEDULED
+      - ARRIVED
+      - STOCKING
+      - CLOSED
+      - CANCELED
+    ShipmentDeliveryInfo:
       type: object
-      description: The delivery window in which the shipment is expected to arrive at the destination.
-      properties:
-        start:
-          type: string
-          description: ISO-8601 timestamp representing the start of the time range.
-          format: date-time
-          example: '2007-12-03T10:15:30+01:00'
-        end:
-          type: string
-          description: ISO-8601 timestamp representing the end of the time range.
-          format: date-time
-          example: '2007-12-03T10:15:30+01:00'
-    ErrorDetail:
-      type: object
-      properties:
-        attribute:
-          type: string
-          description: The error attribute.
-          example: Order Currency Code
-        message:
-          type: string
-          description: The error detail description.
-          example: Order Currency Code must be exactly 3 characters
-      description: The error detail response object.
-    ShipmentStateChange:
-      required:
-      - timestamp
-      - state
-      type: object
-      properties:
-        state:
-          $ref: '#/components/schemas/ShipmentState'
-        timestamp:
-          type: string
-          description: ISO-8601 timestamp representing when the state change occurred.
-          format: date-time
-          example: '2007-12-03T10:15:30+01:00'
+      description: Delivery information for a shipment.
+      discriminator:
+        propertyName: deliveryType
+        mapping:
+          selfDropDeliveryInfo: '#/components/schemas/SelfDropDeliveryInfo'
+          courierServiceDeliveryInfo: '#/components/schemas/CourierServiceDeliveryInfo'
+          parcelCarrierDeliveryInfo: '#/components/schemas/ParcelCarrierDeliveryInfo'
+      oneOf:
+      - $ref: '#/components/schemas/CourierServiceDeliveryInfo'
+      - $ref: '#/components/schemas/ParcelCarrierDeliveryInfo'
+      - $ref: '#/components/schemas/SelfDropDeliveryInfo'
     ShipmentLineItem:
       required:
       - id
@@ -194,29 +226,6 @@ components:
           type: integer
           description: The quantity of the product in the shipment received that was unsellable (damaged, expired, etc.).
           example: 5
-    ErrorMessage:
-      type: object
-      properties:
-        message:
-          type: string
-          description: The error description.
-          example: The request body is invalid.
-        details:
-          type: array
-          description: The error details.
-          items:
-            $ref: '#/components/schemas/ErrorDetail'
-      description: The error response object.
-    CreateShipmentResponse:
-      required:
-      - id
-      type: object
-      properties:
-        id:
-          type: string
-          description: A unique identifier for the shipment.
-          example: 18695c43-c670-4c57-a714-e0d7b215db20
-      description: A response containing information about the created shipment.
     ParcelCarrierDeliveryInfo:
       allOf:
       - $ref: '#/components/schemas/DeliveryMetadata'
@@ -243,92 +252,33 @@ components:
             description: The tracking number for this shipment
             example: 18492b99ad000
         additionalProperties: true
-    CreateShipmentRequest:
-      required:
-      - deliveryInfo
-      - lineItems
-      type: object
-      properties:
-        deliveryInfo:
-          $ref: '#/components/schemas/ShipmentDeliveryInfo'
-        lineItems:
-          type: array
-          description: A list of the shipment line items.
-          items:
-            $ref: '#/components/schemas/CreateShipmentLineItem'
-    DeliveryMetadata:
-      required:
-      - deliveryWindow
-      - deliveryType
-      type: object
-      properties:
-        deliveryWindow:
-          $ref: '#/components/schemas/DeliveryWindow'
-          description: The delivery window for the shipment.
-        deliveryType:
-          type: string
-          description: The type of delivery service for this shipment.
-      additionalProperties: true
-    InventorySummariesResponse:
-      type: object
-      properties:
-        inventorySummaries:
-          type: array
-          description: A list of the inventory summaries.
-          maxItems: 100
-          items:
-            $ref: '#/components/schemas/InventorySummary'
-        nextToken:
-          type: string
-          description: Opaque token used to fetch the following page. If set, pass the value of nextToken to the next request. If not set, no more results are available.
-          example: H12MAF2fFaFFFa
-    SelfDropDeliveryInfo:
-      allOf:
-      - $ref: '#/components/schemas/DeliveryMetadata'
-      - required:
-        - delivererName
-        type: object
-        description: Detailed delivery information for self-delivered shipments.
-        properties:
-          delivererName:
-            type: string
-            description: The name of the deliverer.
-            example: Local Delivery Service
-          delivererEmailAddress:
-            type: string
-            description: The email address of the deliverer.
-            example: foo.bar@deliver.com
-        additionalProperties: true
-    ShipmentDeliveryInfo:
-      type: object
-      description: Delivery information for a shipment.
-      discriminator:
-        propertyName: deliveryType
-        mapping:
-          selfDropDeliveryInfo: '#/components/schemas/SelfDropDeliveryInfo'
-          courierServiceDeliveryInfo: '#/components/schemas/CourierServiceDeliveryInfo'
-          parcelCarrierDeliveryInfo: '#/components/schemas/ParcelCarrierDeliveryInfo'
-      oneOf:
-      - $ref: '#/components/schemas/CourierServiceDeliveryInfo'
-      - $ref: '#/components/schemas/ParcelCarrierDeliveryInfo'
-      - $ref: '#/components/schemas/SelfDropDeliveryInfo'
-    ListShipmentsResponse:
-      type: object
-      properties:
-        shipments:
-          type: array
-          description: A list of shipments.
-          maxItems: 50
-          items:
-            $ref: '#/components/schemas/Shipment'
-        nextToken:
-          type: string
-          description: Opaque token used to fetch the following page. If set, pass the value of nextToken to the next request. If not set, no more results are available.
-          example: H12MAF2fFaFFFa
-    StoreId:
+    Gtin:
       type: string
-      description: The unique identifier of the store in the partner application. This ID, along with the `Application ID`, will be used to match the correct store when performing operations. It cannot be longer than 255 characters and must only contain printable ASCII characters. During on-boarding, this ID will be similar to `onboarding:905bb725-b141-4a9b-832a-1f254f772c94` (where the UUID is the Internal Store ID). During off-boarding, this field will be filled with the last known Store ID, or with an empty string, in case none is found. In that case, please fall back to the provided `internalStoreId` (a.k.a. Sku-Sku ID).
-      example: partner-store-unique-identifier
+      description: A 14 digit Global Trade Item Number (GTIN). For GTIN values that are shorter than 14 digits, value will be padded with leading zeroes.
+      example: 00049000608779
+    ErrorMessage:
+      type: object
+      properties:
+        message:
+          type: string
+          description: The error description.
+          example: The request body is invalid.
+        details:
+          type: array
+          description: The error details.
+          items:
+            $ref: '#/components/schemas/ErrorDetail'
+      description: The error response object.
+    CreateShipmentResponse:
+      required:
+      - id
+      type: object
+      properties:
+        id:
+          type: string
+          description: A unique identifier for the shipment.
+          example: 18695c43-c670-4c57-a714-e0d7b215db20
+      description: A response containing information about the created shipment.
     CourierServiceDeliveryInfo:
       allOf:
       - $ref: '#/components/schemas/DeliveryMetadata'
@@ -375,6 +325,49 @@ components:
           type: integer
           description: The quantity of the product in the shipment received that was unsellable (damaged, expired, etc.).
           example: 5
+    DeliveryWindow:
+      required:
+      - start
+      - end
+      type: object
+      description: The delivery window in which the shipment is expected to arrive at the destination.
+      properties:
+        start:
+          type: string
+          description: ISO-8601 timestamp representing the start of the time range.
+          format: date-time
+          example: '2007-12-03T10:15:30+01:00'
+        end:
+          type: string
+          description: ISO-8601 timestamp representing the end of the time range.
+          format: date-time
+          example: '2007-12-03T10:15:30+01:00'
+    CreateShipmentRequest:
+      required:
+      - deliveryInfo
+      - lineItems
+      type: object
+      properties:
+        deliveryInfo:
+          $ref: '#/components/schemas/ShipmentDeliveryInfo'
+        lineItems:
+          type: array
+          description: A list of the shipment line items.
+          items:
+            $ref: '#/components/schemas/CreateShipmentLineItem'
+    InventorySummariesResponse:
+      type: object
+      properties:
+        inventorySummaries:
+          type: array
+          description: A list of the inventory summaries.
+          maxItems: 100
+          items:
+            $ref: '#/components/schemas/InventorySummary'
+        nextToken:
+          type: string
+          description: Opaque token used to fetch the following page. If set, pass the value of nextToken to the next request. If not set, no more results are available.
+          example: H12MAF2fFaFFFa
     Shipment:
       required:
       - id
@@ -400,54 +393,109 @@ components:
           description: The state changes for the shipment. The final state change represents the current state of the shipment.
           items:
             $ref: '#/components/schemas/ShipmentStateChange'
-    InventorySummary:
-      required:
-      - id
-      - name
-      - sellableQuantity
+    ListShipmentsResponse:
       type: object
       properties:
-        id:
+        shipments:
+          type: array
+          description: A list of shipments.
+          maxItems: 50
+          items:
+            $ref: '#/components/schemas/Shipment'
+        nextToken:
           type: string
-          description: A unique identifier for the product.
-          example: ZDlhYTc1NjUtMzU3Z
-        gtin:
-          $ref: '#/components/schemas/Gtin'
-        name:
+          description: Opaque token used to fetch the following page. If set, pass the value of nextToken to the next request. If not set, no more results are available.
+          example: H12MAF2fFaFFFa
+    ErrorDetail:
+      type: object
+      properties:
+        attribute:
           type: string
-          description: The name of the product.
-          example: Coca-Cola Classic Coke Soft Drink 12 oz. can
-        slug:
+          description: The error attribute.
+          example: Order Currency Code
+        message:
           type: string
-          description: short, unique human-readable id for the product
-          example: coca-cola-classic-soft-drink-12-oz-can
-        externalId:
+          description: The error detail description.
+          example: Order Currency Code must be exactly 3 characters
+      description: The error detail response object.
+    ShipmentStateChange:
+      required:
+      - timestamp
+      - state
+      type: object
+      properties:
+        state:
+          $ref: '#/components/schemas/ShipmentState'
+        timestamp:
           type: string
-          description: id of the product provided by the seller
-          example: some-id-from-a-vendor-123
-        sellableQuantity:
-          type: integer
-          description: The total quantity of the product ready to be sold. Does not include pending or in-progress shipments.
-          example: 42
-        unsellableQuantity:
-          type: integer
-          description: The total quantity of the product that is in the facility but unable to be sold. This will include inventory that is damaged, expired or otherwise unsellable.
-          example: 42
-        inboundQuantity:
-          type: integer
-          description: The total quantity of the product inbound to the facility or waiting at the facility to be processed.
-          example: 8
-      description: The inventory summary for a specific product.
-    ShipmentState:
-      type: string
-      description: The state of the shipment.
-      enum:
-      - SCHEDULED
-      - ARRIVED
-      - STOCKING
-      - CLOSED
-      - CANCELED
+          description: ISO-8601 timestamp representing when the state change occurred.
+          format: date-time
+          example: '2007-12-03T10:15:30+01:00'
+    DeliveryMetadata:
+      required:
+      - deliveryWindow
+      - deliveryType
+      type: object
+      properties:
+        deliveryWindow:
+          $ref: '#/components/schemas/DeliveryWindow'
+          description: The delivery window for the shipment.
+        deliveryType:
+          type: string
+          description: The type of delivery service for this shipment.
+      additionalProperties: true
+  parameters:
+    inventory-summary-limit:
+      name: limit
+      in: query
+      required: false
+      schema:
+        type: string
+        description: Max number of entities to retrieve
+        example: 5
+        maximum: 200
+    opaquePaginationToken:
+      name: token
+      in: query
+      required: false
+      schema:
+        type: string
+        description: Opaque token used for paging. Query parameters must be URL encoded.
+        example: CgwI09+kjQYQwOvF2AM=/(urlencoded:CgwI09%2BkjQYQwOvF2AM%3D)
+    storeIdHeader:
+      name: X-Store-Id
+      in: header
+      required: true
+      schema:
+        $ref: '#/components/schemas/StoreId'
+    inventory-limit:
+      name: limit
+      in: query
+      required: false
+      schema:
+        type: string
+        description: Max number of entities to retrieve
+        example: 5
+        maximum: 50
   responses:
+    '401':
+      description: Invalid authorization.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorMessage'
+    '400':
+      description: The request is malformed.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorMessage'
+    '404':
+      description: Resource not found.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorMessage'
     '422':
       description: The request body is not valid.
       content:
@@ -460,57 +508,6 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/ErrorMessage'
-    '404':
-      description: Resource not found.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorMessage'
-    '400':
-      description: The request is malformed.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorMessage'
-    '401':
-      description: Invalid authorization.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorMessage'
-  parameters:
-    inventory-limit:
-      name: limit
-      in: query
-      required: false
-      schema:
-        type: string
-        description: Max number of entities to retrieve
-        example: 5
-        maximum: 50
-    inventory-summary-limit:
-      name: limit
-      in: query
-      required: false
-      schema:
-        type: string
-        description: Max number of entities to retrieve
-        example: 5
-        maximum: 200
-    storeIdHeader:
-      name: X-Store-Id
-      in: header
-      required: true
-      schema:
-        $ref: '#/components/schemas/StoreId'
-    opaquePaginationToken:
-      name: token
-      in: query
-      required: false
-      schema:
-        type: string
-        description: Opaque token used for paging. Query parameters must be URL encoded.
-        example: CgwI09+kjQYQwOvF2AM=/(urlencoded:CgwI09%2BkjQYQwOvF2AM%3D)
   securitySchemes:
     OAuth2.0:
       type: oauth2
