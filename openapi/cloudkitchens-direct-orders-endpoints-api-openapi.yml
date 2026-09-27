@@ -49,6 +49,91 @@ paths:
         - direct.orders
 components:
   schemas:
+    Item-3:
+      required:
+      - name
+      type: object
+      properties:
+        quantity:
+          minimum: 1
+          maximum: 1000
+          type: integer
+          description: The quantity of the item ordered by the customer.
+          format: int32
+          example: 1
+        id:
+          type:
+          - string
+          - 'null'
+          description: The unique ID of the item.
+          example: 33e0418f-3d56-4360-ba03-18fc5f8844a3
+        name:
+          type:
+          - string
+          - 'null'
+          description: The name of the item as displayed to the customer.
+          example: Juicy Cheeseburger
+    Store-2:
+      required:
+      - id
+      - name
+      - address
+      type: object
+      properties:
+        id:
+          type: string
+          description: Store identifier.
+          example: 9208071e-5f7a-444a-b3a7-4a57ff3f614e
+        name:
+          type: string
+          description: Store name.
+          example: Store name 1
+        logoUrl:
+          type: string
+          description: store's logo image url.
+          example: https://blob-storage.com/photos/storefront-photos/228da7b3-a254-47f4-b82f-5cf29e89b2b9.jpeg
+        bannerUrl:
+          type: string
+          description: store's banner image url.
+          example: https://blob-storage.com/photos/storefront-photos/4abd6b2e-e0f1-467c-a60b-c2e33922573f.jpeg
+        phoneNumber:
+          type: string
+          description: store's phone number.
+          example: 2124567890
+        address:
+          $ref: '#/components/schemas/Address'
+    ErrorMessage:
+      type: object
+      properties:
+        message:
+          type: string
+          description: The error description.
+          example: The request body is invalid.
+        details:
+          type: array
+          description: The error details.
+          items:
+            $ref: '#/components/schemas/ErrorDetail'
+      description: The error response object.
+    Location:
+      required:
+      - latitude
+      - longitude
+      type:
+      - object
+      - 'null'
+      properties:
+        latitude:
+          type: number
+          description: The latitude of the location.
+          format: double
+          example: 38.8977
+        longitude:
+          type: number
+          description: The longitude of the location.
+          format: double
+          example: 77.0365
+      description: Latitude and longitude of the address.
     Address:
       type:
       - object
@@ -100,25 +185,44 @@ components:
         location:
           $ref: '#/components/schemas/Location'
       description: Order delivery address.
-    Location:
+    EaterOrderHistoryRequest:
       required:
-      - latitude
-      - longitude
-      type:
-      - object
-      - 'null'
+      - limit
+      - eaterId
+      type: object
       properties:
-        latitude:
+        limit:
           type: number
-          description: The latitude of the location.
-          format: double
-          example: 38.8977
-        longitude:
-          type: number
-          description: The longitude of the location.
-          format: double
-          example: 77.0365
-      description: Latitude and longitude of the address.
+          description: Max number of orders to retrieve per page
+          format: 10
+        pageToken:
+          type: string
+          description: Opaque token used for paging. Query parameters must be URL encoded.
+          example: CgwI09+kjQYQwOvF2AM=/(urlencoded:CgwI09%2BkjQYQwOvF2AM%3D)
+        eaterId:
+          type: string
+          description: External eater's Id
+          example: eater-12345
+        source:
+          type: string
+          description: Order placed from which source
+          example: venmo
+      description: Request parameters to fetch eater's order history
+    EaterOrderHistoryResponse:
+      required:
+      - orders
+      type: object
+      properties:
+        orders:
+          type: array
+          description: List of orders placed by the user. Each item contains details about a specific order.
+          items:
+            $ref: '#/components/schemas/EaterOrder'
+        nextPageToken:
+          type: string
+          description: Opaque token used to fetch the following page. If not set, no more orders are available.
+          example: H12MAF2fFaFFFa
+      description: Response body containing the user's order history.
     EaterOrder:
       required:
       - currencyCode
@@ -180,30 +284,6 @@ components:
           description: The link url for reordering.
           example: /store/0179860e-8a89-39c2-b9b1-7276683d09f1
       description: An order placed by a customer.
-    Item-3:
-      required:
-      - name
-      type: object
-      properties:
-        quantity:
-          minimum: 1
-          maximum: 1000
-          type: integer
-          description: The quantity of the item ordered by the customer.
-          format: int32
-          example: 1
-        id:
-          type:
-          - string
-          - 'null'
-          description: The unique ID of the item.
-          example: 33e0418f-3d56-4360-ba03-18fc5f8844a3
-        name:
-          type:
-          - string
-          - 'null'
-          description: The name of the item as displayed to the customer.
-          example: Juicy Cheeseburger
     ErrorDetail:
       type: object
       properties:
@@ -216,95 +296,9 @@ components:
           description: The error detail description.
           example: Order Currency Code must be exactly 3 characters
       description: The error detail response object.
-    EaterOrderHistoryRequest:
-      required:
-      - limit
-      - eaterId
-      type: object
-      properties:
-        limit:
-          type: number
-          description: Max number of orders to retrieve per page
-          format: 10
-        pageToken:
-          type: string
-          description: Opaque token used for paging. Query parameters must be URL encoded.
-          example: CgwI09+kjQYQwOvF2AM=/(urlencoded:CgwI09%2BkjQYQwOvF2AM%3D)
-        eaterId:
-          type: string
-          description: External eater's Id
-          example: eater-12345
-        source:
-          type: string
-          description: Order placed from which source
-          example: venmo
-      description: Request parameters to fetch eater's order history
-    EaterOrderHistoryResponse:
-      required:
-      - orders
-      type: object
-      properties:
-        orders:
-          type: array
-          description: List of orders placed by the user. Each item contains details about a specific order.
-          items:
-            $ref: '#/components/schemas/EaterOrder'
-        nextPageToken:
-          type: string
-          description: Opaque token used to fetch the following page. If not set, no more orders are available.
-          example: H12MAF2fFaFFFa
-      description: Response body containing the user's order history.
-    Store-2:
-      required:
-      - id
-      - name
-      - address
-      type: object
-      properties:
-        id:
-          type: string
-          description: Store identifier.
-          example: 9208071e-5f7a-444a-b3a7-4a57ff3f614e
-        name:
-          type: string
-          description: Store name.
-          example: Store name 1
-        logoUrl:
-          type: string
-          description: store's logo image url.
-          example: https://blob-storage.com/photos/storefront-photos/228da7b3-a254-47f4-b82f-5cf29e89b2b9.jpeg
-        bannerUrl:
-          type: string
-          description: store's banner image url.
-          example: https://blob-storage.com/photos/storefront-photos/4abd6b2e-e0f1-467c-a60b-c2e33922573f.jpeg
-        phoneNumber:
-          type: string
-          description: store's phone number.
-          example: 2124567890
-        address:
-          $ref: '#/components/schemas/Address'
-    ErrorMessage:
-      type: object
-      properties:
-        message:
-          type: string
-          description: The error description.
-          example: The request body is invalid.
-        details:
-          type: array
-          description: The error details.
-          items:
-            $ref: '#/components/schemas/ErrorDetail'
-      description: The error response object.
   responses:
-    '400':
-      description: The request is malformed.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorMessage'
-    '401':
-      description: Invalid authorization.
+    '403':
+      description: Authorization not valid for the requested resource.
       content:
         application/json:
           schema:
@@ -315,8 +309,14 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/ErrorMessage'
-    '403':
-      description: Authorization not valid for the requested resource.
+    '401':
+      description: Invalid authorization.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorMessage'
+    '400':
+      description: The request is malformed.
       content:
         application/json:
           schema:

@@ -79,7 +79,68 @@ paths:
       - OAuth2.0:
         - finance
 components:
+  responses:
+    '404':
+      description: Resource not found.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorMessage'
+    '403':
+      description: Authorization not valid for the requested resource.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorMessage'
+    '422':
+      description: The request body is not valid.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorMessage'
+    '401':
+      description: Invalid authorization.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorMessage'
+    '400':
+      description: The request is malformed.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorMessage'
   schemas:
+    PayoutInfo:
+      required:
+      - id
+      - date
+      type: object
+      properties:
+        id:
+          type: string
+          description: Payout identifier.
+        date:
+          type: string
+          description: The payout date.
+          format: date
+          example: '2021-10-01'
+    OrderIdentifierFinance:
+      required:
+      - id
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique ID for the order that was placed.
+          example: 69f60a06-c335-46d9-b5a1-97f1a211c514
+        source:
+          type:
+          - string
+          - 'null'
+          description: Describes the source of the order, typically from a food ordering marketplace.
+          example: ubereats
+      description: The external identifiers of the order.
     CompositeFinanceLine:
       required:
       - breakdown
@@ -92,27 +153,113 @@ components:
           items:
             $ref: '#/components/schemas/SimpleFinanceLine'
       description: composite finance line can represent a value, tax and VAT for a given line as a list of SimpleFinanceLine objects
-    OrderIssue:
-      required:
-      - type
+    ErrorDetail:
       type: object
       properties:
+        attribute:
+          type: string
+          description: The error attribute.
+          example: Order Currency Code
+        message:
+          type: string
+          description: The error detail description.
+          example: Order Currency Code must be exactly 3 characters
+      description: The error detail response object.
+    FinancialTransaction:
+      required:
+      - id
+      - orderIdentifiers
+      - pending
+      - currencyCode
+      - createdAt
+      - type
+      - data
+      type: object
+      properties:
+        orderIdentifiers:
+          $ref: '#/components/schemas/OrderIdentifierFinance'
+        id:
+          type: string
+          description: External financial transaction identifier.
+        pending:
+          type: boolean
+          description: Whether the transaction can be updated in the future.
+        currencyCode:
+          maxLength: 3
+          minLength: 3
+          type: string
+          description: The 3-letter currency code (ISO 4217) to use for all monetary values in this order.
+          example: EUR
+        createdAt:
+          type: string
+          description: The date (in UTC) when the financial transaction was created.
+          format: date-time
+          example: '2007-12-03T10:15:30+01:00'
+        customerId:
+          type:
+          - string
+          - 'null'
+          description: Customer identifier.
+        notes:
+          type:
+          - string
+          - 'null'
+          description: General notes about the financial transaction.
         type:
           type: string
-          description: Order issue type.
+          description: Financial transaction operation type.
           enum:
-          - MISSING_ITEM
-          - INCOMPLETE
-          - WRONG_INGREDIENTS
-          - WRONG_SIZE
-          - WRONG_INSTRUCTIONS
-          - TEMPERATURE_COLD
-          - WRONG_ORDER
-          - POOR_QUALITY
-          - HANDLED_POORLY
-          - WRONG_ITEM
-          - WRONG_QUANTITY
-          - LATE_TO_COURIER
+          - PAYMENT
+          - ADJUSTMENT
+          - CANCELLATION
+          - MISC
+        payout:
+          $ref: '#/components/schemas/PayoutInfo'
+        orderItems:
+          type:
+          - array
+          - 'null'
+          description: Detailed financial per order item.
+          items:
+            $ref: '#/components/schemas/OrderItemInformation'
+        issues:
+          type:
+          - array
+          - 'null'
+          description: List of issues that might have happened with the order.
+          items:
+            $ref: '#/components/schemas/OrderIssue'
+        data:
+          $ref: '#/components/schemas/FinancialData'
+    FinancialInvoice:
+      required:
+      - payout
+      - financialTransactions
+      type: object
+      properties:
+        sourceService:
+          type:
+          - string
+          - 'null'
+          description: Describes the source of the order, typically from a food ordering marketplace.
+          example: ubereats
+        payout:
+          $ref: '#/components/schemas/InvoicePayoutInfo'
+        financialTransactions:
+          type: array
+          description: List of financial transactions related to this invoice.
+          items:
+            $ref: '#/components/schemas/SimpleFinancialTransaction'
+        currencyCode:
+          maxLength: 3
+          minLength: 3
+          type: string
+          description: The 3-letter currency code (ISO 4217) to use for all monetary values in this order.
+          example: EUR
+    StoreId:
+      type: string
+      description: The unique identifier of the store in the partner application. This ID, along with the `Application ID`, will be used to match the correct store when performing operations. It cannot be longer than 255 characters and must only contain printable ASCII characters. During on-boarding, this ID will be similar to `onboarding:905bb725-b141-4a9b-832a-1f254f772c94` (where the UUID is the Internal Store ID). During off-boarding, this field will be filled with the last known Store ID, or with an empty string, in case none is found. In that case, please fall back to the provided `internalStoreId` (a.k.a. Sku-Sku ID).
+      example: partner-store-unique-identifier
     FinancialData:
       required:
       - foodSales
@@ -200,206 +347,6 @@ components:
           example:
           - TACOWED5OFF
       description: "Breakdown of order values. Represents total values, fees, discounts, and any possible adjustments that may happen in the order value.\n\nBreakdown lists can be used to represent aggregate values (e.g. order total value) or, when available, can accurately represent the values of each item/fee/tax/charges related to the order.\n\nAll objects in breakdown lists have a required property \"subType\". Allowed values are:\n\n**VALUE**: represent the net value of the order/item/fee. Should be used in the following cases:\n - when the amount does not contain taxes or VAT\n - when tax/VAT is a known value, in that case, the list must contain an object with subtype TAX or VAT representing this value.\n\n**TAX**: represent the tax value for the order/item/fee. Should be used when tax amount is available, in that case, this information should be part of the breakdown list with the \"VALUE\" as the net amount, example below:\n\n\n  ```\n    \"breakdown\": [\n        {\n            \"name\": \"Item 1\",\n            \"value\": 10,\n            \"subType\": \"VALUE\"\n        },\n        {\n            \"name\": \"Item 1 - Tax\",\n            \"value\": 2,\n            \"subType\": \"TAX\"\n        }\n    ]\n  ```\n\n\n**VAT**: represents the amount for value-added tax. Should be used when the order/item/fee contains VAT. In that case,  this information should be part of the breakdown list with the \"VALUE\" as net amount, example below:\n\n\n  ```\n    \"breakdown\": [\n        {\n            \"name\": \"Item 1\",\n            \"value\": 12,\n            \"subType\": \"VALUE\"\n        },\n        {\n            \"name\": \"Item 1 - Tax\",\n            \"value\": 2,\n            \"subType\": \"VAT\"\n        }\n    ]\n  ```\n\n\n**VALUE_WITH_TAX**: represents the gross value of the order/item/fee. Should be used when the value includes tax/VAT and values related to taxation are not available.\n\n\n  ```\n    \"breakdown\": [\n        {\n            \"name\": \"Item 1\",\n            \"value\": 12,\n            \"subType\": \"VALUE_WITH_TAX\"\n        }\n    ]\n  ```"
-    SimpleFinanceLine:
-      required:
-      - subType
-      - name
-      - value
-      type: object
-      properties:
-        subType:
-          type: string
-          enum:
-          - VALUE
-          - TAX
-          - VALUE_WITH_TAX
-          - VAT
-          description: type of the finance line.
-        name:
-          type: string
-          description: name of the finance line.
-          example: sales tax.
-        value:
-          type: number
-          description: money amount.
-          example: 3.4
-      description: simple finance line.
-    StoreId:
-      type: string
-      description: The unique identifier of the store in the partner application. This ID, along with the `Application ID`, will be used to match the correct store when performing operations. It cannot be longer than 255 characters and must only contain printable ASCII characters. During on-boarding, this ID will be similar to `onboarding:905bb725-b141-4a9b-832a-1f254f772c94` (where the UUID is the Internal Store ID). During off-boarding, this field will be filled with the last known Store ID, or with an empty string, in case none is found. In that case, please fall back to the provided `internalStoreId` (a.k.a. Sku-Sku ID).
-      example: partner-store-unique-identifier
-    FinancialTransaction:
-      required:
-      - id
-      - orderIdentifiers
-      - pending
-      - currencyCode
-      - createdAt
-      - type
-      - data
-      type: object
-      properties:
-        orderIdentifiers:
-          $ref: '#/components/schemas/OrderIdentifierFinance'
-        id:
-          type: string
-          description: External financial transaction identifier.
-        pending:
-          type: boolean
-          description: Whether the transaction can be updated in the future.
-        currencyCode:
-          maxLength: 3
-          minLength: 3
-          type: string
-          description: The 3-letter currency code (ISO 4217) to use for all monetary values in this order.
-          example: EUR
-        createdAt:
-          type: string
-          description: The date (in UTC) when the financial transaction was created.
-          format: date-time
-          example: '2007-12-03T10:15:30+01:00'
-        customerId:
-          type:
-          - string
-          - 'null'
-          description: Customer identifier.
-        notes:
-          type:
-          - string
-          - 'null'
-          description: General notes about the financial transaction.
-        type:
-          type: string
-          description: Financial transaction operation type.
-          enum:
-          - PAYMENT
-          - ADJUSTMENT
-          - CANCELLATION
-          - MISC
-        payout:
-          $ref: '#/components/schemas/PayoutInfo'
-        orderItems:
-          type:
-          - array
-          - 'null'
-          description: Detailed financial per order item.
-          items:
-            $ref: '#/components/schemas/OrderItemInformation'
-        issues:
-          type:
-          - array
-          - 'null'
-          description: List of issues that might have happened with the order.
-          items:
-            $ref: '#/components/schemas/OrderIssue'
-        data:
-          $ref: '#/components/schemas/FinancialData'
-    SimpleOrderIdentifierFinance:
-      required:
-      - id
-      type: object
-      properties:
-        id:
-          type: string
-          description: Unique ID for the order that was placed.
-          example: 69f60a06-c335-46d9-b5a1-97f1a211c514
-      description: The external identifiers of the order.
-    OrderIdentifierFinance:
-      required:
-      - id
-      type: object
-      properties:
-        id:
-          type: string
-          description: Unique ID for the order that was placed.
-          example: 69f60a06-c335-46d9-b5a1-97f1a211c514
-        source:
-          type:
-          - string
-          - 'null'
-          description: Describes the source of the order, typically from a food ordering marketplace.
-          example: ubereats
-      description: The external identifiers of the order.
-    ErrorMessage:
-      type: object
-      properties:
-        message:
-          type: string
-          description: The error description.
-          example: The request body is invalid.
-        details:
-          type: array
-          description: The error details.
-          items:
-            $ref: '#/components/schemas/ErrorDetail'
-      description: The error response object.
-    InvoicePayoutInfo:
-      required:
-      - id
-      - date
-      type: object
-      properties:
-        id:
-          type: string
-          description: Payout identifier.
-        date:
-          type: string
-          description: The payout date.
-          format: date
-          example: '2021-10-01'
-        summary:
-          $ref: '#/components/schemas/FinancialData'
-        total:
-          type:
-          - number
-          - 'null'
-          description: Total payout value. Should only be used if summary is not provided.
-          example: 19.07
-    FinancialInvoice:
-      required:
-      - payout
-      - financialTransactions
-      type: object
-      properties:
-        sourceService:
-          type:
-          - string
-          - 'null'
-          description: Describes the source of the order, typically from a food ordering marketplace.
-          example: ubereats
-        payout:
-          $ref: '#/components/schemas/InvoicePayoutInfo'
-        financialTransactions:
-          type: array
-          description: List of financial transactions related to this invoice.
-          items:
-            $ref: '#/components/schemas/SimpleFinancialTransaction'
-        currencyCode:
-          maxLength: 3
-          minLength: 3
-          type: string
-          description: The 3-letter currency code (ISO 4217) to use for all monetary values in this order.
-          example: EUR
-    OrderItemInformation:
-      required:
-      - id
-      type: object
-      properties:
-        id:
-          type: string
-          description: Regular item identifier.
-        name:
-          type:
-          - string
-          - 'null'
-          description: Item name
-        issues:
-          type:
-          - array
-          - 'null'
-          description: Order issues that relate to this item.
-          items:
-            $ref: '#/components/schemas/OrderIssue'
     SimpleFinancialTransaction:
       required:
       - id
@@ -453,19 +400,17 @@ components:
             $ref: '#/components/schemas/OrderIssue'
         data:
           $ref: '#/components/schemas/FinancialData'
-    ErrorDetail:
+    SimpleOrderIdentifierFinance:
+      required:
+      - id
       type: object
       properties:
-        attribute:
+        id:
           type: string
-          description: The error attribute.
-          example: Order Currency Code
-        message:
-          type: string
-          description: The error detail description.
-          example: Order Currency Code must be exactly 3 characters
-      description: The error detail response object.
-    PayoutInfo:
+          description: Unique ID for the order that was placed.
+          example: 69f60a06-c335-46d9-b5a1-97f1a211c514
+      description: The external identifiers of the order.
+    InvoicePayoutInfo:
       required:
       - id
       - date
@@ -479,37 +424,92 @@ components:
           description: The payout date.
           format: date
           example: '2021-10-01'
-  responses:
-    '401':
-      description: Invalid authorization.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorMessage'
-    '400':
-      description: The request is malformed.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorMessage'
-    '404':
-      description: Resource not found.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorMessage'
-    '422':
-      description: The request body is not valid.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorMessage'
-    '403':
-      description: Authorization not valid for the requested resource.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorMessage'
+        summary:
+          $ref: '#/components/schemas/FinancialData'
+        total:
+          type:
+          - number
+          - 'null'
+          description: Total payout value. Should only be used if summary is not provided.
+          example: 19.07
+    SimpleFinanceLine:
+      required:
+      - subType
+      - name
+      - value
+      type: object
+      properties:
+        subType:
+          type: string
+          enum:
+          - VALUE
+          - TAX
+          - VALUE_WITH_TAX
+          - VAT
+          description: type of the finance line.
+        name:
+          type: string
+          description: name of the finance line.
+          example: sales tax.
+        value:
+          type: number
+          description: money amount.
+          example: 3.4
+      description: simple finance line.
+    ErrorMessage:
+      type: object
+      properties:
+        message:
+          type: string
+          description: The error description.
+          example: The request body is invalid.
+        details:
+          type: array
+          description: The error details.
+          items:
+            $ref: '#/components/schemas/ErrorDetail'
+      description: The error response object.
+    OrderItemInformation:
+      required:
+      - id
+      type: object
+      properties:
+        id:
+          type: string
+          description: Regular item identifier.
+        name:
+          type:
+          - string
+          - 'null'
+          description: Item name
+        issues:
+          type:
+          - array
+          - 'null'
+          description: Order issues that relate to this item.
+          items:
+            $ref: '#/components/schemas/OrderIssue'
+    OrderIssue:
+      required:
+      - type
+      type: object
+      properties:
+        type:
+          type: string
+          description: Order issue type.
+          enum:
+          - MISSING_ITEM
+          - INCOMPLETE
+          - WRONG_INGREDIENTS
+          - WRONG_SIZE
+          - WRONG_INSTRUCTIONS
+          - TEMPERATURE_COLD
+          - WRONG_ORDER
+          - POOR_QUALITY
+          - HANDLED_POORLY
+          - WRONG_ITEM
+          - WRONG_QUANTITY
+          - LATE_TO_COURIER
   parameters:
     storeIdHeader:
       name: X-Store-Id

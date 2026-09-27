@@ -100,6 +100,58 @@ webhooks:
       description: Staging server url
 components:
   schemas:
+    OrderStatusHistory:
+      type: object
+      description: The Order Status Update History and extra data.
+      properties:
+        orderStatusHistory:
+          type: array
+          description: Array of OrderStatusEvent
+          items:
+            $ref: '#/components/schemas/OrderStatusEvent'
+        orderAcceptedInfo:
+          type:
+          - object
+          - 'null'
+          description: '[NEW] Extra information added once the order was accepted by the restaurant. This field is nullable.'
+          properties:
+            preparationTimeInMinutes:
+              type: integer
+              description: '[NEW] The time in minutes the restaurant says it will take to prepare the order.'
+          required:
+          - preparationTimeInMinutes
+    SourceExternalIdentifiers:
+      type:
+      - object
+      - 'null'
+      properties:
+        id:
+          type: string
+          description: Unique ID for the order that was placed.
+          example: 69f60a06-c335-46d9-b5a1-97f1a211c514
+        friendlyId:
+          type: string
+          description: ID used for driver pickup and restaurant management.
+          example: ABCDE
+        source:
+          type: string
+          description: Describes the source of the order, typically from a food ordering marketplace.
+          example: ubereats
+        sourceType:
+          type: string
+          description: source type of the order
+          enum:
+          - POINT_OF_SALE
+          - ORDERING_MARKETPLACE
+          - AGGREGATOR
+          - CUSTOMER_INTERACTION
+        sourceExternalIdentifiers:
+          $ref: '#/components/schemas/SourceExternalIdentifiers'
+      description: The external identifiers.
+    StoreId:
+      type: string
+      description: The unique identifier of the store in the partner application. This ID, along with the `Application ID`, will be used to match the correct store when performing operations. It cannot be longer than 255 characters and must only contain printable ASCII characters. During on-boarding, this ID will be similar to `onboarding:905bb725-b141-4a9b-832a-1f254f772c94` (where the UUID is the Internal Store ID). During off-boarding, this field will be filled with the last known Store ID, or with an empty string, in case none is found. In that case, please fall back to the provided `internalStoreId` (a.k.a. Sku-Sku ID).
+      example: partner-store-unique-identifier
     PosInjectionStateUpdateEvent:
       type: object
       properties:
@@ -137,24 +189,6 @@ components:
             ticketData: Some value for the TicketData
             customField: customValue
       description: Event that describes current POS injection state
-    EventNotification:
-      type: object
-      properties:
-        eventId:
-          type: string
-          description: Unique identifier of the event.
-          format: uuid
-        eventTime:
-          type: string
-          description: Date of event occurrence.
-          format: date-time
-          example: '2007-12-03T10:15:30+01:00'
-        eventType:
-          type: string
-          description: The type of the event.
-        metadata:
-          $ref: '#/components/schemas/MetadataObject'
-      description: Notification message sent on relevant events.
     IntentToCancelEvent:
       type: object
       properties:
@@ -181,46 +215,24 @@ components:
           - CUSTOMER_NOT_FOUND
           - UNABLE_TO_DELIVER
       description: Event that request the intent to cancel an order.
-    OrderStatusHistory:
-      type: object
-      description: The Order Status Update History and extra data.
-      properties:
-        orderStatusHistory:
-          type: array
-          description: Array of OrderStatusEvent
-          items:
-            $ref: '#/components/schemas/OrderStatusEvent'
-        orderAcceptedInfo:
-          type:
-          - object
-          - 'null'
-          description: '[NEW] Extra information added once the order was accepted by the restaurant. This field is nullable.'
-          properties:
-            preparationTimeInMinutes:
-              type: integer
-              description: '[NEW] The time in minutes the restaurant says it will take to prepare the order.'
-          required:
-          - preparationTimeInMinutes
-    StoreId:
-      type: string
-      description: The unique identifier of the store in the partner application. This ID, along with the `Application ID`, will be used to match the correct store when performing operations. It cannot be longer than 255 characters and must only contain printable ASCII characters. During on-boarding, this ID will be similar to `onboarding:905bb725-b141-4a9b-832a-1f254f772c94` (where the UUID is the Internal Store ID). During off-boarding, this field will be filled with the last known Store ID, or with an empty string, in case none is found. In that case, please fall back to the provided `internalStoreId` (a.k.a. Sku-Sku ID).
-      example: partner-store-unique-identifier
-    OrderStatusEvent:
+    EventNotification:
       type: object
       properties:
-        status:
+        eventId:
           type: string
-          description: Events that represent updates on order status.
-          enum:
-          - ORDER_ACCEPTED
-          - ORDER_HANDED_OFF
-          - ORDER_READY_TO_PICKUP
-          - ORDER_FULFILLED
+          description: Unique identifier of the event.
+          format: uuid
         eventTime:
           type: string
-          description: The time when this OrderStatusUpdateEvent occurred
+          description: Date of event occurrence.
           format: date-time
           example: '2007-12-03T10:15:30+01:00'
+        eventType:
+          type: string
+          description: The type of the event.
+        metadata:
+          $ref: '#/components/schemas/MetadataObject'
+      description: Notification message sent on relevant events.
     OrderExternalIdentifiers:
       required:
       - friendlyId
@@ -254,6 +266,22 @@ components:
         sourceExternalIdentifiers:
           $ref: '#/components/schemas/SourceExternalIdentifiers'
       description: The external identifiers.
+    OrderStatusEvent:
+      type: object
+      properties:
+        status:
+          type: string
+          description: Events that represent updates on order status.
+          enum:
+          - ORDER_ACCEPTED
+          - ORDER_HANDED_OFF
+          - ORDER_READY_TO_PICKUP
+          - ORDER_FULFILLED
+        eventTime:
+          type: string
+          description: The time when this OrderStatusUpdateEvent occurred
+          format: date-time
+          example: '2007-12-03T10:15:30+01:00'
     MetadataObject:
       type: object
       properties:
@@ -275,34 +303,6 @@ components:
           description: The full endpoint to fetch the details of the resource, if needed.
           example: resource-href-id-if-needed
       description: Information about the event.
-    SourceExternalIdentifiers:
-      type:
-      - object
-      - 'null'
-      properties:
-        id:
-          type: string
-          description: Unique ID for the order that was placed.
-          example: 69f60a06-c335-46d9-b5a1-97f1a211c514
-        friendlyId:
-          type: string
-          description: ID used for driver pickup and restaurant management.
-          example: ABCDE
-        source:
-          type: string
-          description: Describes the source of the order, typically from a food ordering marketplace.
-          example: ubereats
-        sourceType:
-          type: string
-          description: source type of the order
-          enum:
-          - POINT_OF_SALE
-          - ORDERING_MARKETPLACE
-          - AGGREGATOR
-          - CUSTOMER_INTERACTION
-        sourceExternalIdentifiers:
-          $ref: '#/components/schemas/SourceExternalIdentifiers'
-      description: The external identifiers.
   responses:
     2XX:
       description: Return any 2XX status to indicate that the data was received successfully

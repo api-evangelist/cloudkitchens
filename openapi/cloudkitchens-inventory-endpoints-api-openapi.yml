@@ -123,23 +123,49 @@ paths:
         - catalog
 components:
   schemas:
-    SelfDropDeliveryInfo:
+    CourierServiceDeliveryInfo:
       allOf:
       - $ref: '#/components/schemas/DeliveryMetadata'
       - required:
-        - delivererName
+        - courierName
         type: object
-        description: Detailed delivery information for self-delivered shipments.
+        description: Detailed delivery information for shipments using small point-to-point courier operations that may offer specialized services (scheduling, chill chain, etc).
         properties:
-          delivererName:
+          courierName:
             type: string
-            description: The name of the deliverer.
-            example: Local Delivery Service
-          delivererEmailAddress:
+            description: The name of the company delivering the shipment.
+            example: Express Local Delivery Services
+          trackingId:
             type: string
-            description: The email address of the deliverer.
-            example: foo.bar@deliver.com
+            description: The tracking ID for this shipment
+            example: 18492b99ad000
         additionalProperties: true
+    InventorySummariesResponse:
+      type: object
+      properties:
+        inventorySummaries:
+          type: array
+          description: A list of the inventory summaries.
+          maxItems: 100
+          items:
+            $ref: '#/components/schemas/InventorySummary'
+        nextToken:
+          type: string
+          description: Opaque token used to fetch the following page. If set, pass the value of nextToken to the next request. If not set, no more results are available.
+          example: H12MAF2fFaFFFa
+    CreateShipmentRequest:
+      required:
+      - deliveryInfo
+      - lineItems
+      type: object
+      properties:
+        deliveryInfo:
+          $ref: '#/components/schemas/ShipmentDeliveryInfo'
+        lineItems:
+          type: array
+          description: A list of the shipment line items.
+          items:
+            $ref: '#/components/schemas/CreateShipmentLineItem'
     InventorySummary:
       required:
       - id
@@ -178,10 +204,19 @@ components:
           description: The total quantity of the product inbound to the facility or waiting at the facility to be processed.
           example: 8
       description: The inventory summary for a specific product.
-    StoreId:
-      type: string
-      description: The unique identifier of the store in the partner application. This ID, along with the `Application ID`, will be used to match the correct store when performing operations. It cannot be longer than 255 characters and must only contain printable ASCII characters. During on-boarding, this ID will be similar to `onboarding:905bb725-b141-4a9b-832a-1f254f772c94` (where the UUID is the Internal Store ID). During off-boarding, this field will be filled with the last known Store ID, or with an empty string, in case none is found. In that case, please fall back to the provided `internalStoreId` (a.k.a. Sku-Sku ID).
-      example: partner-store-unique-identifier
+    ShipmentStateChange:
+      required:
+      - timestamp
+      - state
+      type: object
+      properties:
+        state:
+          $ref: '#/components/schemas/ShipmentState'
+        timestamp:
+          type: string
+          description: ISO-8601 timestamp representing when the state change occurred.
+          format: date-time
+          example: '2007-12-03T10:15:30+01:00'
     ShipmentState:
       type: string
       description: The state of the shipment.
@@ -191,6 +226,62 @@ components:
       - STOCKING
       - CLOSED
       - CANCELED
+    ErrorDetail:
+      type: object
+      properties:
+        attribute:
+          type: string
+          description: The error attribute.
+          example: Order Currency Code
+        message:
+          type: string
+          description: The error detail description.
+          example: Order Currency Code must be exactly 3 characters
+      description: The error detail response object.
+    CreateShipmentResponse:
+      required:
+      - id
+      type: object
+      properties:
+        id:
+          type: string
+          description: A unique identifier for the shipment.
+          example: 18695c43-c670-4c57-a714-e0d7b215db20
+      description: A response containing information about the created shipment.
+    SelfDropDeliveryInfo:
+      allOf:
+      - $ref: '#/components/schemas/DeliveryMetadata'
+      - required:
+        - delivererName
+        type: object
+        description: Detailed delivery information for self-delivered shipments.
+        properties:
+          delivererName:
+            type: string
+            description: The name of the deliverer.
+            example: Local Delivery Service
+          delivererEmailAddress:
+            type: string
+            description: The email address of the deliverer.
+            example: foo.bar@deliver.com
+        additionalProperties: true
+    StoreId:
+      type: string
+      description: The unique identifier of the store in the partner application. This ID, along with the `Application ID`, will be used to match the correct store when performing operations. It cannot be longer than 255 characters and must only contain printable ASCII characters. During on-boarding, this ID will be similar to `onboarding:905bb725-b141-4a9b-832a-1f254f772c94` (where the UUID is the Internal Store ID). During off-boarding, this field will be filled with the last known Store ID, or with an empty string, in case none is found. In that case, please fall back to the provided `internalStoreId` (a.k.a. Sku-Sku ID).
+      example: partner-store-unique-identifier
+    DeliveryMetadata:
+      required:
+      - deliveryWindow
+      - deliveryType
+      type: object
+      properties:
+        deliveryWindow:
+          $ref: '#/components/schemas/DeliveryWindow'
+          description: The delivery window for the shipment.
+        deliveryType:
+          type: string
+          description: The type of delivery service for this shipment.
+      additionalProperties: true
     ShipmentDeliveryInfo:
       type: object
       description: Delivery information for a shipment.
@@ -204,6 +295,23 @@ components:
       - $ref: '#/components/schemas/CourierServiceDeliveryInfo'
       - $ref: '#/components/schemas/ParcelCarrierDeliveryInfo'
       - $ref: '#/components/schemas/SelfDropDeliveryInfo'
+    ListShipmentsResponse:
+      type: object
+      properties:
+        shipments:
+          type: array
+          description: A list of shipments.
+          maxItems: 50
+          items:
+            $ref: '#/components/schemas/Shipment'
+        nextToken:
+          type: string
+          description: Opaque token used to fetch the following page. If set, pass the value of nextToken to the next request. If not set, no more results are available.
+          example: H12MAF2fFaFFFa
+    Gtin:
+      type: string
+      description: A 14 digit Global Trade Item Number (GTIN). For GTIN values that are shorter than 14 digits, value will be padded with leading zeroes.
+      example: 00049000608779
     ShipmentLineItem:
       required:
       - id
@@ -252,10 +360,23 @@ components:
             description: The tracking number for this shipment
             example: 18492b99ad000
         additionalProperties: true
-    Gtin:
-      type: string
-      description: A 14 digit Global Trade Item Number (GTIN). For GTIN values that are shorter than 14 digits, value will be padded with leading zeroes.
-      example: 00049000608779
+    DeliveryWindow:
+      required:
+      - start
+      - end
+      type: object
+      description: The delivery window in which the shipment is expected to arrive at the destination.
+      properties:
+        start:
+          type: string
+          description: ISO-8601 timestamp representing the start of the time range.
+          format: date-time
+          example: '2007-12-03T10:15:30+01:00'
+        end:
+          type: string
+          description: ISO-8601 timestamp representing the end of the time range.
+          format: date-time
+          example: '2007-12-03T10:15:30+01:00'
     ErrorMessage:
       type: object
       properties:
@@ -269,33 +390,6 @@ components:
           items:
             $ref: '#/components/schemas/ErrorDetail'
       description: The error response object.
-    CreateShipmentResponse:
-      required:
-      - id
-      type: object
-      properties:
-        id:
-          type: string
-          description: A unique identifier for the shipment.
-          example: 18695c43-c670-4c57-a714-e0d7b215db20
-      description: A response containing information about the created shipment.
-    CourierServiceDeliveryInfo:
-      allOf:
-      - $ref: '#/components/schemas/DeliveryMetadata'
-      - required:
-        - courierName
-        type: object
-        description: Detailed delivery information for shipments using small point-to-point courier operations that may offer specialized services (scheduling, chill chain, etc).
-        properties:
-          courierName:
-            type: string
-            description: The name of the company delivering the shipment.
-            example: Express Local Delivery Services
-          trackingId:
-            type: string
-            description: The tracking ID for this shipment
-            example: 18492b99ad000
-        additionalProperties: true
     CreateShipmentLineItem:
       required:
       - manifestQuantity
@@ -325,49 +419,6 @@ components:
           type: integer
           description: The quantity of the product in the shipment received that was unsellable (damaged, expired, etc.).
           example: 5
-    DeliveryWindow:
-      required:
-      - start
-      - end
-      type: object
-      description: The delivery window in which the shipment is expected to arrive at the destination.
-      properties:
-        start:
-          type: string
-          description: ISO-8601 timestamp representing the start of the time range.
-          format: date-time
-          example: '2007-12-03T10:15:30+01:00'
-        end:
-          type: string
-          description: ISO-8601 timestamp representing the end of the time range.
-          format: date-time
-          example: '2007-12-03T10:15:30+01:00'
-    CreateShipmentRequest:
-      required:
-      - deliveryInfo
-      - lineItems
-      type: object
-      properties:
-        deliveryInfo:
-          $ref: '#/components/schemas/ShipmentDeliveryInfo'
-        lineItems:
-          type: array
-          description: A list of the shipment line items.
-          items:
-            $ref: '#/components/schemas/CreateShipmentLineItem'
-    InventorySummariesResponse:
-      type: object
-      properties:
-        inventorySummaries:
-          type: array
-          description: A list of the inventory summaries.
-          maxItems: 100
-          items:
-            $ref: '#/components/schemas/InventorySummary'
-        nextToken:
-          type: string
-          description: Opaque token used to fetch the following page. If set, pass the value of nextToken to the next request. If not set, no more results are available.
-          example: H12MAF2fFaFFFa
     Shipment:
       required:
       - id
@@ -393,57 +444,37 @@ components:
           description: The state changes for the shipment. The final state change represents the current state of the shipment.
           items:
             $ref: '#/components/schemas/ShipmentStateChange'
-    ListShipmentsResponse:
-      type: object
-      properties:
-        shipments:
-          type: array
-          description: A list of shipments.
-          maxItems: 50
-          items:
-            $ref: '#/components/schemas/Shipment'
-        nextToken:
-          type: string
-          description: Opaque token used to fetch the following page. If set, pass the value of nextToken to the next request. If not set, no more results are available.
-          example: H12MAF2fFaFFFa
-    ErrorDetail:
-      type: object
-      properties:
-        attribute:
-          type: string
-          description: The error attribute.
-          example: Order Currency Code
-        message:
-          type: string
-          description: The error detail description.
-          example: Order Currency Code must be exactly 3 characters
-      description: The error detail response object.
-    ShipmentStateChange:
-      required:
-      - timestamp
-      - state
-      type: object
-      properties:
-        state:
-          $ref: '#/components/schemas/ShipmentState'
-        timestamp:
-          type: string
-          description: ISO-8601 timestamp representing when the state change occurred.
-          format: date-time
-          example: '2007-12-03T10:15:30+01:00'
-    DeliveryMetadata:
-      required:
-      - deliveryWindow
-      - deliveryType
-      type: object
-      properties:
-        deliveryWindow:
-          $ref: '#/components/schemas/DeliveryWindow'
-          description: The delivery window for the shipment.
-        deliveryType:
-          type: string
-          description: The type of delivery service for this shipment.
-      additionalProperties: true
+  responses:
+    '404':
+      description: Resource not found.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorMessage'
+    '403':
+      description: Authorization not valid for the requested resource.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorMessage'
+    '422':
+      description: The request body is not valid.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorMessage'
+    '401':
+      description: Invalid authorization.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorMessage'
+    '400':
+      description: The request is malformed.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorMessage'
   parameters:
     inventory-summary-limit:
       name: limit
@@ -454,14 +485,6 @@ components:
         description: Max number of entities to retrieve
         example: 5
         maximum: 200
-    opaquePaginationToken:
-      name: token
-      in: query
-      required: false
-      schema:
-        type: string
-        description: Opaque token used for paging. Query parameters must be URL encoded.
-        example: CgwI09+kjQYQwOvF2AM=/(urlencoded:CgwI09%2BkjQYQwOvF2AM%3D)
     storeIdHeader:
       name: X-Store-Id
       in: header
@@ -477,37 +500,14 @@ components:
         description: Max number of entities to retrieve
         example: 5
         maximum: 50
-  responses:
-    '401':
-      description: Invalid authorization.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorMessage'
-    '400':
-      description: The request is malformed.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorMessage'
-    '404':
-      description: Resource not found.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorMessage'
-    '422':
-      description: The request body is not valid.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorMessage'
-    '403':
-      description: Authorization not valid for the requested resource.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorMessage'
+    opaquePaginationToken:
+      name: token
+      in: query
+      required: false
+      schema:
+        type: string
+        description: Opaque token used for paging. Query parameters must be URL encoded.
+        example: CgwI09+kjQYQwOvF2AM=/(urlencoded:CgwI09%2BkjQYQwOvF2AM%3D)
   securitySchemes:
     OAuth2.0:
       type: oauth2
