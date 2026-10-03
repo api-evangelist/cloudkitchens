@@ -48,6 +48,27 @@ components:
       type: string
       description: The unique identifier of the store in the partner application. This ID, along with the `Application ID`, will be used to match the correct store when performing operations. It cannot be longer than 255 characters and must only contain printable ASCII characters. During on-boarding, this ID will be similar to `onboarding:905bb725-b141-4a9b-832a-1f254f772c94` (where the UUID is the Internal Store ID). During off-boarding, this field will be filled with the last known Store ID, or with an empty string, in case none is found. In that case, please fall back to the provided `internalStoreId` (a.k.a. Sku-Sku ID).
       example: partner-store-unique-identifier
+    MetadataObject:
+      type: object
+      properties:
+        storeId:
+          $ref: '#/components/schemas/StoreId'
+        applicationId:
+          type: string
+          description: The plain-text Application ID, provided at partner onboarding, also available on Developer Portal.
+          example: ad4ff59d-04c0-4c7d-8ca3-e3a673f8443d
+        resourceId:
+          type: string
+          description: Identifier of the resource that this event refers to, if needed.
+          example: resource-id-if-needed
+        payload:
+          type: object
+          description: Object containing details of the given event, if needed.
+        resourceHref:
+          type: string
+          description: The full endpoint to fetch the details of the resource, if needed.
+          example: resource-href-id-if-needed
+      description: Information about the event.
     EventNotification:
       type: object
       properties:
@@ -72,27 +93,6 @@ components:
         message:
           type: string
           example: Hello World
-    MetadataObject:
-      type: object
-      properties:
-        storeId:
-          $ref: '#/components/schemas/StoreId'
-        applicationId:
-          type: string
-          description: The plain-text Application ID, provided at partner onboarding, also available on Developer Portal.
-          example: ad4ff59d-04c0-4c7d-8ca3-e3a673f8443d
-        resourceId:
-          type: string
-          description: Identifier of the resource that this event refers to, if needed.
-          example: resource-id-if-needed
-        payload:
-          type: object
-          description: Object containing details of the given event, if needed.
-        resourceHref:
-          type: string
-          description: The full endpoint to fetch the details of the resource, if needed.
-          example: resource-href-id-if-needed
-      description: Information about the event.
   responses:
     2XX:
       description: Return any 2XX status to indicate that the data was received successfully

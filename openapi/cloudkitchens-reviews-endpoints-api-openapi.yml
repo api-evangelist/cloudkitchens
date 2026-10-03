@@ -63,6 +63,16 @@ components:
           items:
             $ref: '#/components/schemas/ErrorDetail'
       description: The error response object.
+    ReviewReplyResponse:
+      type: object
+      properties:
+        replyId:
+          type:
+          - string
+          - 'null'
+          description: The reply ID. Returned if no scheduled timestamp was provided.
+          example: reply-f34f-4d35
+      description: The response to reply to a review.
     ReviewReplyRequest:
       type: object
       properties:
@@ -90,16 +100,6 @@ components:
           format: double
           example: 1697727006
       description: The request to reply to a review.
-    ReviewReplyResponse:
-      type: object
-      properties:
-        replyId:
-          type:
-          - string
-          - 'null'
-          description: The reply ID. Returned if no scheduled timestamp was provided.
-          example: reply-f34f-4d35
-      description: The response to reply to a review.
     ErrorDetail:
       type: object
       properties:
@@ -113,14 +113,20 @@ components:
           example: Order Currency Code must be exactly 3 characters
       description: The error detail response object.
   responses:
-    '404':
-      description: Resource not found.
+    '403':
+      description: Authorization not valid for the requested resource.
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/ErrorMessage'
-    '403':
-      description: Authorization not valid for the requested resource.
+    '400':
+      description: The request is malformed.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorMessage'
+    '404':
+      description: Resource not found.
       content:
         application/json:
           schema:
@@ -133,12 +139,6 @@ components:
             $ref: '#/components/schemas/ErrorMessage'
     '401':
       description: Invalid authorization.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorMessage'
-    '400':
-      description: The request is malformed.
       content:
         application/json:
           schema:

@@ -240,6 +240,91 @@ paths:
         - marketintel.service_integration
 components:
   schemas:
+    Marketintel_Coordinates:
+      type: object
+      properties:
+        coordinatesType:
+          type: string
+          description: Coordinates type
+          enum:
+          - WGS84
+          - GCJ02
+        location:
+          type: object
+          description: The longitude and latitude of a location.
+          $ref: '#/components/schemas/Location'
+      description: The geographical coordinates of a location.
+    EventResultMetadata:
+      type:
+      - object
+      - 'null'
+      properties:
+        operationStatus:
+          type: string
+          description: Status of the operation requested by an event.
+          enum:
+          - SUCCEEDED
+          - INTERNAL_ERROR
+          - AUTHENTICATION_FAILURE
+          - AUTHORIZATION_FAILURE
+          - UNKNOWN_FAILURE
+          - INVALID_STORE_STATE
+          - INVALID_STORE_CONFIGURATION
+          - OPERATION_NOT_SUPPORTED
+          - IGNORED_ALREADY_IN_REQUESTED_STATE
+          - INVALID_REQUEST
+        additionalInformation:
+          type:
+          - string
+          - 'null'
+          description: Additional details about the event result, if available.
+          example: Completed without problems.
+        operationFinishedAt:
+          type: string
+          description: Time when the processing of the event finished.
+          format: date-time
+          example: '2007-12-03T10:15:30+01:00'
+      description: Information about the result of a storefront event.
+    Marketintel_StoreChain:
+      type: object
+      properties:
+        chainId:
+          type:
+          - string
+          - 'null'
+          description: The external chain id.
+          example: 1
+        chainName:
+          type:
+          - string
+          - 'null'
+          description: The name of the chain.
+          example: Macdonalds
+      description: The Store Chain information.
+    Storefront_RegularHours:
+      required:
+      - dayOfWeek
+      - timeRanges
+      type: object
+      properties:
+        dayOfWeek:
+          type: string
+          description: Day of the week.
+          enum:
+          - MONDAY
+          - TUESDAY
+          - WEDNESDAY
+          - THURSDAY
+          - FRIDAY
+          - SATURDAY
+          - SUNDAY
+        timeRanges:
+          type: array
+          minItems: 1
+          description: Hours range applied to the provided day of the week
+          items:
+            $ref: '#/components/schemas/Storefront_TimeRange'
+      description: Describes the configuration of regular hours.
     Address:
       type:
       - object
@@ -291,122 +376,6 @@ components:
         location:
           $ref: '#/components/schemas/Location'
       description: Order delivery address.
-    Marketintel_StoreDeliveryInformation:
-      type: object
-      properties:
-        minDeliveryBasketSize:
-          type:
-          - object
-          - 'null'
-          description: The minimum basket value of the order needed for delivery
-          $ref: '#/components/schemas/Money'
-        deliveryFee:
-          type:
-          - object
-          - 'null'
-          description: The delivery fee for the order
-          $ref: '#/components/schemas/Money'
-        deliveryType:
-          type:
-          - string
-          - 'null'
-          description: The delivery type for the order
-          example: Third Party
-        deliveryTimeMinutes:
-          type:
-          - integer
-          - 'null'
-          description: The estimated delivery time in minutes
-          example: 30
-      description: The Store delivery information.
-    Marketintel_StoreMenu:
-      type: object
-      properties:
-        category:
-          type:
-          - string
-          - 'null'
-          description: The grouping category name.
-          example: Fast Food
-        ids:
-          type: array
-          description: The list of external store ids in the list in rank order.
-          items:
-            type: string
-            description: The external id the store
-            example: 123456
-        location:
-          type: object
-          description: The geographic location of the stores that was searched from.
-      description: The Store listing in ranking order based on category.
-    Marketintel_StorePriceLevel:
-      type: object
-      properties:
-        priceLevel:
-          type:
-          - number
-          - 'null'
-          description: The price level of the store in numeric rating.
-          example: 3
-        priceLevelName:
-          type:
-          - string
-          - 'null'
-          description: The price level of the store in text.
-          example: $$$
-      description: The Store Price Level information. At least one of the price level or price level name need to be present.
-    GetStoreDetailsEventResult:
-      type: object
-      properties:
-        superRegion:
-          type: string
-          description: Represents a super region geographical mapping.
-          example: LATAM
-        storeDetails:
-          type: array
-          minItems: 0
-          description: Represents a list of stores
-          items:
-            $ref: '#/components/schemas/Marketintel_StoreDetails'
-      description: The result of an event that request to store details.
-    Marketintel_RegularHours:
-      required:
-      - days
-      - timeRanges
-      type: object
-      properties:
-        days:
-          type: array
-          description: The day of the week this configuration applies.
-          items:
-            type: string
-            description: Day of the week.
-            enum:
-            - MONDAY
-            - TUESDAY
-            - WEDNESDAY
-            - THURSDAY
-            - FRIDAY
-            - SATURDAY
-            - SUNDAY
-        timeRanges:
-          type: array
-          description: Hours range applied to the provided day of the week
-          items:
-            $ref: '#/components/schemas/Marketintel_TimeRange'
-      description: Describes the configuration of regular hours.
-    ErrorDetail:
-      type: object
-      properties:
-        attribute:
-          type: string
-          description: The error attribute.
-          example: Order Currency Code
-        message:
-          type: string
-          description: The error detail description.
-          example: Order Currency Code must be exactly 3 characters
-      description: The error detail response object.
     Marketintel_StorePromotion:
       type: object
       properties:
@@ -435,83 +404,6 @@ components:
           description: The external promotion id.
           example: 12345
       description: The Store Promotion information. At least one of the displayName, promotionType, campaignType or promotionId need to be present.
-    Storefront_TimeRange:
-      type: object
-      properties:
-        startTime:
-          type: string
-          description: Start time of the range in 24 hour format.
-          example: 08:00
-        endTime:
-          type: string
-          description: End time of the range in 24 hour format.
-          example: 08:00
-      description: Time range in a given date.
-    StoreId:
-      type: string
-      description: The unique identifier of the store in the partner application. This ID, along with the `Application ID`, will be used to match the correct store when performing operations. It cannot be longer than 255 characters and must only contain printable ASCII characters. During on-boarding, this ID will be similar to `onboarding:905bb725-b141-4a9b-832a-1f254f772c94` (where the UUID is the Internal Store ID). During off-boarding, this field will be filled with the last known Store ID, or with an empty string, in case none is found. In that case, please fall back to the provided `internalStoreId` (a.k.a. Sku-Sku ID).
-      example: partner-store-unique-identifier
-    StoreHoursConfiguration:
-      required:
-      - timezone
-      type: object
-      properties:
-        deliveryHours:
-          $ref: '#/components/schemas/StoreHours'
-        pickupHours:
-          $ref: '#/components/schemas/StoreHours'
-        timezone:
-          type: string
-          description: The store time zone identifier. (e.g. America/New_York)
-          example: America/Los_Angeles
-      description: The current store hours configuration of a store.
-    Marketintel_StoreChain:
-      type: object
-      properties:
-        chainId:
-          type:
-          - string
-          - 'null'
-          description: The external chain id.
-          example: 1
-        chainName:
-          type:
-          - string
-          - 'null'
-          description: The name of the chain.
-          example: Macdonalds
-      description: The Store Chain information.
-    EventResultMetadata:
-      type:
-      - object
-      - 'null'
-      properties:
-        operationStatus:
-          type: string
-          description: Status of the operation requested by an event.
-          enum:
-          - SUCCEEDED
-          - INTERNAL_ERROR
-          - AUTHENTICATION_FAILURE
-          - AUTHORIZATION_FAILURE
-          - UNKNOWN_FAILURE
-          - INVALID_STORE_STATE
-          - INVALID_STORE_CONFIGURATION
-          - OPERATION_NOT_SUPPORTED
-          - IGNORED_ALREADY_IN_REQUESTED_STATE
-          - INVALID_REQUEST
-        additionalInformation:
-          type:
-          - string
-          - 'null'
-          description: Additional details about the event result, if available.
-          example: Completed without problems.
-        operationFinishedAt:
-          type: string
-          description: Time when the processing of the event finished.
-          format: date-time
-          example: '2007-12-03T10:15:30+01:00'
-      description: Information about the result of a storefront event.
     RequiredEventResultMetadata:
       type: object
       properties:
@@ -541,213 +433,6 @@ components:
           format: date-time
           example: '2007-12-03T10:15:30+01:00'
       description: Information about the result of a storefront event.
-    UnpauseStoreEventResult:
-      type: object
-      properties:
-        eventResultMetadata:
-          $ref: '#/components/schemas/RequiredEventResultMetadata'
-      description: Result of an event that requested to unpause a store.
-    Marketintel_StoreSales:
-      type: object
-      properties:
-        periodType:
-          type:
-          - string
-          - 'null'
-          description: The period type of the sales data
-          example: null
-        numberOfSales:
-          type:
-          - integer
-          - 'null'
-          description: The number of sales.
-          example: 100
-        displayNumberOfSales:
-          type:
-          - string
-          - 'null'
-          description: The display text of the number of sales.
-          example:
-          - 20
-          - 20+
-      description: The Store Sales information. At least one of the periodType, numberOfSales or displayNumberOfSales need to be present.
-    Storefront_SpecialHours:
-      required:
-      - date
-      - timeRanges
-      - specialHourType
-      type: object
-      properties:
-        date:
-          type: string
-          description: Date the special hour configuration applies.
-          format: date
-          example: '2021-10-01'
-        timeRanges:
-          type: array
-          minItems: 1
-          description: Hours range applied to configured date.
-          items:
-            $ref: '#/components/schemas/Storefront_TimeRange'
-        specialHourType:
-          type: string
-          description: Store state that should be applied during the configured special hour.
-          enum:
-          - OPEN
-          - CLOSED
-      description: Describes the configuration of special store hours.
-    Marketintel_Coordinates:
-      type: object
-      properties:
-        coordinatesType:
-          type: string
-          description: Coordinates type
-          enum:
-          - WGS84
-          - GCJ02
-        location:
-          type: object
-          description: The longitude and latitude of a location.
-          $ref: '#/components/schemas/Location'
-      description: The geographical coordinates of a location.
-    Money:
-      required:
-      - amount
-      - currencyCode
-      type: object
-      properties:
-        currencyCode:
-          maxLength: 3
-          minLength: 3
-          type: string
-          description: The 3-letter currency code (ISO 4217) to use for all monetary values.
-          example: EUR
-        amount:
-          minimum: 0
-          type: number
-          description: Amount value.
-          example: 25.21
-      description: Money amount.
-      example: 25.21
-    StoreHours:
-      type:
-      - object
-      - 'null'
-      properties:
-        regularHours:
-          type: array
-          description: List of regular hours configuration.
-          items:
-            $ref: '#/components/schemas/Storefront_RegularHours'
-        specialHours:
-          type:
-          - array
-          - 'null'
-          description: List of special hours configuration.
-          items:
-            $ref: '#/components/schemas/Storefront_SpecialHours'
-      description: Represents store hours configuration with regular hours and special hours.
-    Marketintel_TimeRange:
-      required:
-      - end
-      - start
-      type: object
-      properties:
-        start:
-          type: string
-          description: Start time of the range in 24 hour format.
-          example: 08:00
-        end:
-          type: string
-          description: End time of the range in 24 hour format.
-          example: '22:00'
-      description: Time range in a given date.
-    Marketintel_StoreRating:
-      type: object
-      properties:
-        ratingScore:
-          type:
-          - number
-          - 'null'
-          description: The normalized rating score of the store.
-          example: 2
-        estimatedRatingCount:
-          type:
-          - integer
-          - 'null'
-          description: The estimated number of scores in the rating.
-          example: 100
-        displayRatingCount:
-          type:
-          - string
-          - 'null'
-          description: The display text of the number of scores in the rating.
-          example:
-          - 20+
-          - 20
-      description: The Store rating information. At least one of the ratingScore, estimatedRatingCount or displayRatingCount need to be present.
-    Storefront_RegularHours:
-      required:
-      - dayOfWeek
-      - timeRanges
-      type: object
-      properties:
-        dayOfWeek:
-          type: string
-          description: Day of the week.
-          enum:
-          - MONDAY
-          - TUESDAY
-          - WEDNESDAY
-          - THURSDAY
-          - FRIDAY
-          - SATURDAY
-          - SUNDAY
-        timeRanges:
-          type: array
-          minItems: 1
-          description: Hours range applied to the provided day of the week
-          items:
-            $ref: '#/components/schemas/Storefront_TimeRange'
-      description: Describes the configuration of regular hours.
-    Marketintel_SpecialHours:
-      required:
-      - date
-      - timeRanges
-      - type
-      type: object
-      properties:
-        date:
-          type: string
-          description: Date the special hour configuration applies.
-          format: date
-          example: '2021-10-01'
-        timeRanges:
-          type: array
-          minItems: 1
-          description: Hours range applied to configured date.
-          items:
-            $ref: '#/components/schemas/Marketintel_TimeRange'
-        type:
-          type: string
-          description: Store state that should be applied during the configured special hour.
-          enum:
-          - OPEN
-          - CLOSED
-      description: Describes the configuration of special store hours.
-    ErrorMessage:
-      type: object
-      properties:
-        message:
-          type: string
-          description: The error description.
-          example: The request body is invalid.
-        details:
-          type: array
-          description: The error details.
-          items:
-            $ref: '#/components/schemas/ErrorDetail'
-      description: The error response object.
     Location:
       required:
       - latitude
@@ -767,36 +452,107 @@ components:
           format: double
           example: 77.0365
       description: Latitude and longitude of the address.
-    Marketintel_GeoLocationInformation:
+    PauseStoreEventResult:
       type: object
       properties:
-        regionId:
+        closureId:
           type: string
-          description: The region id of the geographical location.
-          example:
-          - LATAM-N
-        superRegion:
+          description: ID required to unpause a store, if available
+          example: 4109d2c9-8bc5-413c-af3e-1c92aa381e41
+        eventResultMetadata:
+          $ref: '#/components/schemas/RequiredEventResultMetadata'
+      description: Result of an event that requested to pause a store.
+    ErrorMessage:
+      type: object
+      properties:
+        message:
           type: string
-          description: The super region of the geographical location.
-          example:
-          - LATAM
-        h3Index:
+          description: The error description.
+          example: The request body is invalid.
+        details:
+          type: array
+          description: The error details.
+          items:
+            $ref: '#/components/schemas/ErrorDetail'
+      description: The error response object.
+    Marketintel_TimeRange:
+      required:
+      - end
+      - start
+      type: object
+      properties:
+        start:
           type: string
-          description: The H3Index value of the geographic location.
-          example:
-          - 886d344c81fffff
-        searchText:
+          description: Start time of the range in 24 hour format.
+          example: 08:00
+        end:
+          type: string
+          description: End time of the range in 24 hour format.
+          example: '22:00'
+      description: Time range in a given date.
+    StoreAvailabilityEventResult:
+      type: object
+      properties:
+        storeState:
           type:
           - string
           - 'null'
-          description: The text used to search for stores.
-          example:
-          - chinese food
-        address:
+          description: Represents the current state of a store.
+          enum:
+          - OPEN
+          - OFF_HOUR
+          - SERVICE_PROVIDER_PAUSED
+          - OPERATOR_PAUSED
+          - SERVICE_PROVIDER_PAUSED_COURIERS_UNAVAILABLE
+          - STORE_UNAVAILABLE
+          - HOLIDAY_HOUR
+          - MENU_UNAVAILABLE
+          - SERVICE_PROVIDER_PAUSED_MISCONFIGURED
+          - OPEN_FOR_PICKUP_ONLY
+          - OPEN_FOR_DELIVERY_ONLY
+          - CLOSED_FOR_UNDETERMINED_REASON
+        statusChangedAt:
+          type:
+          - string
+          - 'null'
+          description: The time when the store changed to the current state.
+          format: date-time
+          example: '2007-12-03T10:15:30+01:00'
+        eventResultMetadata:
+          $ref: '#/components/schemas/EventResultMetadata'
+      description: The current state of a store.
+    Marketintel_StoreMenu:
+      type: object
+      properties:
+        category:
+          type:
+          - string
+          - 'null'
+          description: The grouping category name.
+          example: Fast Food
+        ids:
+          type: array
+          description: The list of external store ids in the list in rank order.
+          items:
+            type: string
+            description: The external id the store
+            example: 123456
+        location:
           type: object
-          description: The address of the geographical location.
-          $ref: '#/components/schemas/Address'
-      description: The geographical location information used to discover stores.  This information will need be pass back with the result.
+          description: The geographic location of the stores that was searched from.
+      description: The Store listing in ranking order based on category.
+    ErrorDetail:
+      type: object
+      properties:
+        attribute:
+          type: string
+          description: The error attribute.
+          example: Order Currency Code
+        message:
+          type: string
+          description: The error detail description.
+          example: Order Currency Code must be exactly 3 characters
+      description: The error detail response object.
     Marketintel_StoreDetails:
       type: object
       properties:
@@ -921,47 +677,204 @@ components:
           description: The estimated delivery time in minutes.
           $ref: '#/components/schemas/Marketintel_StorePriceLevel'
       description: The Store delivery information.
-    PauseStoreEventResult:
+    UnpauseStoreEventResult:
       type: object
       properties:
-        closureId:
-          type: string
-          description: ID required to unpause a store, if available
-          example: 4109d2c9-8bc5-413c-af3e-1c92aa381e41
         eventResultMetadata:
           $ref: '#/components/schemas/RequiredEventResultMetadata'
-      description: Result of an event that requested to pause a store.
-    StoreAvailabilityEventResult:
+      description: Result of an event that requested to unpause a store.
+    StoreHoursConfigurationEventResult:
       type: object
       properties:
-        storeState:
-          type:
-          - string
-          - 'null'
-          description: Represents the current state of a store.
-          enum:
-          - OPEN
-          - OFF_HOUR
-          - SERVICE_PROVIDER_PAUSED
-          - OPERATOR_PAUSED
-          - SERVICE_PROVIDER_PAUSED_COURIERS_UNAVAILABLE
-          - STORE_UNAVAILABLE
-          - HOLIDAY_HOUR
-          - MENU_UNAVAILABLE
-          - SERVICE_PROVIDER_PAUSED_MISCONFIGURED
-          - OPEN_FOR_PICKUP_ONLY
-          - OPEN_FOR_DELIVERY_ONLY
-          - CLOSED_FOR_UNDETERMINED_REASON
+        storeHoursConfiguration:
+          $ref: '#/components/schemas/StoreHoursConfiguration'
         statusChangedAt:
-          type:
-          - string
-          - 'null'
-          description: The time when the store changed to the current state.
+          type: string
+          description: The time when the store hours configuration changed.
           format: date-time
           example: '2007-12-03T10:15:30+01:00'
         eventResultMetadata:
           $ref: '#/components/schemas/EventResultMetadata'
-      description: The current state of a store.
+      description: The current store hours configuration.
+    GetStoreDetailsEventResult:
+      type: object
+      properties:
+        superRegion:
+          type: string
+          description: Represents a super region geographical mapping.
+          example: LATAM
+        storeDetails:
+          type: array
+          minItems: 0
+          description: Represents a list of stores
+          items:
+            $ref: '#/components/schemas/Marketintel_StoreDetails'
+      description: The result of an event that request to store details.
+    Storefront_SpecialHours:
+      required:
+      - date
+      - timeRanges
+      - specialHourType
+      type: object
+      properties:
+        date:
+          type: string
+          description: Date the special hour configuration applies.
+          format: date
+          example: '2021-10-01'
+        timeRanges:
+          type: array
+          minItems: 1
+          description: Hours range applied to configured date.
+          items:
+            $ref: '#/components/schemas/Storefront_TimeRange'
+        specialHourType:
+          type: string
+          description: Store state that should be applied during the configured special hour.
+          enum:
+          - OPEN
+          - CLOSED
+      description: Describes the configuration of special store hours.
+    StoreId:
+      type: string
+      description: The unique identifier of the store in the partner application. This ID, along with the `Application ID`, will be used to match the correct store when performing operations. It cannot be longer than 255 characters and must only contain printable ASCII characters. During on-boarding, this ID will be similar to `onboarding:905bb725-b141-4a9b-832a-1f254f772c94` (where the UUID is the Internal Store ID). During off-boarding, this field will be filled with the last known Store ID, or with an empty string, in case none is found. In that case, please fall back to the provided `internalStoreId` (a.k.a. Sku-Sku ID).
+      example: partner-store-unique-identifier
+    Marketintel_SpecialHours:
+      required:
+      - date
+      - timeRanges
+      - type
+      type: object
+      properties:
+        date:
+          type: string
+          description: Date the special hour configuration applies.
+          format: date
+          example: '2021-10-01'
+        timeRanges:
+          type: array
+          minItems: 1
+          description: Hours range applied to configured date.
+          items:
+            $ref: '#/components/schemas/Marketintel_TimeRange'
+        type:
+          type: string
+          description: Store state that should be applied during the configured special hour.
+          enum:
+          - OPEN
+          - CLOSED
+      description: Describes the configuration of special store hours.
+    Marketintel_RegularHours:
+      required:
+      - days
+      - timeRanges
+      type: object
+      properties:
+        days:
+          type: array
+          description: The day of the week this configuration applies.
+          items:
+            type: string
+            description: Day of the week.
+            enum:
+            - MONDAY
+            - TUESDAY
+            - WEDNESDAY
+            - THURSDAY
+            - FRIDAY
+            - SATURDAY
+            - SUNDAY
+        timeRanges:
+          type: array
+          description: Hours range applied to the provided day of the week
+          items:
+            $ref: '#/components/schemas/Marketintel_TimeRange'
+      description: Describes the configuration of regular hours.
+    Marketintel_StoreRating:
+      type: object
+      properties:
+        ratingScore:
+          type:
+          - number
+          - 'null'
+          description: The normalized rating score of the store.
+          example: 2
+        estimatedRatingCount:
+          type:
+          - integer
+          - 'null'
+          description: The estimated number of scores in the rating.
+          example: 100
+        displayRatingCount:
+          type:
+          - string
+          - 'null'
+          description: The display text of the number of scores in the rating.
+          example:
+          - 20+
+          - 20
+      description: The Store rating information. At least one of the ratingScore, estimatedRatingCount or displayRatingCount need to be present.
+    Storefront_TimeRange:
+      type: object
+      properties:
+        startTime:
+          type: string
+          description: Start time of the range in 24 hour format.
+          example: 08:00
+        endTime:
+          type: string
+          description: End time of the range in 24 hour format.
+          example: 08:00
+      description: Time range in a given date.
+    Marketintel_GeoLocationInformation:
+      type: object
+      properties:
+        regionId:
+          type: string
+          description: The region id of the geographical location.
+          example:
+          - LATAM-N
+        superRegion:
+          type: string
+          description: The super region of the geographical location.
+          example:
+          - LATAM
+        h3Index:
+          type: string
+          description: The H3Index value of the geographic location.
+          example:
+          - 886d344c81fffff
+        searchText:
+          type:
+          - string
+          - 'null'
+          description: The text used to search for stores.
+          example:
+          - chinese food
+        address:
+          type: object
+          description: The address of the geographical location.
+          $ref: '#/components/schemas/Address'
+      description: The geographical location information used to discover stores.  This information will need be pass back with the result.
+    Money:
+      required:
+      - amount
+      - currencyCode
+      type: object
+      properties:
+        currencyCode:
+          maxLength: 3
+          minLength: 3
+          type: string
+          description: The 3-letter currency code (ISO 4217) to use for all monetary values.
+          example: EUR
+        amount:
+          minimum: 0
+          type: number
+          description: Amount value.
+          example: 25.21
+      description: Money amount.
+      example: 25.21
     Marketintel_HoursData:
       required:
       - regularHours
@@ -985,50 +898,106 @@ components:
           items:
             $ref: '#/components/schemas/Marketintel_SpecialHours'
       description: Represents hours configuration with regular hours and special hours.
-    StoreHoursConfigurationEventResult:
+    StoreHoursConfiguration:
+      required:
+      - timezone
       type: object
       properties:
-        storeHoursConfiguration:
-          $ref: '#/components/schemas/StoreHoursConfiguration'
-        statusChangedAt:
+        deliveryHours:
+          $ref: '#/components/schemas/StoreHours'
+        pickupHours:
+          $ref: '#/components/schemas/StoreHours'
+        timezone:
           type: string
-          description: The time when the store hours configuration changed.
-          format: date-time
-          example: '2007-12-03T10:15:30+01:00'
-        eventResultMetadata:
-          $ref: '#/components/schemas/EventResultMetadata'
-      description: The current store hours configuration.
-  responses:
-    '404':
-      description: Resource not found.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorMessage'
-    '403':
-      description: Authorization not valid for the requested resource.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorMessage'
-    '422':
-      description: The request body is not valid.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorMessage'
-    '401':
-      description: Invalid authorization.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorMessage'
-    '400':
-      description: The request is malformed.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorMessage'
+          description: The store time zone identifier. (e.g. America/New_York)
+          example: America/Los_Angeles
+      description: The current store hours configuration of a store.
+    StoreHours:
+      type:
+      - object
+      - 'null'
+      properties:
+        regularHours:
+          type: array
+          description: List of regular hours configuration.
+          items:
+            $ref: '#/components/schemas/Storefront_RegularHours'
+        specialHours:
+          type:
+          - array
+          - 'null'
+          description: List of special hours configuration.
+          items:
+            $ref: '#/components/schemas/Storefront_SpecialHours'
+      description: Represents store hours configuration with regular hours and special hours.
+    Marketintel_StoreSales:
+      type: object
+      properties:
+        periodType:
+          type:
+          - string
+          - 'null'
+          description: The period type of the sales data
+          example: null
+        numberOfSales:
+          type:
+          - integer
+          - 'null'
+          description: The number of sales.
+          example: 100
+        displayNumberOfSales:
+          type:
+          - string
+          - 'null'
+          description: The display text of the number of sales.
+          example:
+          - 20
+          - 20+
+      description: The Store Sales information. At least one of the periodType, numberOfSales or displayNumberOfSales need to be present.
+    Marketintel_StoreDeliveryInformation:
+      type: object
+      properties:
+        minDeliveryBasketSize:
+          type:
+          - object
+          - 'null'
+          description: The minimum basket value of the order needed for delivery
+          $ref: '#/components/schemas/Money'
+        deliveryFee:
+          type:
+          - object
+          - 'null'
+          description: The delivery fee for the order
+          $ref: '#/components/schemas/Money'
+        deliveryType:
+          type:
+          - string
+          - 'null'
+          description: The delivery type for the order
+          example: Third Party
+        deliveryTimeMinutes:
+          type:
+          - integer
+          - 'null'
+          description: The estimated delivery time in minutes
+          example: 30
+      description: The Store delivery information.
+    Marketintel_StorePriceLevel:
+      type: object
+      properties:
+        priceLevel:
+          type:
+          - number
+          - 'null'
+          description: The price level of the store in numeric rating.
+          example: 3
+        priceLevelName:
+          type:
+          - string
+          - 'null'
+          description: The price level of the store in text.
+          example: $$$
+      description: The Store Price Level information. At least one of the price level or price level name need to be present.
   parameters:
     eventIdHeader:
       name: X-Event-Id
@@ -1052,6 +1021,37 @@ components:
         type: string
         description: Optional unique identifier of the event that this callback refers to.
         example: cf0ce51b-d74e-40d3-b177-1925ab4edc0c
+  responses:
+    '401':
+      description: Invalid authorization.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorMessage'
+    '403':
+      description: Authorization not valid for the requested resource.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorMessage'
+    '422':
+      description: The request body is not valid.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorMessage'
+    '400':
+      description: The request is malformed.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorMessage'
+    '404':
+      description: Resource not found.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorMessage'
   securitySchemes:
     OAuth2.0:
       type: oauth2

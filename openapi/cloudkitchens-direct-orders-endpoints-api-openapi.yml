@@ -49,30 +49,19 @@ paths:
         - direct.orders
 components:
   schemas:
-    Item-3:
-      required:
-      - name
+    ErrorMessage:
       type: object
       properties:
-        quantity:
-          minimum: 1
-          maximum: 1000
-          type: integer
-          description: The quantity of the item ordered by the customer.
-          format: int32
-          example: 1
-        id:
-          type:
-          - string
-          - 'null'
-          description: The unique ID of the item.
-          example: 33e0418f-3d56-4360-ba03-18fc5f8844a3
-        name:
-          type:
-          - string
-          - 'null'
-          description: The name of the item as displayed to the customer.
-          example: Juicy Cheeseburger
+        message:
+          type: string
+          description: The error description.
+          example: The request body is invalid.
+        details:
+          type: array
+          description: The error details.
+          items:
+            $ref: '#/components/schemas/ErrorDetail'
+      description: The error response object.
     Store-2:
       required:
       - id
@@ -102,38 +91,30 @@ components:
           example: 2124567890
         address:
           $ref: '#/components/schemas/Address'
-    ErrorMessage:
+    Item-3:
+      required:
+      - name
       type: object
       properties:
-        message:
-          type: string
-          description: The error description.
-          example: The request body is invalid.
-        details:
-          type: array
-          description: The error details.
-          items:
-            $ref: '#/components/schemas/ErrorDetail'
-      description: The error response object.
-    Location:
-      required:
-      - latitude
-      - longitude
-      type:
-      - object
-      - 'null'
-      properties:
-        latitude:
-          type: number
-          description: The latitude of the location.
-          format: double
-          example: 38.8977
-        longitude:
-          type: number
-          description: The longitude of the location.
-          format: double
-          example: 77.0365
-      description: Latitude and longitude of the address.
+        quantity:
+          minimum: 1
+          maximum: 1000
+          type: integer
+          description: The quantity of the item ordered by the customer.
+          format: int32
+          example: 1
+        id:
+          type:
+          - string
+          - 'null'
+          description: The unique ID of the item.
+          example: 33e0418f-3d56-4360-ba03-18fc5f8844a3
+        name:
+          type:
+          - string
+          - 'null'
+          description: The name of the item as displayed to the customer.
+          example: Juicy Cheeseburger
     Address:
       type:
       - object
@@ -208,21 +189,18 @@ components:
           description: Order placed from which source
           example: venmo
       description: Request parameters to fetch eater's order history
-    EaterOrderHistoryResponse:
-      required:
-      - orders
+    ErrorDetail:
       type: object
       properties:
-        orders:
-          type: array
-          description: List of orders placed by the user. Each item contains details about a specific order.
-          items:
-            $ref: '#/components/schemas/EaterOrder'
-        nextPageToken:
+        attribute:
           type: string
-          description: Opaque token used to fetch the following page. If not set, no more orders are available.
-          example: H12MAF2fFaFFFa
-      description: Response body containing the user's order history.
+          description: The error attribute.
+          example: Order Currency Code
+        message:
+          type: string
+          description: The error detail description.
+          example: Order Currency Code must be exactly 3 characters
+      description: The error detail response object.
     EaterOrder:
       required:
       - currencyCode
@@ -284,18 +262,40 @@ components:
           description: The link url for reordering.
           example: /store/0179860e-8a89-39c2-b9b1-7276683d09f1
       description: An order placed by a customer.
-    ErrorDetail:
+    Location:
+      required:
+      - latitude
+      - longitude
+      type:
+      - object
+      - 'null'
+      properties:
+        latitude:
+          type: number
+          description: The latitude of the location.
+          format: double
+          example: 38.8977
+        longitude:
+          type: number
+          description: The longitude of the location.
+          format: double
+          example: 77.0365
+      description: Latitude and longitude of the address.
+    EaterOrderHistoryResponse:
+      required:
+      - orders
       type: object
       properties:
-        attribute:
+        orders:
+          type: array
+          description: List of orders placed by the user. Each item contains details about a specific order.
+          items:
+            $ref: '#/components/schemas/EaterOrder'
+        nextPageToken:
           type: string
-          description: The error attribute.
-          example: Order Currency Code
-        message:
-          type: string
-          description: The error detail description.
-          example: Order Currency Code must be exactly 3 characters
-      description: The error detail response object.
+          description: Opaque token used to fetch the following page. If not set, no more orders are available.
+          example: H12MAF2fFaFFFa
+      description: Response body containing the user's order history.
   responses:
     '403':
       description: Authorization not valid for the requested resource.
@@ -303,8 +303,8 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/ErrorMessage'
-    '422':
-      description: The request body is not valid.
+    '400':
+      description: The request is malformed.
       content:
         application/json:
           schema:
@@ -315,8 +315,8 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/ErrorMessage'
-    '400':
-      description: The request is malformed.
+    '422':
+      description: The request body is not valid.
       content:
         application/json:
           schema:

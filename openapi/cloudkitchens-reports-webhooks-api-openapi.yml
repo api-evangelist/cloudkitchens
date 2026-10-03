@@ -47,24 +47,6 @@ components:
       type: string
       description: The unique identifier of the store in the partner application. This ID, along with the `Application ID`, will be used to match the correct store when performing operations. It cannot be longer than 255 characters and must only contain printable ASCII characters. During on-boarding, this ID will be similar to `onboarding:905bb725-b141-4a9b-832a-1f254f772c94` (where the UUID is the Internal Store ID). During off-boarding, this field will be filled with the last known Store ID, or with an empty string, in case none is found. In that case, please fall back to the provided `internalStoreId` (a.k.a. Sku-Sku ID).
       example: partner-store-unique-identifier
-    EventNotification:
-      type: object
-      properties:
-        eventId:
-          type: string
-          description: Unique identifier of the event.
-          format: uuid
-        eventTime:
-          type: string
-          description: Date of event occurrence.
-          format: date-time
-          example: '2007-12-03T10:15:30+01:00'
-        eventType:
-          type: string
-          description: The type of the event.
-        metadata:
-          $ref: '#/components/schemas/MetadataObject'
-      description: Notification message sent on relevant events.
     ReportGeneratedEvent:
       type: object
       properties:
@@ -98,6 +80,24 @@ components:
           description: The full endpoint to fetch the details of the resource, if needed.
           example: resource-href-id-if-needed
       description: Information about the event.
+    EventNotification:
+      type: object
+      properties:
+        eventId:
+          type: string
+          description: Unique identifier of the event.
+          format: uuid
+        eventTime:
+          type: string
+          description: Date of event occurrence.
+          format: date-time
+          example: '2007-12-03T10:15:30+01:00'
+        eventType:
+          type: string
+          description: The type of the event.
+        metadata:
+          $ref: '#/components/schemas/MetadataObject'
+      description: Notification message sent on relevant events.
   responses:
     2XX:
       description: Return any 2XX status to indicate that the data was received successfully
