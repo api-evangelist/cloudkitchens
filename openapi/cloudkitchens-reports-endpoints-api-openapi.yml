@@ -98,10 +98,6 @@ components:
         jobId:
           $ref: '#/components/schemas/JobId'
       description: The response to a generate report request
-    JobId:
-      type: string
-      description: ID used to track the job created for generating report.
-      example: 38ab397f-b142-4b06-b70c-40c68a408bea
     ErrorDetail:
       type: object
       properties:
@@ -114,6 +110,32 @@ components:
           description: The error detail description.
           example: Order Currency Code must be exactly 3 characters
       description: The error detail response object.
+    GetReportStatusResponse:
+      type: object
+      properties:
+        status:
+          description: Report export status
+          type: string
+          enum:
+          - IN_PROGRESS
+          - READY
+          - ERROR
+          - EXPIRED
+        payload:
+          type: object
+          properties:
+            reportUrl:
+              type:
+              - string
+              - 'null'
+              description: Url to download the report. It will be available only if status is "READY"
+              example: https://example.com/path/to/report.csv.gz
+            errorMessage:
+              type:
+              - string
+              - 'null'
+              description: Error message. It will be available only if status is "ERROR"
+              example: Report generation error. Please reach out to support and provide jobId
     GenerateReportMultiRequest:
       type: object
       properties:
@@ -165,41 +187,20 @@ components:
           - 'null'
           description: Language of the report. Ignored by ORDER_STORES report Optional. Falls back to English if empty.
       description: The request to generate a report for multiple stores.
-    GetReportStatusResponse:
-      type: object
-      properties:
-        status:
-          description: Report export status
-          type: string
-          enum:
-          - IN_PROGRESS
-          - READY
-          - ERROR
-          - EXPIRED
-        payload:
-          type: object
-          properties:
-            reportUrl:
-              type:
-              - string
-              - 'null'
-              description: Url to download the report. It will be available only if status is "READY"
-              example: https://example.com/path/to/report.csv.gz
-            errorMessage:
-              type:
-              - string
-              - 'null'
-              description: Error message. It will be available only if status is "ERROR"
-              example: Report generation error. Please reach out to support and provide jobId
+    JobId:
+      type: string
+      description: ID used to track the job created for generating report.
+      example: 38ab397f-b142-4b06-b70c-40c68a408bea
+  parameters:
+    jobId:
+      name: jobId
+      in: path
+      required: true
+      schema:
+        $ref: '#/components/schemas/JobId'
   responses:
-    '403':
-      description: Authorization not valid for the requested resource.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorMessage'
-    '400':
-      description: The request is malformed.
+    '422':
+      description: The request body is not valid.
       content:
         application/json:
           schema:
@@ -210,8 +211,8 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/ErrorMessage'
-    '422':
-      description: The request body is not valid.
+    '403':
+      description: Authorization not valid for the requested resource.
       content:
         application/json:
           schema:
@@ -222,13 +223,12 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/ErrorMessage'
-  parameters:
-    jobId:
-      name: jobId
-      in: path
-      required: true
-      schema:
-        $ref: '#/components/schemas/JobId'
+    '400':
+      description: The request is malformed.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorMessage'
   securitySchemes:
     OAuth2.0:
       type: oauth2

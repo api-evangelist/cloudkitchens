@@ -212,168 +212,25 @@ paths:
       - OAuth2.0:
         - delivery.provider
 components:
-  parameters:
-    eventIdHeader:
-      name: X-Event-Id
-      in: header
-      required: true
-      schema:
-        type: string
-        description: Unique identifier of the event that this callback refers to.
-        example: cf0ce51b-d74e-40d3-b177-1925ab4edc0c
-    storeIdHeader:
-      name: X-Store-Id
-      in: header
-      required: true
-      schema:
-        $ref: '#/components/schemas/StoreId'
-    deliveryReferenceId:
-      name: deliveryReferenceId
-      in: path
-      required: true
-      schema:
-        type: string
-        description: A unique identifier of the delivery in a UUID format.
-        example: 295f76b4-5725-4bf5-a8ab-97943dbdc3b4
   schemas:
-    EventCallbackError:
-      type: object
-      properties:
-        errorCode:
-          type: string
-          description: 'Errors that occur processing the webhook, modeled after Google''s gRPC error codes.
-
-            For callback errors responding to menu-related webhooks, any error with status code in:  "INVALID_ARGUMENT", "FAILED_PRECONDITION", "NOT_FOUND", "PERMISSION_DENIED", "ALREADY_EXISTS", "UNIMPLEMENTED", "DATA_LOSS", "UNAUTHENTICATED" will be considered fatal and will fail the operation without retrying.'
-          enum:
-          - CANCELLED
-          - UNKNOWN
-          - INVALID_ARGUMENT
-          - FAILED_PRECONDITION
-          - DEADLINE_EXCEEDED
-          - NOT_FOUND
-          - PERMISSION_DENIED
-          - ALREADY_EXISTS
-          - RESOURCE_EXHAUSTED
-          - ABORTED
-          - OUT_OF_RANGE
-          - UNIMPLEMENTED
-          - INTERNAL
-          - UNAVAILABLE
-          - DATA_LOSS
-          - UNAUTHENTICATED
-          example: NOT_FOUND
-        errorMessage:
-          type:
-          - string
-          - 'null'
-          description: Additional information about the error. This message will be displayed to the user, so ideally it should be friendly.
-          example: The store was not found.
-      description: The error container for a processed callback.
-    Person:
+    PersonalIdentifiers:
       type:
       - object
       - 'null'
       properties:
-        name:
+        taxIdentificationNumber:
           type:
           - string
           - 'null'
-          description: The person's name as it should be displayed.
-          example: Jane Doe
-          maxLength: 255
-        phone:
+          description: Person tax identification number.
+          example: 1234567890
+        serviceProviderId:
           type:
           - string
           - 'null'
-          description: The person's phone number.
-          example: +1-555-555-5555
-          maxLength: 25
-        phoneCode:
-          type:
-          - string
-          - 'null'
-          description: A code or extension of the phone number.
-          example: 111 11 111
-          maxLength: 25
-        email:
-          type:
-          - string
-          - 'null'
-          description: The person's email address.
-          example: email@email.com
-        personalIdentifiers:
-          $ref: '#/components/schemas/PersonalIdentifiers'
-      description: The recipient information.
-    RequestDeliveryQuoteCallbackRequest:
-      type: object
-      properties:
-        minPickupDuration:
-          type: integer
-          minimum: 0
-          format: int32
-          description: Minimum time required for courier to arrive at pickup location in minutes It is an estimation.
-          example: 5
-        maxPickupDuration:
-          type:
-          - integer
-          - 'null'
-          description: Maximum time that the courier's arrival at pick up location can be delayed. If not provided, it will default to 60 minutes or minPickUpDuration, whichever is greater. This value is an estimation and expressed in minutes.
-          format: int32
-          example: 10
-        deliveryDistance:
-          $ref: '#/components/schemas/Distance'
-        currencyCode:
-          type: string
-          minLength: 3
-          maxLength: 3
-          description: The 3-letter currency code (ISO 4217) to use for all monetary values.
-          example: EUR
-        cost:
-          $ref: '#/components/schemas/DeliveryCost'
-        provider:
-          type:
-          - string
-          - 'null'
-          description: Delivery Service Provider Slug.
-          example: doordash
-        fulfillmentPath:
-          type:
-          - array
-          - 'null'
-          description: List of entities involved in the fulfillment processing path.
-          items:
-            $ref: '#/components/schemas/FulfillmentPathEntity'
-        createdAt:
-          type: string
-          description: The time that the quote was created.
-          format: date-time
-          example: '2007-12-03T10:15:30+01:00'
-        accountBalance:
-          type:
-          - number
-          - 'null'
-          description: The remaining account balance of the requester for the delivery provider.
-          example: 1068.32
-      description: Delivery quote information.
-    Location:
-      required:
-      - latitude
-      - longitude
-      type:
-      - object
-      - 'null'
-      properties:
-        latitude:
-          type: number
-          description: The latitude of the location.
-          format: double
-          example: 38.8977
-        longitude:
-          type: number
-          description: The longitude of the location.
-          format: double
-          example: 77.0365
-      description: Latitude and longitude of the address.
+          description: External service provider ID i.e. Courier Id.
+          example: 12345ba6-789e-123f-4e56-d78db90d123b
+      description: The person's personal identifiers (e.g. tax identification number).
     VehicleInformation:
       type:
       - object
@@ -400,28 +257,16 @@ components:
           - 'null'
           description: The make and model of the vehicle used to fulfill the delivery.
           example: Honda Civic
-    ErrorMessage:
-      type: object
+    VerificationProof:
+      type:
+      - object
+      - 'null'
       properties:
-        message:
-          type: string
-          description: The error description.
-          example: The request body is invalid.
-        details:
-          type: array
-          description: The error details.
-          items:
-            $ref: '#/components/schemas/ErrorDetail'
-      description: The error response object.
-    CancelDeliveryCallbackRequest:
-      type: object
-      properties:
-        canceledAt:
-          type: string
-          description: The time that the request was cancelled.
-          format: date-time
-          example: '2007-12-03T10:15:30+01:00'
-      description: Cancellation result callback request.
+        signatureProof:
+          $ref: '#/components/schemas/SignatureProof'
+        pictureProof:
+          $ref: '#/components/schemas/PictureProof'
+      description: Verification details.
     DeliveryStatus:
       type: string
       description: The status of the delivery.
@@ -433,42 +278,6 @@ components:
       - CANCELED
       - ARRIVED_AT_PICKUP
       - ARRIVED_AT_DROP_OFF
-    PictureProof:
-      type:
-      - object
-      - 'null'
-      properties:
-        pictureUrl:
-          type: string
-          description: Image url.
-      description: Picture info captured.
-    Distance:
-      type:
-      - object
-      - 'null'
-      properties:
-        unit:
-          type: string
-          description: Distance unit value.
-          enum:
-          - KILOMETERS
-          - MILES
-        value:
-          type: number
-          description: Distance value.
-      description: Delivery distance.
-    ErrorDetail:
-      type: object
-      properties:
-        attribute:
-          type: string
-          description: The error attribute.
-          example: Order Currency Code
-        message:
-          type: string
-          description: The error detail description.
-          example: Order Currency Code must be exactly 3 characters
-      description: The error detail response object.
     DeliveryStatusUpdateRequest:
       type: object
       properties:
@@ -523,96 +332,6 @@ components:
           - 'null'
           description: Delivery tracking url.
       description: Update delivery status request.
-    StoreId:
-      type: string
-      description: The unique identifier of the store in the partner application. This ID, along with the `Application ID`, will be used to match the correct store when performing operations. It cannot be longer than 255 characters and must only contain printable ASCII characters. During on-boarding, this ID will be similar to `onboarding:905bb725-b141-4a9b-832a-1f254f772c94` (where the UUID is the Internal Store ID). During off-boarding, this field will be filled with the last known Store ID, or with an empty string, in case none is found. In that case, please fall back to the provided `internalStoreId` (a.k.a. Sku-Sku ID).
-      example: partner-store-unique-identifier
-    FulfillmentPathEntity:
-      type: object
-      properties:
-        name:
-          type: string
-          minLength: 1
-          description: Describes the entity name.
-          example: rappi
-        type:
-          type: string
-          description: Type of entities in the fulfillment path.
-          enum:
-          - FULFILLMENT_PROCESSOR
-          - INTERMEDIARY
-      description: Delivery distance.
-    VerificationProof:
-      type:
-      - object
-      - 'null'
-      properties:
-        signatureProof:
-          $ref: '#/components/schemas/SignatureProof'
-        pictureProof:
-          $ref: '#/components/schemas/PictureProof'
-      description: Verification details.
-    DeliveryCost:
-      type: object
-      properties:
-        baseCost:
-          type: number
-          format: double
-          description: Base delivery cost value.
-          example: 4.99
-        extraCost:
-          type: number
-          format: double
-          description: Extra delivery cost value.
-          example: 0.99
-      description: Delivery cost details.
-    UpdateDeliveryRequestCallbackRequest:
-      type: object
-      properties:
-        currencyCode:
-          type:
-          - string
-          - 'null'
-          minLength: 3
-          maxLength: 3
-          description: The 3-letter currency code (ISO 4217) to use for all monetary values.
-          example: EUR
-        cost:
-          $ref: '#/components/schemas/DeliveryCost'
-          description: Updated delivery cost.
-      description: Updated Delivery information.
-    PersonalIdentifiers:
-      type:
-      - object
-      - 'null'
-      properties:
-        taxIdentificationNumber:
-          type:
-          - string
-          - 'null'
-          description: Person tax identification number.
-          example: 1234567890
-        serviceProviderId:
-          type:
-          - string
-          - 'null'
-          description: External service provider ID i.e. Courier Id.
-          example: 12345ba6-789e-123f-4e56-d78db90d123b
-      description: The person's personal identifiers (e.g. tax identification number).
-    DropoffInfo:
-      type:
-      - object
-      - 'null'
-      properties:
-        courierNote:
-          type:
-          - string
-          - 'null'
-          description: Courier supplied dropoff note.
-        proofOfDelivery:
-          $ref: '#/components/schemas/VerificationProof'
-          description: Proof of delivery.
-      description: Delivery dropoff details.
     SignatureProof:
       type:
       - object
@@ -632,6 +351,207 @@ components:
           - 'null'
           description: The relationship of signer to the intended recipient.
       description: Signature info captured.
+    Person:
+      type:
+      - object
+      - 'null'
+      properties:
+        name:
+          type:
+          - string
+          - 'null'
+          description: The person's name as it should be displayed.
+          example: Jane Doe
+          maxLength: 255
+        phone:
+          type:
+          - string
+          - 'null'
+          description: The person's phone number.
+          example: +1-555-555-5555
+          maxLength: 25
+        phoneCode:
+          type:
+          - string
+          - 'null'
+          description: A code or extension of the phone number.
+          example: 111 11 111
+          maxLength: 25
+        email:
+          type:
+          - string
+          - 'null'
+          description: The person's email address.
+          example: email@email.com
+        personalIdentifiers:
+          $ref: '#/components/schemas/PersonalIdentifiers'
+      description: The recipient information.
+    CancelDeliveryCallbackRequest:
+      type: object
+      properties:
+        canceledAt:
+          type: string
+          description: The time that the request was cancelled.
+          format: date-time
+          example: '2007-12-03T10:15:30+01:00'
+      description: Cancellation result callback request.
+    RequestDeliveryQuoteCallbackRequest:
+      type: object
+      properties:
+        minPickupDuration:
+          type: integer
+          minimum: 0
+          format: int32
+          description: Minimum time required for courier to arrive at pickup location in minutes It is an estimation.
+          example: 5
+        maxPickupDuration:
+          type:
+          - integer
+          - 'null'
+          description: Maximum time that the courier's arrival at pick up location can be delayed. If not provided, it will default to 60 minutes or minPickUpDuration, whichever is greater. This value is an estimation and expressed in minutes.
+          format: int32
+          example: 10
+        deliveryDistance:
+          $ref: '#/components/schemas/Distance'
+        currencyCode:
+          type: string
+          minLength: 3
+          maxLength: 3
+          description: The 3-letter currency code (ISO 4217) to use for all monetary values.
+          example: EUR
+        cost:
+          $ref: '#/components/schemas/DeliveryCost'
+        provider:
+          type:
+          - string
+          - 'null'
+          description: Delivery Service Provider Slug.
+          example: doordash
+        fulfillmentPath:
+          type:
+          - array
+          - 'null'
+          description: List of entities involved in the fulfillment processing path.
+          items:
+            $ref: '#/components/schemas/FulfillmentPathEntity'
+        createdAt:
+          type: string
+          description: The time that the quote was created.
+          format: date-time
+          example: '2007-12-03T10:15:30+01:00'
+        accountBalance:
+          type:
+          - number
+          - 'null'
+          description: The remaining account balance of the requester for the delivery provider.
+          example: 1068.32
+      description: Delivery quote information.
+    StoreId:
+      type: string
+      description: The unique identifier of the store in the partner application. This ID, along with the `Application ID`, will be used to match the correct store when performing operations. It cannot be longer than 255 characters and must only contain printable ASCII characters. During on-boarding, this ID will be similar to `onboarding:905bb725-b141-4a9b-832a-1f254f772c94` (where the UUID is the Internal Store ID). During off-boarding, this field will be filled with the last known Store ID, or with an empty string, in case none is found. In that case, please fall back to the provided `internalStoreId` (a.k.a. Sku-Sku ID).
+      example: partner-store-unique-identifier
+    DeliveryCost:
+      type: object
+      properties:
+        baseCost:
+          type: number
+          format: double
+          description: Base delivery cost value.
+          example: 4.99
+        extraCost:
+          type: number
+          format: double
+          description: Extra delivery cost value.
+          example: 0.99
+      description: Delivery cost details.
+    ErrorDetail:
+      type: object
+      properties:
+        attribute:
+          type: string
+          description: The error attribute.
+          example: Order Currency Code
+        message:
+          type: string
+          description: The error detail description.
+          example: Order Currency Code must be exactly 3 characters
+      description: The error detail response object.
+    UpdateDeliveryRequestCallbackRequest:
+      type: object
+      properties:
+        currencyCode:
+          type:
+          - string
+          - 'null'
+          minLength: 3
+          maxLength: 3
+          description: The 3-letter currency code (ISO 4217) to use for all monetary values.
+          example: EUR
+        cost:
+          $ref: '#/components/schemas/DeliveryCost'
+          description: Updated delivery cost.
+      description: Updated Delivery information.
+    FulfillmentPathEntity:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          description: Describes the entity name.
+          example: rappi
+        type:
+          type: string
+          description: Type of entities in the fulfillment path.
+          enum:
+          - FULFILLMENT_PROCESSOR
+          - INTERMEDIARY
+      description: Delivery distance.
+    Location:
+      required:
+      - latitude
+      - longitude
+      type:
+      - object
+      - 'null'
+      properties:
+        latitude:
+          type: number
+          description: The latitude of the location.
+          format: double
+          example: 38.8977
+        longitude:
+          type: number
+          description: The longitude of the location.
+          format: double
+          example: 77.0365
+      description: Latitude and longitude of the address.
+    DropoffInfo:
+      type:
+      - object
+      - 'null'
+      properties:
+        courierNote:
+          type:
+          - string
+          - 'null'
+          description: Courier supplied dropoff note.
+        proofOfDelivery:
+          $ref: '#/components/schemas/VerificationProof'
+          description: Proof of delivery.
+      description: Delivery dropoff details.
+    ErrorMessage:
+      type: object
+      properties:
+        message:
+          type: string
+          description: The error description.
+          example: The request body is invalid.
+        details:
+          type: array
+          description: The error details.
+          items:
+            $ref: '#/components/schemas/ErrorDetail'
+      description: The error response object.
     AcceptDeliveryCallbackRequest:
       type: object
       properties:
@@ -683,9 +603,95 @@ components:
           - 'null'
           description: The provider's internal identifier for the delivery used for tracking purposes.
       description: Delivery information.
+    EventCallbackError:
+      type: object
+      properties:
+        errorCode:
+          type: string
+          description: 'Errors that occur processing the webhook, modeled after Google''s gRPC error codes.
+
+            For callback errors responding to menu-related webhooks, any error with status code in:  "INVALID_ARGUMENT", "FAILED_PRECONDITION", "NOT_FOUND", "PERMISSION_DENIED", "ALREADY_EXISTS", "UNIMPLEMENTED", "DATA_LOSS", "UNAUTHENTICATED" will be considered fatal and will fail the operation without retrying.'
+          enum:
+          - CANCELLED
+          - UNKNOWN
+          - INVALID_ARGUMENT
+          - FAILED_PRECONDITION
+          - DEADLINE_EXCEEDED
+          - NOT_FOUND
+          - PERMISSION_DENIED
+          - ALREADY_EXISTS
+          - RESOURCE_EXHAUSTED
+          - ABORTED
+          - OUT_OF_RANGE
+          - UNIMPLEMENTED
+          - INTERNAL
+          - UNAVAILABLE
+          - DATA_LOSS
+          - UNAUTHENTICATED
+          example: NOT_FOUND
+        errorMessage:
+          type:
+          - string
+          - 'null'
+          description: Additional information about the error. This message will be displayed to the user, so ideally it should be friendly.
+          example: The store was not found.
+      description: The error container for a processed callback.
+    Distance:
+      type:
+      - object
+      - 'null'
+      properties:
+        unit:
+          type: string
+          description: Distance unit value.
+          enum:
+          - KILOMETERS
+          - MILES
+        value:
+          type: number
+          description: Distance value.
+      description: Delivery distance.
+    PictureProof:
+      type:
+      - object
+      - 'null'
+      properties:
+        pictureUrl:
+          type: string
+          description: Image url.
+      description: Picture info captured.
+  parameters:
+    storeIdHeader:
+      name: X-Store-Id
+      in: header
+      required: true
+      schema:
+        $ref: '#/components/schemas/StoreId'
+    deliveryReferenceId:
+      name: deliveryReferenceId
+      in: path
+      required: true
+      schema:
+        type: string
+        description: A unique identifier of the delivery in a UUID format.
+        example: 295f76b4-5725-4bf5-a8ab-97943dbdc3b4
+    eventIdHeader:
+      name: X-Event-Id
+      in: header
+      required: true
+      schema:
+        type: string
+        description: Unique identifier of the event that this callback refers to.
+        example: cf0ce51b-d74e-40d3-b177-1925ab4edc0c
   responses:
-    '401':
-      description: Invalid authorization.
+    '422':
+      description: The request body is not valid.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorMessage'
+    '404':
+      description: Resource not found.
       content:
         application/json:
           schema:
@@ -696,20 +702,14 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/ErrorMessage'
-    '422':
-      description: The request body is not valid.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorMessage'
     '400':
       description: The request is malformed.
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/ErrorMessage'
-    '404':
-      description: Resource not found.
+    '401':
+      description: Invalid authorization.
       content:
         application/json:
           schema:

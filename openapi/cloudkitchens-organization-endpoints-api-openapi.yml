@@ -253,14 +253,6 @@ components:
         type: string
         description: Opaque token used for paging. Query parameters must be URL encoded.
         example: CgwI09+kjQYQwOvF2AM=/(urlencoded:CgwI09%2BkjQYQwOvF2AM%3D)
-    limit-2:
-      name: limit
-      in: query
-      required: true
-      schema:
-        type: string
-        description: Max number of stores to retrieve
-        example: 5
     storeId:
       name: storeId
       in: path
@@ -269,6 +261,14 @@ components:
         type: string
         description: A unique identifier of a store in a UUID format.
         example: 295f76b4-5725-4bf5-a8ab-97943dbdc3b4
+    limit-2:
+      name: limit
+      in: query
+      required: true
+      schema:
+        type: string
+        description: Max number of stores to retrieve
+        example: 5
     brandId:
       name: brandId
       in: path
@@ -278,6 +278,91 @@ components:
         description: A unique identifier of a brand in a UUID format.
         example: 295f76b4-5725-4bf5-a8ab-97943dbdc3b4
   schemas:
+    CreateConnectionRequest:
+      required:
+      - storeId
+      type: object
+      properties:
+        storeId:
+          type: string
+          description: The unique identifier of the store in the partner application. This is the ID, along with the Application ID, used to match the correct store when performing operations.
+          example: 9208071e-5f7a-444a-b3a7-4a57ff3f614e
+    ListStoresResponse:
+      required:
+      - items
+      type: object
+      properties:
+        items:
+          type: array
+          description: Array of Stores
+          items:
+            $ref: '#/components/schemas/Store'
+        offsetToken:
+          type: string
+          description: Opaque token used to fetch the following page. If not set, no more stores are available.
+          example: H12MAF2fFaFFFa
+    Store:
+      required:
+      - id
+      - name
+      - address
+      type: object
+      properties:
+        id:
+          type: string
+          description: Store identifier.
+          example: 9208071e-5f7a-444a-b3a7-4a57ff3f614e
+        name:
+          type: string
+          description: Store name.
+          example: Store name 1
+        address:
+          $ref: '#/components/schemas/Address'
+    ErrorDetail:
+      type: object
+      properties:
+        attribute:
+          type: string
+          description: The error attribute.
+          example: Order Currency Code
+        message:
+          type: string
+          description: The error detail description.
+          example: Order Currency Code must be exactly 3 characters
+      description: The error detail response object.
+    Organization:
+      required:
+      - id
+      - name
+      type: object
+      properties:
+        id:
+          type: string
+          description: Organization identifier.
+          example: 9208071e-5f7a-444a-b3a7-4a57ff3f614e
+        name:
+          type: string
+          description: Organization name.
+          example: Organization name 1
+    Location:
+      required:
+      - latitude
+      - longitude
+      type:
+      - object
+      - 'null'
+      properties:
+        latitude:
+          type: number
+          description: The latitude of the location.
+          format: double
+          example: 38.8977
+        longitude:
+          type: number
+          description: The longitude of the location.
+          format: double
+          example: 77.0365
+      description: Latitude and longitude of the address.
     Address:
       type:
       - object
@@ -329,66 +414,6 @@ components:
         location:
           $ref: '#/components/schemas/Location'
       description: Order delivery address.
-    Location:
-      required:
-      - latitude
-      - longitude
-      type:
-      - object
-      - 'null'
-      properties:
-        latitude:
-          type: number
-          description: The latitude of the location.
-          format: double
-          example: 38.8977
-        longitude:
-          type: number
-          description: The longitude of the location.
-          format: double
-          example: 77.0365
-      description: Latitude and longitude of the address.
-    Organization:
-      required:
-      - id
-      - name
-      type: object
-      properties:
-        id:
-          type: string
-          description: Organization identifier.
-          example: 9208071e-5f7a-444a-b3a7-4a57ff3f614e
-        name:
-          type: string
-          description: Organization name.
-          example: Organization name 1
-    ErrorMessage:
-      type: object
-      properties:
-        message:
-          type: string
-          description: The error description.
-          example: The request body is invalid.
-        details:
-          type: array
-          description: The error details.
-          items:
-            $ref: '#/components/schemas/ErrorDetail'
-      description: The error response object.
-    ListStoresResponse:
-      required:
-      - items
-      type: object
-      properties:
-        items:
-          type: array
-          description: Array of Stores
-          items:
-            $ref: '#/components/schemas/Store'
-        offsetToken:
-          type: string
-          description: Opaque token used to fetch the following page. If not set, no more stores are available.
-          example: H12MAF2fFaFFFa
     Brand:
       required:
       - id
@@ -403,35 +428,6 @@ components:
           type: string
           description: Brand name.
           example: Brand name 1
-    Store:
-      required:
-      - id
-      - name
-      - address
-      type: object
-      properties:
-        id:
-          type: string
-          description: Store identifier.
-          example: 9208071e-5f7a-444a-b3a7-4a57ff3f614e
-        name:
-          type: string
-          description: Store name.
-          example: Store name 1
-        address:
-          $ref: '#/components/schemas/Address'
-    ErrorDetail:
-      type: object
-      properties:
-        attribute:
-          type: string
-          description: The error attribute.
-          example: Order Currency Code
-        message:
-          type: string
-          description: The error detail description.
-          example: Order Currency Code must be exactly 3 characters
-      description: The error detail response object.
     Connection:
       required:
       - storeId
@@ -441,15 +437,19 @@ components:
           type: string
           description: The unique identifier of the store in the partner application. This is the ID, along with the Application ID, used to match the correct store when performing operations.
           example: 9208071e-5f7a-444a-b3a7-4a57ff3f614e
-    CreateConnectionRequest:
-      required:
-      - storeId
+    ErrorMessage:
       type: object
       properties:
-        storeId:
+        message:
           type: string
-          description: The unique identifier of the store in the partner application. This is the ID, along with the Application ID, used to match the correct store when performing operations.
-          example: 9208071e-5f7a-444a-b3a7-4a57ff3f614e
+          description: The error description.
+          example: The request body is invalid.
+        details:
+          type: array
+          description: The error details.
+          items:
+            $ref: '#/components/schemas/ErrorDetail'
+      description: The error response object.
     ListBrandsResponse:
       required:
       - items
@@ -465,14 +465,8 @@ components:
           description: Opaque token used to fetch the following page. If not set, no more brands are available.
           example: H12MAF2fFaFFFa
   responses:
-    '401':
-      description: Invalid authorization.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorMessage'
-    '409':
-      description: The connection between the partner application and the store already exists.
+    '422':
+      description: The request body is not valid.
       content:
         application/json:
           schema:
@@ -483,8 +477,8 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/ErrorMessage'
-    '422':
-      description: The request body is not valid.
+    '404':
+      description: Resource not found.
       content:
         application/json:
           schema:
@@ -495,8 +489,14 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/ErrorMessage'
-    '404':
-      description: Resource not found.
+    '409':
+      description: The connection between the partner application and the store already exists.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorMessage'
+    '401':
+      description: Invalid authorization.
       content:
         application/json:
           schema:

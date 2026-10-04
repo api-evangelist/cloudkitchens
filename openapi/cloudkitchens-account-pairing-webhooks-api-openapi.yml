@@ -146,98 +146,32 @@ webhooks:
     - url: https://{{public-api-url}}
       description: Staging server url
 components:
+  responses:
+    '404':
+      description: Resource not found.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorMessage'
+    '403':
+      description: Authorization not valid for the requested resource.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorMessage'
+    '400':
+      description: The request is malformed.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorMessage'
+    '401':
+      description: Invalid authorization.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorMessage'
   schemas:
-    CredentialsSchemaVersion:
-      type: string
-      description: The version of the credentials schema.
-      example: '1.0'
-    UpsertStorelinkEvent:
-      required:
-      - credentialsSchemaVersion
-      - credentials
-      - storeInfo
-      type: object
-      properties:
-        credentialsSchemaVersion:
-          type: string
-          description: The version of the credentials schema.
-          example: '1.0'
-        credentials:
-          type: array
-          description: Array of fulfilled credentials containing its keys and values.
-          items:
-            $ref: '#/components/schemas/FulfilledCredential'
-          example:
-          - key: email
-            value: test@email.com
-          - key: password
-            value: test-pwd-1234
-        storeInfo:
-          $ref: '#/components/schemas/StoreInfo-2'
-    FetchCredentialsEvent:
-      type: object
-      properties:
-        credentials:
-          type: array
-          description: Array of existing credentials added so far. It's used by multi step onboarding to verify if other credentials are needed based on existing ones values.
-          items:
-            $ref: '#/components/schemas/ExistingCredential'
-          example:
-          - key: email
-            value: test@email.com
-          - key: password
-            value: test-pwd-1234
-    ErrorMessage:
-      type: object
-      properties:
-        message:
-          type: string
-          description: The error description.
-          example: The request body is invalid.
-        details:
-          type: array
-          description: The error details.
-          items:
-            $ref: '#/components/schemas/ErrorDetail'
-      description: The error response object.
-    OptionalStoreIdInMetadata:
-      type: object
-      properties:
-        metadata:
-          type: object
-          properties:
-            storeId:
-              $ref: '#/components/schemas/StoreId'
-    ErrorDetail:
-      type: object
-      properties:
-        attribute:
-          type: string
-          description: The error attribute.
-          example: Order Currency Code
-        message:
-          type: string
-          description: The error detail description.
-          example: Order Currency Code must be exactly 3 characters
-      description: The error detail response object.
-    ExistingCredential:
-      required:
-      - key
-      - value
-      type: object
-      properties:
-        key:
-          type: string
-          description: The key of the credential.
-          example: userEmail
-        value:
-          type: string
-          description: The value of the credential.
-          example: test-user@gmail.com
-    StoreId:
-      type: string
-      description: The unique identifier of the store in the partner application. This ID, along with the `Application ID`, will be used to match the correct store when performing operations. It cannot be longer than 255 characters and must only contain printable ASCII characters. During on-boarding, this ID will be similar to `onboarding:905bb725-b141-4a9b-832a-1f254f772c94` (where the UUID is the Internal Store ID). During off-boarding, this field will be filled with the last known Store ID, or with an empty string, in case none is found. In that case, please fall back to the provided `internalStoreId` (a.k.a. Sku-Sku ID).
-      example: partner-store-unique-identifier
     ViewCredential:
       required:
       - key
@@ -269,6 +203,59 @@ components:
           description: options to select when type is `SELECT` or `MULTI_SELECT`
           items:
             type: string
+    StoreId:
+      type: string
+      description: The unique identifier of the store in the partner application. This ID, along with the `Application ID`, will be used to match the correct store when performing operations. It cannot be longer than 255 characters and must only contain printable ASCII characters. During on-boarding, this ID will be similar to `onboarding:905bb725-b141-4a9b-832a-1f254f772c94` (where the UUID is the Internal Store ID). During off-boarding, this field will be filled with the last known Store ID, or with an empty string, in case none is found. In that case, please fall back to the provided `internalStoreId` (a.k.a. Sku-Sku ID).
+      example: partner-store-unique-identifier
+    UpsertStorelinkEvent:
+      required:
+      - credentialsSchemaVersion
+      - credentials
+      - storeInfo
+      type: object
+      properties:
+        credentialsSchemaVersion:
+          type: string
+          description: The version of the credentials schema.
+          example: '1.0'
+        credentials:
+          type: array
+          description: Array of fulfilled credentials containing its keys and values.
+          items:
+            $ref: '#/components/schemas/FulfilledCredential'
+          example:
+          - key: email
+            value: test@email.com
+          - key: password
+            value: test-pwd-1234
+        storeInfo:
+          $ref: '#/components/schemas/StoreInfo-2'
+    ExistingCredential:
+      required:
+      - key
+      - value
+      type: object
+      properties:
+        key:
+          type: string
+          description: The key of the credential.
+          example: userEmail
+        value:
+          type: string
+          description: The value of the credential.
+          example: test-user@gmail.com
+    ErrorDetail:
+      type: object
+      properties:
+        attribute:
+          type: string
+          description: The error attribute.
+          example: Order Currency Code
+        message:
+          type: string
+          description: The error detail description.
+          example: Order Currency Code must be exactly 3 characters
+      description: The error detail response object.
     MetadataObject:
       type: object
       properties:
@@ -290,6 +277,37 @@ components:
           description: The full endpoint to fetch the details of the resource, if needed.
           example: resource-href-id-if-needed
       description: Information about the event.
+    EventNotification:
+      type: object
+      properties:
+        eventId:
+          type: string
+          description: Unique identifier of the event.
+          format: uuid
+        eventTime:
+          type: string
+          description: Date of event occurrence.
+          format: date-time
+          example: '2007-12-03T10:15:30+01:00'
+        eventType:
+          type: string
+          description: The type of the event.
+        metadata:
+          $ref: '#/components/schemas/MetadataObject'
+      description: Notification message sent on relevant events.
+    ErrorMessage:
+      type: object
+      properties:
+        message:
+          type: string
+          description: The error description.
+          example: The request body is invalid.
+        details:
+          type: array
+          description: The error details.
+          items:
+            $ref: '#/components/schemas/ErrorDetail'
+      description: The error response object.
     StoreInfo-2:
       required:
       - name
@@ -321,38 +339,21 @@ components:
         currencyCode: USD
         timezone: America/Los_Angeles
         internalStoreId: 51608e41-5d9e-477f-ae02-8c0c68036d5d
-    EventNotification:
-      type: object
-      properties:
-        eventId:
-          type: string
-          description: Unique identifier of the event.
-          format: uuid
-        eventTime:
-          type: string
-          description: Date of event occurrence.
-          format: date-time
-          example: '2007-12-03T10:15:30+01:00'
-        eventType:
-          type: string
-          description: The type of the event.
-        metadata:
-          $ref: '#/components/schemas/MetadataObject'
-      description: Notification message sent on relevant events.
-    FulfilledCredential:
+    RemoveStorelinkEvent:
       required:
-      - key
-      - value
+      - storeInfo
       type: object
       properties:
-        key:
-          type: string
-          description: The key of the credential.
-          example: userEmail
-        value:
-          type: string
-          description: The value of the credential.
-          example: test-user@gmail.com
+        storeInfo:
+          $ref: '#/components/schemas/StoreInfo-2'
+    OptionalStoreIdInMetadata:
+      type: object
+      properties:
+        metadata:
+          type: object
+          properties:
+            storeId:
+              $ref: '#/components/schemas/StoreId'
     EventNotificationBase:
       required:
       - eventId
@@ -374,6 +375,37 @@ components:
           type: string
           description: The type of event.
       description: Notification message sent on relevant events.
+    CredentialsSchemaVersion:
+      type: string
+      description: The version of the credentials schema.
+      example: '1.0'
+    FetchCredentialsEvent:
+      type: object
+      properties:
+        credentials:
+          type: array
+          description: Array of existing credentials added so far. It's used by multi step onboarding to verify if other credentials are needed based on existing ones values.
+          items:
+            $ref: '#/components/schemas/ExistingCredential'
+          example:
+          - key: email
+            value: test@email.com
+          - key: password
+            value: test-pwd-1234
+    FulfilledCredential:
+      required:
+      - key
+      - value
+      type: object
+      properties:
+        key:
+          type: string
+          description: The key of the credential.
+          example: userEmail
+        value:
+          type: string
+          description: The value of the credential.
+          example: test-user@gmail.com
     ViewCredentialsArray:
       type: object
       properties:
@@ -404,38 +436,6 @@ components:
             - SMALL
             - MEDIUM
             - LARGE
-    RemoveStorelinkEvent:
-      required:
-      - storeInfo
-      type: object
-      properties:
-        storeInfo:
-          $ref: '#/components/schemas/StoreInfo-2'
-  responses:
-    '401':
-      description: Invalid authorization.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorMessage'
-    '403':
-      description: Authorization not valid for the requested resource.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorMessage'
-    '400':
-      description: The request is malformed.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorMessage'
-    '404':
-      description: Resource not found.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorMessage'
   securitySchemes:
     OAuth2.0:
       type: oauth2

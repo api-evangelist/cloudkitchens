@@ -147,7 +147,128 @@ paths:
       - OAuth2.0:
         - manager.storefront
 components:
+  parameters:
+    storeIdHeader:
+      name: X-Store-Id
+      in: header
+      required: true
+      schema:
+        $ref: '#/components/schemas/StoreId'
+    requestId:
+      name: requestId
+      in: path
+      required: true
+      schema:
+        type: string
+        description: A unique identifier of the order in a UUID format.
+        example: 295f76b4-5725-4bf5-a8ab-97943dbdc3b4
   schemas:
+    UnpauseResponse:
+      type: object
+      properties:
+        requestId:
+          type: string
+          description: The requestId of the unpause request.
+      description: Unpause response details
+    RequestAction:
+      type: object
+      properties:
+        operationType:
+          $ref: '#/components/schemas/OperationType'
+        status:
+          $ref: '#/components/schemas/Status'
+        retryAttempt:
+          type: number
+          description: The current retry attempt.
+          example: 2
+        error:
+          $ref: '#/components/schemas/StorefrontError'
+      description: Request action details of the current state
+    PauseReason:
+      type: string
+      description: Reason for pausing the storefronts
+      enum:
+      - STORE_MAINTENANCE
+      - OTHER
+    RequestState:
+      type: string
+      description: State of the requested operation
+      enum:
+      - UNKNOWN
+      - QUEUED
+      - IN_PROGRESS
+      - PROVIDER_REQUEST_IN_PROGRESS
+      - VALIDATION
+      - COMPLETED
+      - FAILED
+      - CANCELLED
+    ProcessingStatusResponse:
+      type: object
+      properties:
+        processRequestStatuses:
+          type: array
+          minItems: 0
+          description: List of provider level requests
+          items:
+            $ref: '#/components/schemas/ProcessStoreServiceProviderStatus'
+      description: Processing status response
+    ProcessStoreServiceProviderStatus:
+      type: object
+      properties:
+        requestId:
+          type: string
+          description: The request id of the operation specific to service provider.
+        provider:
+          type: string
+          description: The service provider.
+          example: doordash
+        startedAt:
+          type:
+          - string
+          - 'null'
+          description: The time at which the provider level request was started.
+          format: date-time
+          example: '2007-12-03T10:15:30+01:00'
+        finishedAt:
+          type:
+          - string
+          - 'null'
+          description: The time at which the provider level request was completed.
+          format: date-time
+          example: '2007-12-03T10:15:30+01:00'
+        stateInfo:
+          type: array
+          minItems: 0
+          description: List of request state details.
+          items:
+            $ref: '#/components/schemas/RequestStateInfo'
+        requestStatus:
+          $ref: '#/components/schemas/Status'
+        currentState:
+          $ref: '#/components/schemas/RequestState'
+      description: Provider level request status details
+    Status:
+      type: string
+      description: Status of the operation
+      enum:
+      - UNKNOWN
+      - SUCCESS
+      - FAIL
+      - IN_PROGRESS
+    UnpauseRequest:
+      type: object
+      properties:
+        comment:
+          type:
+          - string
+          - 'null'
+          description: Comment for the unpause
+          example: Some comment
+      description: Unpause request parameters
+    StoreId:
+      type: string
+      description: The unique identifier of the store in the partner application. This ID, along with the `Application ID`, will be used to match the correct store when performing operations. It cannot be longer than 255 characters and must only contain printable ASCII characters. During on-boarding, this ID will be similar to `onboarding:905bb725-b141-4a9b-832a-1f254f772c94` (where the UUID is the Internal Store ID). During off-boarding, this field will be filled with the last known Store ID, or with an empty string, in case none is found. In that case, please fall back to the provided `internalStoreId` (a.k.a. Sku-Sku ID).
+      example: partner-store-unique-identifier
     PauseRequest:
       type: object
       properties:
@@ -174,45 +295,18 @@ components:
         reason:
           $ref: '#/components/schemas/PauseReason'
       description: Pause request parameters
-    StorefrontError:
+    ErrorDetail:
       type: object
       properties:
-        errorType:
+        attribute:
           type: string
-          description: The type of the error.
+          description: The error attribute.
+          example: Order Currency Code
         message:
           type: string
-          description: The error messageß.
-      description: Unpause response details
-    RequestAction:
-      type: object
-      properties:
-        operationType:
-          $ref: '#/components/schemas/OperationType'
-        status:
-          $ref: '#/components/schemas/Status'
-        retryAttempt:
-          type: number
-          description: The current retry attempt.
-          example: 2
-        error:
-          $ref: '#/components/schemas/StorefrontError'
-      description: Request action details of the current state
-    UnpauseResponse:
-      type: object
-      properties:
-        requestId:
-          type: string
-          description: The requestId of the unpause request.
-      description: Unpause response details
-    Status:
-      type: string
-      description: Status of the operation
-      enum:
-      - UNKNOWN
-      - SUCCESS
-      - FAIL
-      - IN_PROGRESS
+          description: The error detail description.
+          example: Order Currency Code must be exactly 3 characters
+      description: The error detail response object.
     ErrorMessage:
       type: object
       properties:
@@ -226,22 +320,16 @@ components:
           items:
             $ref: '#/components/schemas/ErrorDetail'
       description: The error response object.
-    ErrorDetail:
+    StorefrontError:
       type: object
       properties:
-        attribute:
+        errorType:
           type: string
-          description: The error attribute.
-          example: Order Currency Code
+          description: The type of the error.
         message:
           type: string
-          description: The error detail description.
-          example: Order Currency Code must be exactly 3 characters
-      description: The error detail response object.
-    StoreId:
-      type: string
-      description: The unique identifier of the store in the partner application. This ID, along with the `Application ID`, will be used to match the correct store when performing operations. It cannot be longer than 255 characters and must only contain printable ASCII characters. During on-boarding, this ID will be similar to `onboarding:905bb725-b141-4a9b-832a-1f254f772c94` (where the UUID is the Internal Store ID). During off-boarding, this field will be filled with the last known Store ID, or with an empty string, in case none is found. In that case, please fall back to the provided `internalStoreId` (a.k.a. Sku-Sku ID).
-      example: partner-store-unique-identifier
+          description: The error messageß.
+      description: Unpause response details
     RequestStateInfo:
       type: object
       properties:
@@ -279,69 +367,6 @@ components:
           type: string
           description: The requestId of the pause request.
       description: Pause response details
-    PauseReason:
-      type: string
-      description: Reason for pausing the storefronts
-      enum:
-      - STORE_MAINTENANCE
-      - OTHER
-    UnpauseRequest:
-      type: object
-      properties:
-        comment:
-          type:
-          - string
-          - 'null'
-          description: Comment for the unpause
-          example: Some comment
-      description: Unpause request parameters
-    ProcessStoreServiceProviderStatus:
-      type: object
-      properties:
-        requestId:
-          type: string
-          description: The request id of the operation specific to service provider.
-        provider:
-          type: string
-          description: The service provider.
-          example: doordash
-        startedAt:
-          type:
-          - string
-          - 'null'
-          description: The time at which the provider level request was started.
-          format: date-time
-          example: '2007-12-03T10:15:30+01:00'
-        finishedAt:
-          type:
-          - string
-          - 'null'
-          description: The time at which the provider level request was completed.
-          format: date-time
-          example: '2007-12-03T10:15:30+01:00'
-        stateInfo:
-          type: array
-          minItems: 0
-          description: List of request state details.
-          items:
-            $ref: '#/components/schemas/RequestStateInfo'
-        requestStatus:
-          $ref: '#/components/schemas/Status'
-        currentState:
-          $ref: '#/components/schemas/RequestState'
-      description: Provider level request status details
-    RequestState:
-      type: string
-      description: State of the requested operation
-      enum:
-      - UNKNOWN
-      - QUEUED
-      - IN_PROGRESS
-      - PROVIDER_REQUEST_IN_PROGRESS
-      - VALIDATION
-      - COMPLETED
-      - FAILED
-      - CANCELLED
     OperationType:
       type: string
       description: Type of the operation
@@ -349,34 +374,15 @@ components:
       - UNKNOWN
       - PAUSE
       - UNPAUSE
-    ProcessingStatusResponse:
-      type: object
-      properties:
-        processRequestStatuses:
-          type: array
-          minItems: 0
-          description: List of provider level requests
-          items:
-            $ref: '#/components/schemas/ProcessStoreServiceProviderStatus'
-      description: Processing status response
-  parameters:
-    storeIdHeader:
-      name: X-Store-Id
-      in: header
-      required: true
-      schema:
-        $ref: '#/components/schemas/StoreId'
-    requestId:
-      name: requestId
-      in: path
-      required: true
-      schema:
-        type: string
-        description: A unique identifier of the order in a UUID format.
-        example: 295f76b4-5725-4bf5-a8ab-97943dbdc3b4
   responses:
-    '401':
-      description: Invalid authorization.
+    '422':
+      description: The request body is not valid.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorMessage'
+    '404':
+      description: Resource not found.
       content:
         application/json:
           schema:
@@ -387,20 +393,14 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/ErrorMessage'
-    '422':
-      description: The request body is not valid.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorMessage'
     '400':
       description: The request is malformed.
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/ErrorMessage'
-    '404':
-      description: Resource not found.
+    '401':
+      description: Invalid authorization.
       content:
         application/json:
           schema:

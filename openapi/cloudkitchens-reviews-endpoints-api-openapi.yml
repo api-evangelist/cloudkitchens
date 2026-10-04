@@ -63,16 +63,18 @@ components:
           items:
             $ref: '#/components/schemas/ErrorDetail'
       description: The error response object.
-    ReviewReplyResponse:
+    ErrorDetail:
       type: object
       properties:
-        replyId:
-          type:
-          - string
-          - 'null'
-          description: The reply ID. Returned if no scheduled timestamp was provided.
-          example: reply-f34f-4d35
-      description: The response to reply to a review.
+        attribute:
+          type: string
+          description: The error attribute.
+          example: Order Currency Code
+        message:
+          type: string
+          description: The error detail description.
+          example: Order Currency Code must be exactly 3 characters
+      description: The error detail response object.
     ReviewReplyRequest:
       type: object
       properties:
@@ -100,27 +102,19 @@ components:
           format: double
           example: 1697727006
       description: The request to reply to a review.
-    ErrorDetail:
+    ReviewReplyResponse:
       type: object
       properties:
-        attribute:
-          type: string
-          description: The error attribute.
-          example: Order Currency Code
-        message:
-          type: string
-          description: The error detail description.
-          example: Order Currency Code must be exactly 3 characters
-      description: The error detail response object.
+        replyId:
+          type:
+          - string
+          - 'null'
+          description: The reply ID. Returned if no scheduled timestamp was provided.
+          example: reply-f34f-4d35
+      description: The response to reply to a review.
   responses:
-    '403':
-      description: Authorization not valid for the requested resource.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorMessage'
-    '400':
-      description: The request is malformed.
+    '422':
+      description: The request body is not valid.
       content:
         application/json:
           schema:
@@ -131,14 +125,20 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/ErrorMessage'
-    '422':
-      description: The request body is not valid.
+    '403':
+      description: Authorization not valid for the requested resource.
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/ErrorMessage'
     '401':
       description: Invalid authorization.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorMessage'
+    '400':
+      description: The request is malformed.
       content:
         application/json:
           schema:

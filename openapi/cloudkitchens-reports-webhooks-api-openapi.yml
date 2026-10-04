@@ -43,22 +43,6 @@ webhooks:
       description: Staging server url
 components:
   schemas:
-    StoreId:
-      type: string
-      description: The unique identifier of the store in the partner application. This ID, along with the `Application ID`, will be used to match the correct store when performing operations. It cannot be longer than 255 characters and must only contain printable ASCII characters. During on-boarding, this ID will be similar to `onboarding:905bb725-b141-4a9b-832a-1f254f772c94` (where the UUID is the Internal Store ID). During off-boarding, this field will be filled with the last known Store ID, or with an empty string, in case none is found. In that case, please fall back to the provided `internalStoreId` (a.k.a. Sku-Sku ID).
-      example: partner-store-unique-identifier
-    ReportGeneratedEvent:
-      type: object
-      properties:
-        reportUrl:
-          type: string
-          description: Public URL to download generated report
-          example: https://example.com/
-        jobId:
-          type: string
-          description: Job id as returned by /v1/reports call
-          example: 38ab397f-b142-4b06-b70c-40c68a408bea
-      description: Event data containing metadata of the generated report
     MetadataObject:
       type: object
       properties:
@@ -98,6 +82,22 @@ components:
         metadata:
           $ref: '#/components/schemas/MetadataObject'
       description: Notification message sent on relevant events.
+    ReportGeneratedEvent:
+      type: object
+      properties:
+        reportUrl:
+          type: string
+          description: Public URL to download generated report
+          example: https://example.com/
+        jobId:
+          type: string
+          description: Job id as returned by /v1/reports call
+          example: 38ab397f-b142-4b06-b70c-40c68a408bea
+      description: Event data containing metadata of the generated report
+    StoreId:
+      type: string
+      description: The unique identifier of the store in the partner application. This ID, along with the `Application ID`, will be used to match the correct store when performing operations. It cannot be longer than 255 characters and must only contain printable ASCII characters. During on-boarding, this ID will be similar to `onboarding:905bb725-b141-4a9b-832a-1f254f772c94` (where the UUID is the Internal Store ID). During off-boarding, this field will be filled with the last known Store ID, or with an empty string, in case none is found. In that case, please fall back to the provided `internalStoreId` (a.k.a. Sku-Sku ID).
+      example: partner-store-unique-identifier
   responses:
     2XX:
       description: Return any 2XX status to indicate that the data was received successfully

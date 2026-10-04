@@ -121,26 +121,18 @@ components:
           items:
             $ref: '#/components/schemas/ErrorDetail'
       description: The error response object.
-    HydraToken:
+    ErrorDetail:
       type: object
       properties:
-        access_token:
+        attribute:
           type: string
-          description: The auth token used when consuming the API endpoints.
-          example: oMahtBwBbnZeh4Q66mSuLFmk2V0_CLCKVt0aYcNJlcg.yditzjwCP7yp0PgR6AzQR3wQ1rTdCjkcPeAMuyfK-NU
-        expires_in:
-          type: integer
-          format: int64
-          description: The token expiration time in seconds.
-          example: 2627999
-        scope:
+          description: The error attribute.
+          example: Order Currency Code
+        message:
           type: string
-          description: The scopes available for the token.
-          example: ping orders.create
-        token_type:
-          type: string
-          description: The token type is always "bearer".
-          example: bearer
+          description: The error detail description.
+          example: Order Currency Code must be exactly 3 characters
+      description: The error detail response object.
     OAuthTokenGenerationRequest:
       required:
       - grant_type
@@ -183,25 +175,27 @@ components:
           description: If the code_challenge parameter was included in the initial authorization requests, the application must now provide the code verifier. The value is the plaintext string that was used to calculate the hash that was previously sent in the code_challenge parameter.
           example: Th7UHJdLswIYQxwSg29DbK1a_d9o41uNMTRmuH0PM8zyoMAQ
       description: The entity to request a token, following the OAuth2.0 protocol.
-    ErrorDetail:
+    HydraToken:
       type: object
       properties:
-        attribute:
+        access_token:
           type: string
-          description: The error attribute.
-          example: Order Currency Code
-        message:
+          description: The auth token used when consuming the API endpoints.
+          example: oMahtBwBbnZeh4Q66mSuLFmk2V0_CLCKVt0aYcNJlcg.yditzjwCP7yp0PgR6AzQR3wQ1rTdCjkcPeAMuyfK-NU
+        expires_in:
+          type: integer
+          format: int64
+          description: The token expiration time in seconds.
+          example: 2627999
+        scope:
           type: string
-          description: The error detail description.
-          example: Order Currency Code must be exactly 3 characters
-      description: The error detail response object.
+          description: The scopes available for the token.
+          example: ping orders.create
+        token_type:
+          type: string
+          description: The token type is always "bearer".
+          example: bearer
   responses:
-    '400':
-      description: The request is malformed.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorMessage'
     '422':
       description: The request body is not valid.
       content:
@@ -210,6 +204,12 @@ components:
             $ref: '#/components/schemas/ErrorMessage'
     '401':
       description: Invalid authorization.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorMessage'
+    '400':
+      description: The request is malformed.
       content:
         application/json:
           schema:

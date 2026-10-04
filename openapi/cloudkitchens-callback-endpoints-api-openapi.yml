@@ -53,10 +53,6 @@ paths:
         - callback.error.write
 components:
   schemas:
-    StoreId:
-      type: string
-      description: The unique identifier of the store in the partner application. This ID, along with the `Application ID`, will be used to match the correct store when performing operations. It cannot be longer than 255 characters and must only contain printable ASCII characters. During on-boarding, this ID will be similar to `onboarding:905bb725-b141-4a9b-832a-1f254f772c94` (where the UUID is the Internal Store ID). During off-boarding, this field will be filled with the last known Store ID, or with an empty string, in case none is found. In that case, please fall back to the provided `internalStoreId` (a.k.a. Sku-Sku ID).
-      example: partner-store-unique-identifier
     ErrorMessage:
       type: object
       properties:
@@ -70,6 +66,18 @@ components:
           items:
             $ref: '#/components/schemas/ErrorDetail'
       description: The error response object.
+    ErrorDetail:
+      type: object
+      properties:
+        attribute:
+          type: string
+          description: The error attribute.
+          example: Order Currency Code
+        message:
+          type: string
+          description: The error detail description.
+          example: Order Currency Code must be exactly 3 characters
+      description: The error detail response object.
     EventCallbackError:
       type: object
       properties:
@@ -103,27 +111,28 @@ components:
           description: Additional information about the error. This message will be displayed to the user, so ideally it should be friendly.
           example: The store was not found.
       description: The error container for a processed callback.
-    ErrorDetail:
-      type: object
-      properties:
-        attribute:
-          type: string
-          description: The error attribute.
-          example: Order Currency Code
-        message:
-          type: string
-          description: The error detail description.
-          example: Order Currency Code must be exactly 3 characters
-      description: The error detail response object.
+    StoreId:
+      type: string
+      description: The unique identifier of the store in the partner application. This ID, along with the `Application ID`, will be used to match the correct store when performing operations. It cannot be longer than 255 characters and must only contain printable ASCII characters. During on-boarding, this ID will be similar to `onboarding:905bb725-b141-4a9b-832a-1f254f772c94` (where the UUID is the Internal Store ID). During off-boarding, this field will be filled with the last known Store ID, or with an empty string, in case none is found. In that case, please fall back to the provided `internalStoreId` (a.k.a. Sku-Sku ID).
+      example: partner-store-unique-identifier
+  parameters:
+    storeIdHeader:
+      name: X-Store-Id
+      in: header
+      required: true
+      schema:
+        $ref: '#/components/schemas/StoreId'
+    eventIdHeader:
+      name: X-Event-Id
+      in: header
+      required: true
+      schema:
+        type: string
+        description: Unique identifier of the event that this callback refers to.
+        example: cf0ce51b-d74e-40d3-b177-1925ab4edc0c
   responses:
-    '403':
-      description: Authorization not valid for the requested resource.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorMessage'
-    '400':
-      description: The request is malformed.
+    '422':
+      description: The request body is not valid.
       content:
         application/json:
           schema:
@@ -134,8 +143,8 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/ErrorMessage'
-    '422':
-      description: The request body is not valid.
+    '403':
+      description: Authorization not valid for the requested resource.
       content:
         application/json:
           schema:
@@ -146,21 +155,12 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/ErrorMessage'
-  parameters:
-    eventIdHeader:
-      name: X-Event-Id
-      in: header
-      required: true
-      schema:
-        type: string
-        description: Unique identifier of the event that this callback refers to.
-        example: cf0ce51b-d74e-40d3-b177-1925ab4edc0c
-    storeIdHeader:
-      name: X-Store-Id
-      in: header
-      required: true
-      schema:
-        $ref: '#/components/schemas/StoreId'
+    '400':
+      description: The request is malformed.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorMessage'
   securitySchemes:
     OAuth2.0:
       type: oauth2
