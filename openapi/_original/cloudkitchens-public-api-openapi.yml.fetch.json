@@ -1,0 +1,12 @@
+{
+ "url": "https://connect.cloudkitchens.com/docs/openapi/public-api.yaml",
+ "requested_url": "https://connect.cloudkitchens.com/docs/openapi/public-api.yaml",
+ "status": 200,
+ "content_type": "application/x-yaml",
+ "bytes": 466803,
+ "sha256": "4d264c40829a98c89cf3a513a39a7b4b18484529db412252818b530065b171ea",
+ "fetched_at": "2026-10-04",
+ "fetched_by": "APIEvangelist-Harvest/1.0 (+https://apievangelist.com)",
+ "match": "equivalent",
+ "note": "Re-fetched from the provider by verify-openapi-sources.py; the provider's current document describes the same operations (Jaccard 0.963), but the bytes differ, so the archive is an earlier or reformatted copy."
+}
