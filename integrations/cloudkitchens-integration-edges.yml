@@ -1,0 +1,16 @@
+generated: '2026-10-12'
+method: none
+source:
+- https://zapier.com/apps/cloudkitchens/integrations
+- https://n8n.io/integrations/cloudkitchens/
+- https://composio.dev/toolkits/cloudkitchens
+- https://monid.ai/tools/cloudkitchens
+checked:
+- https://composio.dev/toolkits/cloudkitchens
+- https://monid.ai/tools/cloudkitchens
+- https://n8n.io/integrations/cloudkitchens/
+- https://zapier.com/apps/cloudkitchens/integrations
+summary: null
+marketplace_apps: []
+edges: []
+templates: []
