@@ -275,28 +275,14 @@ paths:
         - manager.loyalty
 components:
   parameters:
-    opaquePaginationToken:
-      name: token
-      in: query
-      required: false
-      schema:
-        type: string
-        description: Opaque token used for paging. Query parameters must be URL encoded.
-        example: CgwI09+kjQYQwOvF2AM=/(urlencoded:CgwI09%2BkjQYQwOvF2AM%3D)
-    storeIdHeader:
-      name: X-Store-Id
-      in: header
-      required: true
-      schema:
-        $ref: '#/components/schemas/StoreId'
-    limit-3:
-      name: limit
+    id:
+      name: id
       in: query
       required: true
       schema:
         type: string
-        description: Max number of items to retrieve (minimum 1, maximum is 10, anything smaller/larger than min/max resets to min/max)
-        example: 5
+        description: User's id
+        example: somestring
     term:
       name: term
       in: query
@@ -313,102 +299,175 @@ components:
         type: string
         description: Loyalty provider source
         example: css-loyalty
-    id:
-      name: id
+    limit-3:
+      name: limit
       in: query
       required: true
       schema:
         type: string
-        description: User's id
-        example: somestring
+        description: Max number of items to retrieve (minimum 1, maximum is 10, anything smaller/larger than min/max resets to min/max)
+        example: 5
+    storeIdHeader:
+      name: X-Store-Id
+      in: header
+      required: true
+      schema:
+        $ref: '#/components/schemas/StoreId'
+    opaquePaginationToken:
+      name: token
+      in: query
+      required: false
+      schema:
+        type: string
+        description: Opaque token used for paging. Query parameters must be URL encoded.
+        example: CgwI09+kjQYQwOvF2AM=/(urlencoded:CgwI09%2BkjQYQwOvF2AM%3D)
   schemas:
-    SelectedMenuReward:
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          description: The user identifier.
+          example: somestring
+        userFields:
+          type: array
+          description: The user info fields.
+          items:
+            $ref: '#/components/schemas/UserField'
+    ComputeApplicableRewardsResponse:
+      type: object
+      properties:
+        rewards:
+          type: array
+          description: List of rewards the user can redeem, depending on the reward type, only one of subtotal/menus will be present.
+          items:
+            $ref: '#/components/schemas/Reward'
+      description: Response body for ComputeApplicableRewards API call.
+    SimulateRewardsResponse:
+      type: object
+      properties:
+        transactionId:
+          type: string
+          description: The id of the transaction.
+          example: someidstring
+        rewardEffect:
+          type: object
+          description: Effect after applying the reward.
+          $ref: '#/components/schemas/RewardEffect'
+      description: Response body for SimulateRewards API call.
+    RefundRewardsResponse:
+      type: object
+      properties:
+        transactionId:
+          type: string
+          description: The transaction id of the refund.
+          example: someidstring
+      description: Response body for RefundRewardsResponse API call.
+    RefundRewardsRequest:
+      required:
+      - userId
+      - orderId
+      type: object
+      properties:
+        userId:
+          type: string
+          description: The id of the user.
+          example: someidstring
+        orderId:
+          type: string
+          description: The id of the order.
+          example: someidstring
+      description: Request body for RefundRewards API call.
+    RedeemAndAccumulateRewardsRequest:
+      required:
+      - userId
+      - order
+      - selectedRewards
+      type: object
+      properties:
+        userId:
+          type: string
+          description: The id of the user.
+          example: someidstring
+        order:
+          $ref: '#/components/schemas/Order-2'
+        selectedRewards:
+          type: array
+          description: Selected rewards, currently only support one reward, if multiple rewards are passed it will throw an error.
+          items:
+            $ref: '#/components/schemas/SelectedReward'
+      description: Request body for RedeemAndAccumulateRewards API call.
+    ComputeApplicableRewardsRequest:
+      required:
+      - userId
+      type: object
+      properties:
+        userId:
+          type: string
+          description: The id of the user.
+          example: someidstring
+        order:
+          oneOf:
+          - $ref: '#/components/schemas/Order-2'
+          - type: 'null'
+      description: Request body for ComputeApplicableRewards API call.
+    RedeemAndAccumulateRewardsResponse:
+      type: object
+      properties:
+        transactionId:
+          type: string
+          description: The id of the transaction.
+          example: someidstring
+        rewardEffect:
+          $ref: '#/components/schemas/RewardEffect'
+        accumulatedRewards:
+          type: array
+          description: List of rewards accumulated.
+          items:
+            $ref: '#/components/schemas/UserBalance'
+      description: Response body for RedeemAndAccumulateRewards API call.
+    TriggerMenu:
       type: object
       properties:
         entityId:
           type: string
-          description: The id of the selected item.
+          description: The id of the entity.
           example: someidstring
-      description: Indicates the item the user want to redeem, if reward type is MENUS, this should be present.
-    Order-2:
-      type: object
-      properties:
-        id:
+        entityType:
           type: string
-          description: The id of the order in the partner's system.
-          example: someidstring
-        currencyCode:
-          type: string
-          description: Currency code.
-          example: USD
-        items:
-          type: array
-          description: The ordered items in the order.
-          items:
-            $ref: '#/components/schemas/Item-2'
-        totals:
-          $ref: '#/components/schemas/Totals'
-    Trigger:
-      type: object
-      properties:
-        menus:
-          type: array
-          description: The item/category preconditions to redeem this reward, for example, buy any drinks to get a free Burger.
-          items:
-            $ref: '#/components/schemas/TriggerMenu'
-      description: The preconditions to redeem this reward, for example, buy Fries to get a free Burger. Nullable, if null, this reward can be unconditionally redeemed.
-    UserBalance:
-      type: object
-      properties:
-        amount:
-          type: number
-          description: Balance amount.
-          example: 19.07
-        type:
-          type: string
-          description: The type of balance.
-          example: POINT
+          description: The type of entity.
+          example: ITEM
           enum:
-          - POINT
-          - DOLLAR
-    SelectedReward:
-      type: object
-      properties:
-        id:
-          type: string
-          description: The ID of reward.
-          example: someidstring
-        amount:
+          - ITEM
+          - CATEGORY
+        minimumPurchaseQuantity:
           type: number
-          description: The amount that was deducted.
-          example: 19.07
-        menus:
-          oneOf:
-          - $ref: '#/components/schemas/SelectedMenuReward'
-          - type: 'null'
-    RewardEffect:
+          description: Minimum quantity need to be purchased to activate the trigger.
+          example: 1
+    SearchUsersResponse:
       type: object
       properties:
-        subtotal:
-          $ref: '#/components/schemas/Subtotal'
-      description: Shows how much is deducted from total.
-    UserField:
-      type: object
-      properties:
-        key:
+        users:
+          type: array
+          description: The users that matches the search condition.
+          items:
+            $ref: '#/components/schemas/User'
+        offsetToken:
           type: string
-          description: The key of field, this is retrieved from GetEnrollmentConfig API call.
-          example: full_name
-        value:
-          type: string
-          description: The value of the field.
-          example: john doe
-    GetUserResponse:
+          description: Opaque token used to fetch the following page. If not set, no more results are available.
+          example: H12MAF2fFaFFFa
+      description: Response body for SearchUsers API call.
+    CreateUserRequest:
+      required:
+      - userFields
       type: object
       properties:
-        userAccount:
-          $ref: '#/components/schemas/UserAccount'
-      description: Response body for GetUser API call.
+        userFields:
+          type: array
+          description: The user info fields for the new user.
+          items:
+            $ref: '#/components/schemas/UserField'
+      description: Request body for CreateUser API call.
     EnrollmentField:
       type: object
       properties:
@@ -439,21 +498,39 @@ components:
           type: string
           description: This can be used as the field input's label on the frontend.
           example: First Name and Last Name
-    RedeemAndAccumulateRewardsResponse:
+    StoreId:
+      type: string
+      description: The unique identifier of the store in the partner application. This ID, along with the `Application ID`, will be used to match the correct store when performing operations. It cannot be longer than 255 characters and must only contain printable ASCII characters. During on-boarding, this ID will be similar to `onboarding:905bb725-b141-4a9b-832a-1f254f772c94` (where the UUID is the Internal Store ID). During off-boarding, this field will be filled with the last known Store ID, or with an empty string, in case none is found. In that case, please fall back to the provided `internalStoreId` (a.k.a. Sku-Sku ID).
+      example: partner-store-unique-identifier
+    ErrorMessage:
       type: object
       properties:
-        transactionId:
+        message:
           type: string
-          description: The id of the transaction.
-          example: someidstring
-        rewardEffect:
-          $ref: '#/components/schemas/RewardEffect'
-        accumulatedRewards:
+          description: The error description.
+          example: The request body is invalid.
+        details:
           type: array
-          description: List of rewards accumulated.
+          description: The error details.
           items:
-            $ref: '#/components/schemas/UserBalance'
-      description: Response body for RedeemAndAccumulateRewards API call.
+            $ref: '#/components/schemas/ErrorDetail'
+      description: The error response object.
+    GetEnrollmentConfigResponse:
+      type: object
+      properties:
+        enrollmentFields:
+          type: array
+          description: The fields that can be passed into when creating a new loyalty user.
+          items:
+            $ref: '#/components/schemas/EnrollmentField'
+      description: Response body for GetEnrollmentConfig API call.
+    Subtotal:
+      type: object
+      properties:
+        amount:
+          type: number
+          description: The amount that was discounted.
+          example: 19.07
     Reward:
       type: object
       properties:
@@ -498,78 +575,61 @@ components:
             items:
               $ref: '#/components/schemas/MenusReward'
           - type: 'null'
-    SimulateRewardsResponse:
-      type: object
-      properties:
-        transactionId:
-          type: string
-          description: The id of the transaction.
-          example: someidstring
-        rewardEffect:
-          type: object
-          description: Effect after applying the reward.
-          $ref: '#/components/schemas/RewardEffect'
-      description: Response body for SimulateRewards API call.
-    RedeemAndAccumulateRewardsRequest:
-      required:
-      - userId
-      - order
-      - selectedRewards
-      type: object
-      properties:
-        userId:
-          type: string
-          description: The id of the user.
-          example: someidstring
-        order:
-          $ref: '#/components/schemas/Order-2'
-        selectedRewards:
-          type: array
-          description: Selected rewards, currently only support one reward, if multiple rewards are passed it will throw an error.
-          items:
-            $ref: '#/components/schemas/SelectedReward'
-      description: Request body for RedeemAndAccumulateRewards API call.
-    UserAccount:
+    SelectedReward:
       type: object
       properties:
         id:
           type: string
-          description: The user identifier.
-          example: somestring
-        userFields:
-          type: array
-          description: The user info fields.
-          items:
-            $ref: '#/components/schemas/UserField'
-        balances:
-          type: array
-          description: The user's current balances.
-          items:
-            $ref: '#/components/schemas/UserBalance'
-    User:
-      type: object
-      properties:
-        id:
-          type: string
-          description: The user identifier.
-          example: somestring
-        userFields:
-          type: array
-          description: The user info fields.
-          items:
-            $ref: '#/components/schemas/UserField'
-    StoreId:
-      type: string
-      description: The unique identifier of the store in the partner application. This ID, along with the `Application ID`, will be used to match the correct store when performing operations. It cannot be longer than 255 characters and must only contain printable ASCII characters. During on-boarding, this ID will be similar to `onboarding:905bb725-b141-4a9b-832a-1f254f772c94` (where the UUID is the Internal Store ID). During off-boarding, this field will be filled with the last known Store ID, or with an empty string, in case none is found. In that case, please fall back to the provided `internalStoreId` (a.k.a. Sku-Sku ID).
-      example: partner-store-unique-identifier
-    RefundRewardsResponse:
-      type: object
-      properties:
-        transactionId:
-          type: string
-          description: The transaction id of the refund.
+          description: The ID of reward.
           example: someidstring
-      description: Response body for RefundRewardsResponse API call.
+        amount:
+          type: number
+          description: The amount that was deducted.
+          example: 19.07
+        menus:
+          oneOf:
+          - $ref: '#/components/schemas/SelectedMenuReward'
+          - type: 'null'
+    UserBalance:
+      type: object
+      properties:
+        amount:
+          type: number
+          description: Balance amount.
+          example: 19.07
+        type:
+          type: string
+          description: The type of balance.
+          example: POINT
+          enum:
+          - POINT
+          - DOLLAR
+    RewardEffect:
+      type: object
+      properties:
+        subtotal:
+          $ref: '#/components/schemas/Subtotal'
+      description: Shows how much is deducted from total.
+    SubtotalReward:
+      type: object
+      properties:
+        amount:
+          type: number
+          description: Discount amount, if it's percentage discount, the percentage amount shown is in basis points, ie 1000 = 10% discount.
+          example: 20
+        type:
+          type: string
+          description: The type of discount, absolute or percentage.
+          example: ABSOLUTE_DISCOUNT
+          enum:
+          - ABSOLUTE_DISCOUNT
+          - PERCENT_DISCOUNT
+    GetUserResponse:
+      type: object
+      properties:
+        userAccount:
+          $ref: '#/components/schemas/UserAccount'
+      description: Response body for GetUser API call.
     SimulateRewardsRequest:
       required:
       - userId
@@ -589,89 +649,31 @@ components:
           items:
             $ref: '#/components/schemas/SelectedReward'
       description: Request body for SimulateRewards API call.
-    ErrorDetail:
-      type: object
-      properties:
-        attribute:
-          type: string
-          description: The error attribute.
-          example: Order Currency Code
-        message:
-          type: string
-          description: The error detail description.
-          example: Order Currency Code must be exactly 3 characters
-      description: The error detail response object.
-    RefundRewardsRequest:
-      required:
-      - userId
-      - orderId
-      type: object
-      properties:
-        userId:
-          type: string
-          description: The id of the user.
-          example: someidstring
-        orderId:
-          type: string
-          description: The id of the order.
-          example: someidstring
-      description: Request body for RefundRewards API call.
-    ComputeApplicableRewardsResponse:
-      type: object
-      properties:
-        rewards:
-          type: array
-          description: List of rewards the user can redeem, depending on the reward type, only one of subtotal/menus will be present.
-          items:
-            $ref: '#/components/schemas/Reward'
-      description: Response body for ComputeApplicableRewards API call.
-    SearchUsersResponse:
-      type: object
-      properties:
-        users:
-          type: array
-          description: The users that matches the search condition.
-          items:
-            $ref: '#/components/schemas/User'
-        offsetToken:
-          type: string
-          description: Opaque token used to fetch the following page. If not set, no more results are available.
-          example: H12MAF2fFaFFFa
-      description: Response body for SearchUsers API call.
-    TriggerMenu:
+    SelectedMenuReward:
       type: object
       properties:
         entityId:
           type: string
-          description: The id of the entity.
+          description: The id of the selected item.
           example: someidstring
-        entityType:
+      description: Indicates the item the user want to redeem, if reward type is MENUS, this should be present.
+    UserAccount:
+      type: object
+      properties:
+        id:
           type: string
-          description: The type of entity.
-          example: ITEM
-          enum:
-          - ITEM
-          - CATEGORY
-        minimumPurchaseQuantity:
-          type: number
-          description: Minimum quantity need to be purchased to activate the trigger.
-          example: 1
-    GetEnrollmentConfigResponse:
-      type: object
-      properties:
-        enrollmentFields:
+          description: The user identifier.
+          example: somestring
+        userFields:
           type: array
-          description: The fields that can be passed into when creating a new loyalty user.
+          description: The user info fields.
           items:
-            $ref: '#/components/schemas/EnrollmentField'
-      description: Response body for GetEnrollmentConfig API call.
-    Subtotal:
-      type: object
-      properties:
-        amount:
-          type: number
-          description: The amount that was discounted.
-          example: 19.07
+            $ref: '#/components/schemas/UserField'
+        balances:
+          type: array
+          description: The user's current balances.
+          items:
+            $ref: '#/components/schemas/UserBalance'
     MenusReward:
       type: object
       properties:
@@ -690,33 +692,81 @@ components:
           enum:
           - ABSOLUTE_DISCOUNT
           - PERCENT_DISCOUNT
-    ErrorMessage:
+    ErrorDetail:
       type: object
       properties:
+        attribute:
+          type: string
+          description: The error attribute.
+          example: Order Currency Code
         message:
           type: string
-          description: The error description.
-          example: The request body is invalid.
-        details:
-          type: array
-          description: The error details.
-          items:
-            $ref: '#/components/schemas/ErrorDetail'
-      description: The error response object.
-    ComputeApplicableRewardsRequest:
-      required:
-      - userId
+          description: The error detail description.
+          example: Order Currency Code must be exactly 3 characters
+      description: The error detail response object.
+    CreateUserResponse:
       type: object
       properties:
-        userId:
+        user:
+          $ref: '#/components/schemas/User'
+      description: Response body for CreateUser API call.
+    Trigger:
+      type: object
+      properties:
+        menus:
+          type: array
+          description: The item/category preconditions to redeem this reward, for example, buy any drinks to get a free Burger.
+          items:
+            $ref: '#/components/schemas/TriggerMenu'
+      description: The preconditions to redeem this reward, for example, buy Fries to get a free Burger. Nullable, if null, this reward can be unconditionally redeemed.
+    Totals:
+      type: object
+      properties:
+        subTotal:
+          type: number
+          description: Order subtotal.
+          example: 29.07
+        tax:
+          type: number
+          description: Order tax.
+          example: 10
+        discount:
+          type: number
+          description: Order discount.
+          example: 9.07
+        total:
+          type: number
+          description: Order total.
+          example: 30
+    Order-2:
+      type: object
+      properties:
+        id:
           type: string
-          description: The id of the user.
+          description: The id of the order in the partner's system.
           example: someidstring
-        order:
-          oneOf:
-          - $ref: '#/components/schemas/Order-2'
-          - type: 'null'
-      description: Request body for ComputeApplicableRewards API call.
+        currencyCode:
+          type: string
+          description: Currency code.
+          example: USD
+        items:
+          type: array
+          description: The ordered items in the order.
+          items:
+            $ref: '#/components/schemas/Item-2'
+        totals:
+          $ref: '#/components/schemas/Totals'
+    UserField:
+      type: object
+      properties:
+        key:
+          type: string
+          description: The key of field, this is retrieved from GetEnrollmentConfig API call.
+          example: full_name
+        value:
+          type: string
+          description: The value of the field.
+          example: john doe
     Item-2:
       type: object
       properties:
@@ -743,69 +793,7 @@ components:
             items:
               $ref: '#/components/schemas/Item-2'
           - type: 'null'
-    CreateUserRequest:
-      required:
-      - userFields
-      type: object
-      properties:
-        userFields:
-          type: array
-          description: The user info fields for the new user.
-          items:
-            $ref: '#/components/schemas/UserField'
-      description: Request body for CreateUser API call.
-    SubtotalReward:
-      type: object
-      properties:
-        amount:
-          type: number
-          description: Discount amount, if it's percentage discount, the percentage amount shown is in basis points, ie 1000 = 10% discount.
-          example: 20
-        type:
-          type: string
-          description: The type of discount, absolute or percentage.
-          example: ABSOLUTE_DISCOUNT
-          enum:
-          - ABSOLUTE_DISCOUNT
-          - PERCENT_DISCOUNT
-    Totals:
-      type: object
-      properties:
-        subTotal:
-          type: number
-          description: Order subtotal.
-          example: 29.07
-        tax:
-          type: number
-          description: Order tax.
-          example: 10
-        discount:
-          type: number
-          description: Order discount.
-          example: 9.07
-        total:
-          type: number
-          description: Order total.
-          example: 30
-    CreateUserResponse:
-      type: object
-      properties:
-        user:
-          $ref: '#/components/schemas/User'
-      description: Response body for CreateUser API call.
   responses:
-    '404':
-      description: Resource not found.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorMessage'
-    '422':
-      description: The request body is not valid.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorMessage'
     '403':
       description: Authorization not valid for the requested resource.
       content:
@@ -818,8 +806,20 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/ErrorMessage'
+    '404':
+      description: Resource not found.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorMessage'
     '401':
       description: Invalid authorization.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorMessage'
+    '422':
+      description: The request body is not valid.
       content:
         application/json:
           schema:

@@ -151,321 +151,240 @@ webhooks:
       description: Staging server url
 components:
   schemas:
-    PaymentDetailsAcss:
+    MandateStatus:
+      type: string
+      enum:
+      - ACTIVE
+      - INACTIVE
+      - PENDING
+      description: The status of the mandate.
+      example: ACTIVE
+    DeliveryStatusUpdateEvent:
       type: object
-      description: Details of an ACSS payment method in Canada.
       properties:
-        mandateStatus:
-          $ref: '#/components/schemas/MandateStatus'
-        acceptedAt:
+        provider:
           type: string
+          description: Describes the provider of the delivery.
+          example: doordash
+        courier:
+          $ref: '#/components/schemas/Courier'
+        estimatedDeliveryTime:
+          type:
+          - string
+          - 'null'
+          description: The expected delivery time.
           format: date-time
-          description: The timestamp when the mandate was accepted.
-          example: '2023-01-01T12:00:00Z'
-        lastFour:
-          type: string
-          description: The last four digits of the ACSS account.
-          example: '6543'
-        transitNumber:
-          type: string
-          description: The transit number of the ACSS account.
-          example: '11001'
-        institutionNumber:
-          type: string
-          description: The institution number of the ACSS account.
-          example: '001'
-        bankName:
-          type: string
-          description: The name of the bank.
-          example: Bank of Examples
-        mandateId:
-          type: string
-          description: The mandate ID for the ACSS account.
-          example: acss_mandate_456
-        transactionType:
-          type: string
-          description: The type of transaction.
-          example: recurring
-        intervalDescription:
-          type: string
-          description: The description of the transaction interval.
-          example: monthly
-    PaymentDetailsCard:
-      type: object
-      description: Details of a card payment method.
-      properties:
-        brandType:
-          $ref: '#/components/schemas/CardBrandType'
-        expiration:
-          type: object
-          properties:
-            year:
-              type: integer
-              description: The expiration year of the card.
-              example: 2025
-            month:
-              type: integer
-              description: The expiration month of the card.
-              example: 12
-        fundingType:
-          $ref: '#/components/schemas/CardFundingType'
-        walletType:
-          $ref: '#/components/schemas/CardWalletType'
-        lastFour:
-          type: string
-          description: The last four digits of the card.
-          example: '1234'
-        walletLastFour:
-          type: string
-          description: The last four digits of the wallet account.
-          example: '5678'
-        authorizationCode:
-          type: string
-          description: The authorization code for the card.
-          example: auth_code_123
-        applicationPreferredName:
-          type: string
-          description: The preferred name of the application.
-          example: MyApp
-        fingerprint:
-          type: string
-          description: The fingerprint of the card.
-          example: fingerprint_abc123
-        readMethod:
-          type: string
-          description: The method used to read the card.
-          example: chip
-    PersonalIdentifiers:
-      type:
-      - object
-      - 'null'
-      properties:
-        taxIdentificationNumber:
+          example: '2007-12-03T10:15:30+01:00'
+        estimatedPickupTime:
           type:
           - string
           - 'null'
-          description: Person tax identification number.
-          example: 1234567890
-        serviceProviderId:
+          description: The expected pickup time.
+          format: date-time
+          example: '2007-12-03T10:15:30+01:00'
+        status:
+          $ref: '#/components/schemas/DeliveryStatus'
+        deliveryStatus:
+          $ref: '#/components/schemas/DeliveryStatus'
+        currencyCode:
           type:
           - string
           - 'null'
-          description: External service provider ID i.e. Courier Id.
-          example: 12345ba6-789e-123f-4e56-d78db90d123b
-      description: The person's personal identifiers (e.g. tax identification number).
-    RecordProviderType:
-      type: string
-      enum:
-      - ALLINPAY
-      - CHECKOUT
-      - CSS
-      - MERCADO_PAGO
-      - OLIVENETWORKS
-      - SHOUQIANBA
-      - STRIPE
-      - UNIONPAY
-      - VAN_DAOU
-      - VAN_JTNET
-      - VAN_KICC
-      - VAN_KIS
-      - VAN_KOVAN
-      - VAN_KSNET
-      - VAN_NICE
-      - VAN_SMARTRO
-      - UNKNOWN
-      example: STRIPE
-      description: The type of payment provider.
-    RecordPaymentType:
-      type: string
-      enum:
-      - ACH_CREDIT
-      - ACH_DEBIT
-      - ACSS_DEBIT
-      - ALIPAY_MINIAPP
-      - ALI_PAY
-      - BACS_DEBIT
-      - BANK_TRANSFER
-      - BECS_DEBIT
-      - BOLETO
-      - CARD
-      - CARD_PRESENT
-      - CASH
-      - CHECK
-      - CHECKOUT_SESSION
-      - ETC
-      - EXTERNAL_CASH_BALANCE
-      - GIFT_CARD
-      - INTERNAL_CASH_BALANCE
-      - KAKAO_PAY
-      - LIABILITY_BALANCE
-      - LINKED_BANK_ACCOUNT
-      - NAVER_PAY
-      - PIX
-      - QRCODE
-      - QRCODE_ALIPAY
-      - QRCODE_WECHAT
-      - SEPA_DEBIT
-      - SPEI_BANK_TRANSFER
-      - WALLET
-      - WECHAT_PAY
-      - UNKNOWN
-      example: CARD
-      description: The type of payment method.
-    VerificationProof:
-      type:
-      - object
-      - 'null'
-      properties:
-        signatureProof:
-          $ref: '#/components/schemas/SignatureProof'
-        pictureProof:
-          $ref: '#/components/schemas/PictureProof'
-      description: Verification details.
-    CustomerPayment:
+          minLength: 3
+          maxLength: 3
+          description: The 3-letter currency code (ISO 4217) to use for all monetary values.
+          example: EUR
+        baseFee:
+          type:
+          - number
+          - 'null'
+          format: double
+        extraFee:
+          type:
+          - number
+          - 'null'
+          format: double
+        totalFee:
+          type:
+          - number
+          - 'null'
+          format: double
+        distance:
+          $ref: '#/components/schemas/Distance'
+        updatedTime:
+          type:
+          - string
+          - 'null'
+          description: The time that the delivery status was updated.
+          format: date-time
+          example: '2007-12-03T10:15:30+01:00'
+        deliveryTrackingUrl:
+          type:
+          - string
+          - 'null'
+          format: uri
+          description: The URL to track the delivery.
+          example: https://www.doordash.com/delivery/track/1234567890
+        dropoffInfo:
+          $ref: '#/components/schemas/DropoffInfo'
+      description: Event that represent a status update for a delivery.
+    OrderExternalIdentifiers:
       required:
-      - paymentMethod
-      - processingStatus
-      - value
+      - friendlyId
+      - id
       type: object
+      properties:
+        id:
+          type: string
+          description: Unique ID for the order that was placed.
+          example: 69f60a06-c335-46d9-b5a1-97f1a211c514
+        friendlyId:
+          type: string
+          description: ID used for driver pickup and restaurant management.
+          example: ABCDE
+        source:
+          type:
+          - string
+          - 'null'
+          description: Describes the source of the order, typically from a food ordering marketplace.
+          example: ubereats
+        sourceType:
+          type:
+          - string
+          - 'null'
+          description: source type of the order
+          enum:
+          - POINT_OF_SALE
+          - ORDERING_MARKETPLACE
+          - AGGREGATOR
+          - CUSTOMER_INTERACTION
+        sourceExternalIdentifiers:
+          $ref: '#/components/schemas/SourceExternalIdentifiers'
+      description: The external identifiers.
+    Courier:
+      type:
+      - object
+      - 'null'
+      properties:
+        name:
+          type:
+          - string
+          - 'null'
+          description: The person's name as it should be displayed.
+          example: Jane Doe
+        phone:
+          type:
+          - string
+          - 'null'
+          description: The person's phone number.
+          example: +1-555-555-5555
+        phoneCode:
+          type:
+          - string
+          - 'null'
+          description: A code or extension of the phone number.
+          example: 111 11 111
+        email:
+          type:
+          - string
+          - 'null'
+          description: The person's email address.
+          example: email@email.com
+        personalIdentifiers:
+          $ref: '#/components/schemas/PersonalIdentifiers'
+      description: Details about the delivery courier.
+    SourceExternalIdentifiers:
+      type:
+      - object
+      - 'null'
+      properties:
+        id:
+          type: string
+          description: Unique ID for the order that was placed.
+          example: 69f60a06-c335-46d9-b5a1-97f1a211c514
+        friendlyId:
+          type: string
+          description: ID used for driver pickup and restaurant management.
+          example: ABCDE
+        source:
+          type: string
+          description: Describes the source of the order, typically from a food ordering marketplace.
+          example: ubereats
+        sourceType:
+          type: string
+          description: source type of the order
+          enum:
+          - POINT_OF_SALE
+          - ORDERING_MARKETPLACE
+          - AGGREGATOR
+          - CUSTOMER_INTERACTION
+        sourceExternalIdentifiers:
+          $ref: '#/components/schemas/SourceExternalIdentifiers'
+      description: The external identifiers.
+    PictureProof:
+      type:
+      - object
+      - 'null'
+      properties:
+        pictureUrl:
+          type: string
+          description: Image url.
+      description: Picture info captured.
+    DeliveryFee:
+      type:
+      - object
+      - 'null'
+      required:
+      - value
       properties:
         value:
           type: number
-          description: The portion of the overall amount that needs to be paid.
+          description: The delivery fee paid by the customer.
           example: 2
-        processingStatus:
-          type: string
-          description: The processing status of the payment. (PROCESSED is only valid when the payment method is CARD)
-          enum:
-          - COLLECTABLE
-          - PROCESSED
-        paymentMethod:
-          type: string
-          description: The method of payment.
-          enum:
-          - CASH
-          - CARD
-          - UNKNOWN
-          - OTHER
-          - CHEQUE
-          - GIFT_CARD
-        paymentAuthorizer:
-          type:
-          - string
-          - 'null'
-          description: A payment system type responsible for a card transaction (containing information for payment network and payment type).
-          enum:
-          - UNKNOWN_TYPE
-          - OTHER_TYPE
-          - MASTERCARD
-          - MASTERCARD_MAESTRO
-          - MASTERCARD_DEBIT
-          - VISA
-          - VISA_DEBIT
-          - AMEX
-          - VISA_ELECTORN
-          - DINERS
-          - ELO
-          - ELO_DEBIT
-          - HIPERCARD
-          - BANRICOMPRAS
-          - BANRICOMPRAS_DEBIT
-          - NUGO
-          - GOODCARD
-          - VERDECARD
-          - CARNET
-          - CHEF_CARD
-          - GER_CC_CREDITO
-          - TERMINAL_BANCARIA
-          - DEBIT
-          - QR_CODE
-          - RAPPI_PAY
-          - DISCOVER
-          - VALE_GREEN_CARD_PAPEL
-          - VALE_GREEN_CARD_CARD
-          - VALE_REFEISUL
-          - VALE_VEROCARD
-          - VALE_VR_SMART
-          - VALE_SODEXO
-          - VALE_TICKET_RESTAURANTE
-          - VALE_ALELO
-          - VALE_BEN_VIS
-          - VALE_COOPER_CARD
-          - NUTRICARD_REFEICAO_E_ALIMENTACAO
-          - APPLE_PAY_MASTERCARD
-          - APPLE_PAY_VISA
-          - APPLE_PAY_AMEX
-          - GOOGLE_PAY_ELO
-          - GOOGLE_PAY_MASTERCARD
-          - GOOGLE_PAY_VISA
-          - MOVILE_PAY
-          - MOVILE_PAY_AMEX
-          - MOVILE_PAY_DINERS
-          - MOVILE_PAY_ELO
-          - MOVILE_PAY_HIPERCARD
-          - MOVILE_PAY_MASTERCARD
-          - MOVILE_PAY_VISA
-          - IFOOD_CORP
-          - LOOP_CLUB
-          - PAYPAL
-          - PSE
-          - PIX
-        cardInfo:
-          deprecated: true
-          $ref: '#/components/schemas/CardInfo'
-        externalPaymentType:
-          type:
-          - string
-          - 'null'
-          description: External payment type string. Should be only used if not mapped by any value of paymentAuthorizer, and it's value is OTHER_TYPE.
-        paymentRecords:
-          type:
-          - array
-          - 'null'
-          description: '[WIP - in development, not supported yet] List of payment records, including method and card details and ids from payment processing entities.'
-          items:
-            $ref: '#/components/schemas/PaymentRecord'
-        loyaltyInfo:
-          $ref: '#/components/schemas/LoyaltyInfo'
-    CardInfo:
-      required:
-      - paymentNetwork
-      - type
+    DropoffInfo:
       type:
       - object
       - 'null'
-      deprecated: true
-      description: Additional card information.
       properties:
-        paymentNetwork:
-          type: string
-          description: The payment network (aka card brand or card scheme) for this card.
-          enum:
-          - MASTERCARD
-          - MASTERCARD_MAESTRO
-          - VISA
-          - AMEX
-          - DINERS
-          - ELO
-          - HIPERCARD
-          - BANRICOMPRAS
-          - NUGO
-          - GOODCARD
-          - ELO_MAIS
-          - GREENCARD
-          - VEROCARD
-          - COOPER
-          - NUTRICARD
-          - VR
-          - SODEXO
-          - OTHER
-        type:
-          type: string
-          description: The payment type of the card.
-          enum:
-          - CREDIT
-          - DEBIT
-          - VOUCHER
-          - OTHER
+        courierNote:
+          type:
+          - string
+          - 'null'
+          description: Courier supplied dropoff note.
+        proofOfDelivery:
+          $ref: '#/components/schemas/VerificationProof'
+          description: Proof of delivery.
+      description: Delivery dropoff details.
+    Location:
+      required:
+      - latitude
+      - longitude
+      type:
+      - object
+      - 'null'
+      properties:
+        latitude:
+          type: number
+          description: The latitude of the location.
+          format: double
+          example: 38.8977
+        longitude:
+          type: number
+          description: The longitude of the location.
+          format: double
+          example: 77.0365
+      description: Latitude and longitude of the address.
+    CustomerTip:
+      type:
+      - object
+      - 'null'
+      required:
+      - value
+      properties:
+        value:
+          type: number
+          description: The amount that the customer tipped.
+          example: 2
     DeliveryStatus:
       type: string
       description: The status of the delivery.
@@ -477,35 +396,6 @@ components:
       - CANCELED
       - ARRIVED_AT_PICKUP
       - ARRIVED_AT_DROP_OFF
-    PictureRequirement:
-      type:
-      - object
-      - 'null'
-      properties:
-        enabled:
-          type: boolean
-          description: Marks the picture requirement as required.
-          example: true
-      description: Enables and configure the picture requirement.
-    SignatureProof:
-      type:
-      - object
-      - 'null'
-      properties:
-        signatureImageUrl:
-          type: string
-          description: Signature image url.
-        signerName:
-          type:
-          - string
-          - 'null'
-          description: The name of the signer.
-        signerRelationship:
-          type:
-          - string
-          - 'null'
-          description: The relationship of signer to the intended recipient.
-      description: Signature info captured.
     RequestDeliveryQuoteEvent:
       type: object
       properties:
@@ -569,235 +459,42 @@ components:
         orderExternalIdentifiers:
           $ref: '#/components/schemas/OrderExternalIdentifiers'
           description: ID info associated with the order in external system, which is utilized for 3pl integrations.
-    PickUpInfo:
-      type:
-      - object
-      - 'null'
-      properties:
-        readyAtTime:
-          type: string
-          description: The timestamp the order(s) became ready for pick up by a courier. If not provided, the order is not yet ready to be picked up.
-          format: date-time
-          example: '2007-12-03T10:15:30+01:00'
-      description: Pick up information for delivery.
-    Courier:
-      type:
-      - object
-      - 'null'
-      properties:
-        name:
-          type:
-          - string
-          - 'null'
-          description: The person's name as it should be displayed.
-          example: Jane Doe
-        phone:
-          type:
-          - string
-          - 'null'
-          description: The person's phone number.
-          example: +1-555-555-5555
-        phoneCode:
-          type:
-          - string
-          - 'null'
-          description: A code or extension of the phone number.
-          example: 111 11 111
-        email:
-          type:
-          - string
-          - 'null'
-          description: The person's email address.
-          example: email@email.com
-        personalIdentifiers:
-          $ref: '#/components/schemas/PersonalIdentifiers'
-      description: Details about the delivery courier.
-    DeliveryFee:
-      type:
-      - object
-      - 'null'
-      required:
-      - value
-      properties:
-        value:
-          type: number
-          description: The delivery fee paid by the customer.
-          example: 2
-    RequiredPerson:
-      type: object
-      properties:
-        name:
-          type:
-          - string
-          - 'null'
-          description: The person's name as it should be displayed.
-          example: Jane Doe
-          maxLength: 255
-        phone:
-          type:
-          - string
-          - 'null'
-          description: The person's phone number.
-          example: +1-555-555-5555
-          maxLength: 25
-        phoneCode:
-          type:
-          - string
-          - 'null'
-          description: A code or extension of the phone number.
-          example: 111 11 111
-          maxLength: 25
-        email:
-          type:
-          - string
-          - 'null'
-          description: The person's email address.
-          example: email@email.com
-        personalIdentifiers:
-          $ref: '#/components/schemas/PersonalIdentifiers'
-      description: Details about the customer who placed the order.
-    AccountType:
-      type: string
-      enum:
-      - CHECKING
-      - SAVINGS
-      description: The type of ACH account.
-      example: CHECKING
-    SourceExternalIdentifiers:
-      type:
-      - object
-      - 'null'
-      properties:
-        id:
-          type: string
-          description: Unique ID for the order that was placed.
-          example: 69f60a06-c335-46d9-b5a1-97f1a211c514
-        friendlyId:
-          type: string
-          description: ID used for driver pickup and restaurant management.
-          example: ABCDE
-        source:
-          type: string
-          description: Describes the source of the order, typically from a food ordering marketplace.
-          example: ubereats
-        sourceType:
-          type: string
-          description: source type of the order
-          enum:
-          - POINT_OF_SALE
-          - ORDERING_MARKETPLACE
-          - AGGREGATOR
-          - CUSTOMER_INTERACTION
-        sourceExternalIdentifiers:
-          $ref: '#/components/schemas/SourceExternalIdentifiers'
-      description: The external identifiers.
-    CustomerTip:
-      type:
-      - object
-      - 'null'
-      required:
-      - value
-      properties:
-        value:
-          type: number
-          description: The amount that the customer tipped.
-          example: 2
-    CardWalletType:
-      type: string
-      enum:
-      - UNKNOWN
-      - APPLE_PAY
-      - GOOGLE_PAY
-      description: The type of wallet associated with the card.
-      example: APPLE_PAY
-    CardFundingType:
-      type: string
-      enum:
-      - UNKNOWN
-      - CREDIT
-      - DEBIT
-      - PREPAID
-      description: The funding type of the card.
-      example: CREDIT
     StoreId:
       type: string
       description: The unique identifier of the store in the partner application. This ID, along with the `Application ID`, will be used to match the correct store when performing operations. It cannot be longer than 255 characters and must only contain printable ASCII characters. During on-boarding, this ID will be similar to `onboarding:905bb725-b141-4a9b-832a-1f254f772c94` (where the UUID is the Internal Store ID). During off-boarding, this field will be filled with the last known Store ID, or with an empty string, in case none is found. In that case, please fall back to the provided `internalStoreId` (a.k.a. Sku-Sku ID).
       example: partner-store-unique-identifier
-    PaymentDetailsAch:
-      type: object
-      description: Details of a debit ACH payment method in the US.
-      properties:
-        accountHolderType:
-          $ref: '#/components/schemas/AccountHolderType'
-        accountType:
-          $ref: '#/components/schemas/AccountType'
-        mandateStatus:
-          $ref: '#/components/schemas/MandateStatus'
-        lastFour:
-          type: string
-          description: The last four digits of the ACH account.
-          example: '7890'
-        routingNumber:
-          type: string
-          description: The routing number of the ACH account.
-          example: '123456789'
-        bankName:
-          type: string
-          description: The name of the bank.
-          example: Example Bank
-        mandateId:
-          type: string
-          description: The mandate ID for the ACH account.
-          example: ach_mandate_345
-    LoyaltyInfo:
+    Item-4:
       type:
       - object
       - 'null'
-      description: The customer's loyalty information.
       properties:
-        hasMembershipPass:
-          type: boolean
-          description: Indicates if the customer has a membership pass.
-          example: true
-    MetadataObject:
-      type: object
-      properties:
-        storeId:
-          $ref: '#/components/schemas/StoreId'
-        applicationId:
-          type: string
-          description: The plain-text Application ID, provided at partner onboarding, also available on Developer Portal.
-          example: ad4ff59d-04c0-4c7d-8ca3-e3a673f8443d
-        resourceId:
-          type: string
-          description: Identifier of the resource that this event refers to, if needed.
-          example: resource-id-if-needed
-        payload:
-          type: object
-          description: Object containing details of the given event, if needed.
-        resourceHref:
-          type: string
-          description: The full endpoint to fetch the details of the resource, if needed.
-          example: resource-href-id-if-needed
-      description: Information about the event.
-    EventNotification:
-      type: object
-      properties:
-        eventId:
-          type: string
-          description: Unique identifier of the event.
-          format: uuid
-        eventTime:
-          type: string
-          description: Date of event occurrence.
-          format: date-time
-          example: '2007-12-03T10:15:30+01:00'
-        eventType:
-          type: string
-          description: The type of the event.
-        metadata:
-          $ref: '#/components/schemas/MetadataObject'
-      description: Notification message sent on relevant events.
+        name:
+          type:
+          - string
+          - 'null'
+          description: Human-readable name for this item.
+        price:
+          type:
+          - number
+          - 'null'
+          description: Per-unit price. This value excludes modifier prices.
+        quantity:
+          type:
+          - number
+          - 'null'
+          description: Number of units of this item being ordered.
+        itemId:
+          type:
+          - string
+          - 'null'
+          description: ID for this item.
+        modifiers:
+          type:
+          - array
+          - 'null'
+          description: Any modifiers attached to this item.
+          items:
+            $ref: '#/components/schemas/ModifierItem'
     AcceptDeliveryEvent:
       type: object
       properties:
@@ -911,158 +608,132 @@ components:
           description: Information to instruct couriers how to dropoff the order.
         deliveryFee:
           $ref: '#/components/schemas/DeliveryFee'
-    DeliveryStatusUpdateEvent:
+    RecordPaymentType:
+      type: string
+      enum:
+      - ACH_CREDIT
+      - ACH_DEBIT
+      - ACSS_DEBIT
+      - ALIPAY_MINIAPP
+      - ALI_PAY
+      - BACS_DEBIT
+      - BANK_TRANSFER
+      - BECS_DEBIT
+      - BOLETO
+      - CARD
+      - CARD_PRESENT
+      - CASH
+      - CHECK
+      - CHECKOUT_SESSION
+      - ETC
+      - EXTERNAL_CASH_BALANCE
+      - GIFT_CARD
+      - INTERNAL_CASH_BALANCE
+      - KAKAO_PAY
+      - LIABILITY_BALANCE
+      - LINKED_BANK_ACCOUNT
+      - NAVER_PAY
+      - PIX
+      - QRCODE
+      - QRCODE_ALIPAY
+      - QRCODE_WECHAT
+      - SEPA_DEBIT
+      - SPEI_BANK_TRANSFER
+      - WALLET
+      - WECHAT_PAY
+      - UNKNOWN
+      example: CARD
+      description: The type of payment method.
+    CardBrandType:
+      type: string
+      enum:
+      - UNKNOWN
+      - AMEX
+      - DINERS_CLUB
+      - DISCOVER
+      - JCB
+      - MASTERCARD
+      - UNION_PAY
+      - VISA
+      - GIROCARD
+      - EFTPOS_AU
+      - INTERAC
+      description: The brand of the card.
+      example: VISA
+    RecordProviderType:
+      type: string
+      enum:
+      - ALLINPAY
+      - CHECKOUT
+      - CSS
+      - MERCADO_PAGO
+      - OLIVENETWORKS
+      - SHOUQIANBA
+      - STRIPE
+      - UNIONPAY
+      - VAN_DAOU
+      - VAN_JTNET
+      - VAN_KICC
+      - VAN_KIS
+      - VAN_KOVAN
+      - VAN_KSNET
+      - VAN_NICE
+      - VAN_SMARTRO
+      - UNKNOWN
+      example: STRIPE
+      description: The type of payment provider.
+    PaymentDetailsAch:
       type: object
+      description: Details of a debit ACH payment method in the US.
       properties:
-        provider:
+        accountHolderType:
+          $ref: '#/components/schemas/AccountHolderType'
+        accountType:
+          $ref: '#/components/schemas/AccountType'
+        mandateStatus:
+          $ref: '#/components/schemas/MandateStatus'
+        lastFour:
           type: string
-          description: Describes the provider of the delivery.
-          example: doordash
-        courier:
-          $ref: '#/components/schemas/Courier'
-        estimatedDeliveryTime:
-          type:
-          - string
-          - 'null'
-          description: The expected delivery time.
-          format: date-time
-          example: '2007-12-03T10:15:30+01:00'
-        estimatedPickupTime:
-          type:
-          - string
-          - 'null'
-          description: The expected pickup time.
-          format: date-time
-          example: '2007-12-03T10:15:30+01:00'
-        status:
-          $ref: '#/components/schemas/DeliveryStatus'
-        deliveryStatus:
-          $ref: '#/components/schemas/DeliveryStatus'
-        currencyCode:
-          type:
-          - string
-          - 'null'
-          minLength: 3
-          maxLength: 3
-          description: The 3-letter currency code (ISO 4217) to use for all monetary values.
-          example: EUR
-        baseFee:
-          type:
-          - number
-          - 'null'
-          format: double
-        extraFee:
-          type:
-          - number
-          - 'null'
-          format: double
-        totalFee:
-          type:
-          - number
-          - 'null'
-          format: double
-        distance:
-          $ref: '#/components/schemas/Distance'
-        updatedTime:
-          type:
-          - string
-          - 'null'
-          description: The time that the delivery status was updated.
-          format: date-time
-          example: '2007-12-03T10:15:30+01:00'
-        deliveryTrackingUrl:
-          type:
-          - string
-          - 'null'
-          format: uri
-          description: The URL to track the delivery.
-          example: https://www.doordash.com/delivery/track/1234567890
-        dropoffInfo:
-          $ref: '#/components/schemas/DropoffInfo'
-      description: Event that represent a status update for a delivery.
-    Location:
-      required:
-      - latitude
-      - longitude
-      type:
-      - object
-      - 'null'
-      properties:
-        latitude:
-          type: number
-          description: The latitude of the location.
-          format: double
-          example: 38.8977
-        longitude:
-          type: number
-          description: The longitude of the location.
-          format: double
-          example: 77.0365
-      description: Latitude and longitude of the address.
-    PaymentDetailsBecs:
+          description: The last four digits of the ACH account.
+          example: '7890'
+        routingNumber:
+          type: string
+          description: The routing number of the ACH account.
+          example: '123456789'
+        bankName:
+          type: string
+          description: The name of the bank.
+          example: Example Bank
+        mandateId:
+          type: string
+          description: The mandate ID for the ACH account.
+          example: ach_mandate_345
+    PaymentDetailsBacs:
       type: object
-      description: Details of a BECS payment method in Australia.
+      description: Details of a BACS payment method in the UK.
       properties:
         mandateStatus:
           $ref: '#/components/schemas/MandateStatus'
         lastFour:
           type: string
-          description: The last four digits of the BECS account.
-          example: '3210'
-        bsbNumber:
+          description: The last four digits of the BACS account.
+          example: '9876'
+        sortCode:
           type: string
-          description: The BSB number of the BECS account.
-          example: 062-001
+          description: The sort code of the BACS account.
+          example: 12-34-56
         mandateId:
           type: string
-          description: The mandate ID for the BECS account.
-          example: becs_mandate_789
+          description: The mandate ID for the BACS account.
+          example: mandate_123
+        reference:
+          type: string
+          description: The reference for the BACS payment.
+          example: reference_abc
         url:
           type: string
-          description: The URL for the BECS payment details.
-          example: http://example.com/becs
-    VerificationRequirements:
-      type:
-      - object
-      - 'null'
-      properties:
-        signatureRequirement:
-          $ref: '#/components/schemas/SignatureRequirement'
-        pictureRequirement:
-          $ref: '#/components/schemas/PictureRequirement'
-      description: Verification requirements for the delivery.
-    SignatureRequirement:
-      type:
-      - object
-      - 'null'
-      properties:
-        enabled:
-          type: boolean
-          description: Marks the signature requirement as required.
-          example: true
-        collectSignerName:
-          type: boolean
-          description: Whether the signer's name should be collected.
-          example: true
-        collectSignerRelationship:
-          type: boolean
-          description: Whether the signer's relationship with the intended recipient should be collected.
-          example: true
-      description: Enables and configure the signature requirement.
-    DropoffInfo:
-      type:
-      - object
-      - 'null'
-      properties:
-        courierNote:
-          type:
-          - string
-          - 'null'
-          description: Courier supplied dropoff note.
-        proofOfDelivery:
-          $ref: '#/components/schemas/VerificationProof'
-          description: Proof of delivery.
-      description: Delivery dropoff details.
+          description: The URL for the BACS payment details.
+          example: http://example.com/bacs
     ModifierItem:
       type:
       - object
@@ -1095,192 +766,121 @@ components:
           description: Nested modifier items.
           items:
             $ref: '#/components/schemas/ModifierItem'
-    PaymentDetailsBacs:
-      type: object
-      description: Details of a BACS payment method in the UK.
-      properties:
-        mandateStatus:
-          $ref: '#/components/schemas/MandateStatus'
-        lastFour:
-          type: string
-          description: The last four digits of the BACS account.
-          example: '9876'
-        sortCode:
-          type: string
-          description: The sort code of the BACS account.
-          example: 12-34-56
-        mandateId:
-          type: string
-          description: The mandate ID for the BACS account.
-          example: mandate_123
-        reference:
-          type: string
-          description: The reference for the BACS payment.
-          example: reference_abc
-        url:
-          type: string
-          description: The URL for the BACS payment details.
-          example: http://example.com/bacs
-    OrderExternalIdentifiers:
+    CustomerPayment:
       required:
-      - friendlyId
-      - id
+      - paymentMethod
+      - processingStatus
+      - value
       type: object
       properties:
-        id:
+        value:
+          type: number
+          description: The portion of the overall amount that needs to be paid.
+          example: 2
+        processingStatus:
           type: string
-          description: Unique ID for the order that was placed.
-          example: 69f60a06-c335-46d9-b5a1-97f1a211c514
-        friendlyId:
-          type: string
-          description: ID used for driver pickup and restaurant management.
-          example: ABCDE
-        source:
-          type:
-          - string
-          - 'null'
-          description: Describes the source of the order, typically from a food ordering marketplace.
-          example: ubereats
-        sourceType:
-          type:
-          - string
-          - 'null'
-          description: source type of the order
+          description: The processing status of the payment. (PROCESSED is only valid when the payment method is CARD)
           enum:
-          - POINT_OF_SALE
-          - ORDERING_MARKETPLACE
-          - AGGREGATOR
-          - CUSTOMER_INTERACTION
-        sourceExternalIdentifiers:
-          $ref: '#/components/schemas/SourceExternalIdentifiers'
-      description: The external identifiers.
-    UpdateDeliveryRequestEvent:
-      type: object
-      properties:
-        deliveryReferenceId:
+          - COLLECTABLE
+          - PROCESSED
+        paymentMethod:
           type: string
-          description: Generated delivery reference id.
-          example: d1a5e7c6-a79a-49bc-83bf-4169cd9c9dda
-        provider:
-          type: string
-          description: the pre-configured fulfillment provider slug in the onboarding process.
-          example: doordash
-        currencyCode:
+          description: The method of payment.
+          enum:
+          - CASH
+          - CARD
+          - UNKNOWN
+          - OTHER
+          - CHEQUE
+          - GIFT_CARD
+        paymentAuthorizer:
           type:
           - string
           - 'null'
-          minLength: 3
-          maxLength: 3
-          description: The 3-letter currency code (ISO 4217) to use for all monetary values.
-          example: USD
-        customerPayments:
+          description: A payment system type responsible for a card transaction (containing information for payment network and payment type).
+          enum:
+          - UNKNOWN_TYPE
+          - OTHER_TYPE
+          - MASTERCARD
+          - MASTERCARD_MAESTRO
+          - MASTERCARD_DEBIT
+          - VISA
+          - VISA_DEBIT
+          - AMEX
+          - VISA_ELECTORN
+          - DINERS
+          - ELO
+          - ELO_DEBIT
+          - HIPERCARD
+          - BANRICOMPRAS
+          - BANRICOMPRAS_DEBIT
+          - NUGO
+          - GOODCARD
+          - VERDECARD
+          - CARNET
+          - CHEF_CARD
+          - GER_CC_CREDITO
+          - TERMINAL_BANCARIA
+          - DEBIT
+          - QR_CODE
+          - RAPPI_PAY
+          - DISCOVER
+          - VALE_GREEN_CARD_PAPEL
+          - VALE_GREEN_CARD_CARD
+          - VALE_REFEISUL
+          - VALE_VEROCARD
+          - VALE_VR_SMART
+          - VALE_SODEXO
+          - VALE_TICKET_RESTAURANTE
+          - VALE_ALELO
+          - VALE_BEN_VIS
+          - VALE_COOPER_CARD
+          - NUTRICARD_REFEICAO_E_ALIMENTACAO
+          - APPLE_PAY_MASTERCARD
+          - APPLE_PAY_VISA
+          - APPLE_PAY_AMEX
+          - GOOGLE_PAY_ELO
+          - GOOGLE_PAY_MASTERCARD
+          - GOOGLE_PAY_VISA
+          - MOVILE_PAY
+          - MOVILE_PAY_AMEX
+          - MOVILE_PAY_DINERS
+          - MOVILE_PAY_ELO
+          - MOVILE_PAY_HIPERCARD
+          - MOVILE_PAY_MASTERCARD
+          - MOVILE_PAY_VISA
+          - IFOOD_CORP
+          - LOOP_CLUB
+          - PAYPAL
+          - PSE
+          - PIX
+        cardInfo:
+          deprecated: true
+          $ref: '#/components/schemas/CardInfo'
+        externalPaymentType:
+          type:
+          - string
+          - 'null'
+          description: External payment type string. Should be only used if not mapped by any value of paymentAuthorizer, and it's value is OTHER_TYPE.
+        paymentRecords:
           type:
           - array
           - 'null'
-          description: Processed and collectible payments from the customer.
+          description: '[WIP - in development, not supported yet] List of payment records, including method and card details and ids from payment processing entities.'
           items:
-            $ref: '#/components/schemas/CustomerPayment'
-        customerTip:
-          $ref: '#/components/schemas/CustomerTip'
-        pickUpInfo:
-          $ref: '#/components/schemas/PickUpInfo'
-    Item-4:
+            $ref: '#/components/schemas/PaymentRecord'
+        loyaltyInfo:
+          $ref: '#/components/schemas/LoyaltyInfo'
+    LoyaltyInfo:
       type:
       - object
       - 'null'
+      description: The customer's loyalty information.
       properties:
-        name:
-          type:
-          - string
-          - 'null'
-          description: Human-readable name for this item.
-        price:
-          type:
-          - number
-          - 'null'
-          description: Per-unit price. This value excludes modifier prices.
-        quantity:
-          type:
-          - number
-          - 'null'
-          description: Number of units of this item being ordered.
-        itemId:
-          type:
-          - string
-          - 'null'
-          description: ID for this item.
-        modifiers:
-          type:
-          - array
-          - 'null'
-          description: Any modifiers attached to this item.
-          items:
-            $ref: '#/components/schemas/ModifierItem'
-    PaymentRecord:
-      type: object
-      description: Represents the details and metadata of a payment method used in transactions.
-      properties:
-        otterPaymentRecordId:
-          type: string
-          description: The identifier for the payment record in the Otter system, for reference.
-          example: otter_123456789
-        recordProviderType:
-          description: The type of payment provider.
-          $ref: '#/components/schemas/RecordProviderType'
-        recordPaymentType:
-          description: The type of payment method.
-          $ref: '#/components/schemas/RecordPaymentType'
-        paymentRecordId:
-          type: string
-          description: The identifier for the payment record from the payment provider.
-          example: pm_123456789
-        payerId:
-          type: string
-          description: The identifier for the payer from the payment provider.
-          example: payer_123456789
-        balanceTransactionId:
-          type: string
-          description: The balance transaction ID from the payment provider.
-          example: ext_bt_123456789
-        paymentDetails:
-          description: One of the possible payment method details, depending on the payment method type.
-          oneOf:
-          - $ref: '#/components/schemas/PaymentDetailsCard'
-          - $ref: '#/components/schemas/PaymentDetailsBacs'
-          - $ref: '#/components/schemas/PaymentDetailsAcss'
-          - $ref: '#/components/schemas/PaymentDetailsBecs'
-          - $ref: '#/components/schemas/PaymentDetailsSepa'
-          - $ref: '#/components/schemas/PaymentDetailsAch'
-    DropoffInstructions:
-      type:
-      - object
-      - 'null'
-      properties:
-        dropoffType:
-          type: string
-          description: The drop-off type for the delivery.
-          enum:
-          - MEET_AT_DOOR
-          - LEAVE_AT_DOOR
-          - MEET_IN_LOBBY
-        verificationRequirements:
-          $ref: '#/components/schemas/VerificationRequirements'
-      description: Requirements to verify the completion of the delivery.
-    MandateStatus:
-      type: string
-      enum:
-      - ACTIVE
-      - INACTIVE
-      - PENDING
-      description: The status of the mandate.
-      example: ACTIVE
-    CancelDeliveryEvent:
-      type: object
-      properties:
-        deliveryReferenceId:
-          type: string
-          description: Generated delivery reference id.
-          example: d1a5e7c6-a79a-49bc-83bf-4169cd9c9dda
+        hasMembershipPass:
+          type: boolean
+          description: Indicates if the customer has a membership pass.
+          example: true
     PaymentDetailsSepa:
       type: object
       description: Details of a SEPA payment method in EU countries.
@@ -1315,6 +915,115 @@ components:
           type: string
           description: The URL for the SEPA payment details.
           example: http://example.com/sepa
+    VerificationProof:
+      type:
+      - object
+      - 'null'
+      properties:
+        signatureProof:
+          $ref: '#/components/schemas/SignatureProof'
+        pictureProof:
+          $ref: '#/components/schemas/PictureProof'
+      description: Verification details.
+    PaymentDetailsBecs:
+      type: object
+      description: Details of a BECS payment method in Australia.
+      properties:
+        mandateStatus:
+          $ref: '#/components/schemas/MandateStatus'
+        lastFour:
+          type: string
+          description: The last four digits of the BECS account.
+          example: '3210'
+        bsbNumber:
+          type: string
+          description: The BSB number of the BECS account.
+          example: 062-001
+        mandateId:
+          type: string
+          description: The mandate ID for the BECS account.
+          example: becs_mandate_789
+        url:
+          type: string
+          description: The URL for the BECS payment details.
+          example: http://example.com/becs
+    DropoffInstructions:
+      type:
+      - object
+      - 'null'
+      properties:
+        dropoffType:
+          type: string
+          description: The drop-off type for the delivery.
+          enum:
+          - MEET_AT_DOOR
+          - LEAVE_AT_DOOR
+          - MEET_IN_LOBBY
+        verificationRequirements:
+          $ref: '#/components/schemas/VerificationRequirements'
+      description: Requirements to verify the completion of the delivery.
+    PaymentDetailsAcss:
+      type: object
+      description: Details of an ACSS payment method in Canada.
+      properties:
+        mandateStatus:
+          $ref: '#/components/schemas/MandateStatus'
+        acceptedAt:
+          type: string
+          format: date-time
+          description: The timestamp when the mandate was accepted.
+          example: '2023-01-01T12:00:00Z'
+        lastFour:
+          type: string
+          description: The last four digits of the ACSS account.
+          example: '6543'
+        transitNumber:
+          type: string
+          description: The transit number of the ACSS account.
+          example: '11001'
+        institutionNumber:
+          type: string
+          description: The institution number of the ACSS account.
+          example: '001'
+        bankName:
+          type: string
+          description: The name of the bank.
+          example: Bank of Examples
+        mandateId:
+          type: string
+          description: The mandate ID for the ACSS account.
+          example: acss_mandate_456
+        transactionType:
+          type: string
+          description: The type of transaction.
+          example: recurring
+        intervalDescription:
+          type: string
+          description: The description of the transaction interval.
+          example: monthly
+    CardFundingType:
+      type: string
+      enum:
+      - UNKNOWN
+      - CREDIT
+      - DEBIT
+      - PREPAID
+      description: The funding type of the card.
+      example: CREDIT
+    CancelDeliveryEvent:
+      type: object
+      properties:
+        deliveryReferenceId:
+          type: string
+          description: Generated delivery reference id.
+          example: d1a5e7c6-a79a-49bc-83bf-4169cd9c9dda
+    AccountHolderType:
+      type: string
+      enum:
+      - INDIVIDUAL
+      - COMPANY
+      description: The type of account holder.
+      example: INDIVIDUAL
     Store-3:
       type:
       - object
@@ -1381,22 +1090,54 @@ components:
         location:
           $ref: '#/components/schemas/Location'
       description: Address.
-    CardBrandType:
-      type: string
-      enum:
-      - UNKNOWN
-      - AMEX
-      - DINERS_CLUB
-      - DISCOVER
-      - JCB
-      - MASTERCARD
-      - UNION_PAY
-      - VISA
-      - GIROCARD
-      - EFTPOS_AU
-      - INTERAC
-      description: The brand of the card.
-      example: VISA
+    EventNotification:
+      type: object
+      properties:
+        eventId:
+          type: string
+          description: Unique identifier of the event.
+          format: uuid
+        eventTime:
+          type: string
+          description: Date of event occurrence.
+          format: date-time
+          example: '2007-12-03T10:15:30+01:00'
+        eventType:
+          type: string
+          description: The type of the event.
+        metadata:
+          $ref: '#/components/schemas/MetadataObject'
+      description: Notification message sent on relevant events.
+    UpdateDeliveryRequestEvent:
+      type: object
+      properties:
+        deliveryReferenceId:
+          type: string
+          description: Generated delivery reference id.
+          example: d1a5e7c6-a79a-49bc-83bf-4169cd9c9dda
+        provider:
+          type: string
+          description: the pre-configured fulfillment provider slug in the onboarding process.
+          example: doordash
+        currencyCode:
+          type:
+          - string
+          - 'null'
+          minLength: 3
+          maxLength: 3
+          description: The 3-letter currency code (ISO 4217) to use for all monetary values.
+          example: USD
+        customerPayments:
+          type:
+          - array
+          - 'null'
+          description: Processed and collectible payments from the customer.
+          items:
+            $ref: '#/components/schemas/CustomerPayment'
+        customerTip:
+          $ref: '#/components/schemas/CustomerTip'
+        pickUpInfo:
+          $ref: '#/components/schemas/PickUpInfo'
     Distance:
       type:
       - object
@@ -1412,22 +1153,281 @@ components:
           type: number
           description: Distance value.
       description: Delivery distance.
-    AccountHolderType:
-      type: string
-      enum:
-      - INDIVIDUAL
-      - COMPANY
-      description: The type of account holder.
-      example: INDIVIDUAL
-    PictureProof:
+    SignatureProof:
       type:
       - object
       - 'null'
       properties:
-        pictureUrl:
+        signatureImageUrl:
           type: string
-          description: Image url.
-      description: Picture info captured.
+          description: Signature image url.
+        signerName:
+          type:
+          - string
+          - 'null'
+          description: The name of the signer.
+        signerRelationship:
+          type:
+          - string
+          - 'null'
+          description: The relationship of signer to the intended recipient.
+      description: Signature info captured.
+    CardWalletType:
+      type: string
+      enum:
+      - UNKNOWN
+      - APPLE_PAY
+      - GOOGLE_PAY
+      description: The type of wallet associated with the card.
+      example: APPLE_PAY
+    AccountType:
+      type: string
+      enum:
+      - CHECKING
+      - SAVINGS
+      description: The type of ACH account.
+      example: CHECKING
+    RequiredPerson:
+      type: object
+      properties:
+        name:
+          type:
+          - string
+          - 'null'
+          description: The person's name as it should be displayed.
+          example: Jane Doe
+          maxLength: 255
+        phone:
+          type:
+          - string
+          - 'null'
+          description: The person's phone number.
+          example: +1-555-555-5555
+          maxLength: 25
+        phoneCode:
+          type:
+          - string
+          - 'null'
+          description: A code or extension of the phone number.
+          example: 111 11 111
+          maxLength: 25
+        email:
+          type:
+          - string
+          - 'null'
+          description: The person's email address.
+          example: email@email.com
+        personalIdentifiers:
+          $ref: '#/components/schemas/PersonalIdentifiers'
+      description: Details about the customer who placed the order.
+    PickUpInfo:
+      type:
+      - object
+      - 'null'
+      properties:
+        readyAtTime:
+          type: string
+          description: The timestamp the order(s) became ready for pick up by a courier. If not provided, the order is not yet ready to be picked up.
+          format: date-time
+          example: '2007-12-03T10:15:30+01:00'
+      description: Pick up information for delivery.
+    SignatureRequirement:
+      type:
+      - object
+      - 'null'
+      properties:
+        enabled:
+          type: boolean
+          description: Marks the signature requirement as required.
+          example: true
+        collectSignerName:
+          type: boolean
+          description: Whether the signer's name should be collected.
+          example: true
+        collectSignerRelationship:
+          type: boolean
+          description: Whether the signer's relationship with the intended recipient should be collected.
+          example: true
+      description: Enables and configure the signature requirement.
+    PersonalIdentifiers:
+      type:
+      - object
+      - 'null'
+      properties:
+        taxIdentificationNumber:
+          type:
+          - string
+          - 'null'
+          description: Person tax identification number.
+          example: 1234567890
+        serviceProviderId:
+          type:
+          - string
+          - 'null'
+          description: External service provider ID i.e. Courier Id.
+          example: 12345ba6-789e-123f-4e56-d78db90d123b
+      description: The person's personal identifiers (e.g. tax identification number).
+    PaymentRecord:
+      type: object
+      description: Represents the details and metadata of a payment method used in transactions.
+      properties:
+        otterPaymentRecordId:
+          type: string
+          description: The identifier for the payment record in the Otter system, for reference.
+          example: otter_123456789
+        recordProviderType:
+          description: The type of payment provider.
+          $ref: '#/components/schemas/RecordProviderType'
+        recordPaymentType:
+          description: The type of payment method.
+          $ref: '#/components/schemas/RecordPaymentType'
+        paymentRecordId:
+          type: string
+          description: The identifier for the payment record from the payment provider.
+          example: pm_123456789
+        payerId:
+          type: string
+          description: The identifier for the payer from the payment provider.
+          example: payer_123456789
+        balanceTransactionId:
+          type: string
+          description: The balance transaction ID from the payment provider.
+          example: ext_bt_123456789
+        paymentDetails:
+          description: One of the possible payment method details, depending on the payment method type.
+          oneOf:
+          - $ref: '#/components/schemas/PaymentDetailsCard'
+          - $ref: '#/components/schemas/PaymentDetailsBacs'
+          - $ref: '#/components/schemas/PaymentDetailsAcss'
+          - $ref: '#/components/schemas/PaymentDetailsBecs'
+          - $ref: '#/components/schemas/PaymentDetailsSepa'
+          - $ref: '#/components/schemas/PaymentDetailsAch'
+    PaymentDetailsCard:
+      type: object
+      description: Details of a card payment method.
+      properties:
+        brandType:
+          $ref: '#/components/schemas/CardBrandType'
+        expiration:
+          type: object
+          properties:
+            year:
+              type: integer
+              description: The expiration year of the card.
+              example: 2025
+            month:
+              type: integer
+              description: The expiration month of the card.
+              example: 12
+        fundingType:
+          $ref: '#/components/schemas/CardFundingType'
+        walletType:
+          $ref: '#/components/schemas/CardWalletType'
+        lastFour:
+          type: string
+          description: The last four digits of the card.
+          example: '1234'
+        walletLastFour:
+          type: string
+          description: The last four digits of the wallet account.
+          example: '5678'
+        authorizationCode:
+          type: string
+          description: The authorization code for the card.
+          example: auth_code_123
+        applicationPreferredName:
+          type: string
+          description: The preferred name of the application.
+          example: MyApp
+        fingerprint:
+          type: string
+          description: The fingerprint of the card.
+          example: fingerprint_abc123
+        readMethod:
+          type: string
+          description: The method used to read the card.
+          example: chip
+    CardInfo:
+      required:
+      - paymentNetwork
+      - type
+      type:
+      - object
+      - 'null'
+      deprecated: true
+      description: Additional card information.
+      properties:
+        paymentNetwork:
+          type: string
+          description: The payment network (aka card brand or card scheme) for this card.
+          enum:
+          - MASTERCARD
+          - MASTERCARD_MAESTRO
+          - VISA
+          - AMEX
+          - DINERS
+          - ELO
+          - HIPERCARD
+          - BANRICOMPRAS
+          - NUGO
+          - GOODCARD
+          - ELO_MAIS
+          - GREENCARD
+          - VEROCARD
+          - COOPER
+          - NUTRICARD
+          - VR
+          - SODEXO
+          - OTHER
+        type:
+          type: string
+          description: The payment type of the card.
+          enum:
+          - CREDIT
+          - DEBIT
+          - VOUCHER
+          - OTHER
+    VerificationRequirements:
+      type:
+      - object
+      - 'null'
+      properties:
+        signatureRequirement:
+          $ref: '#/components/schemas/SignatureRequirement'
+        pictureRequirement:
+          $ref: '#/components/schemas/PictureRequirement'
+      description: Verification requirements for the delivery.
+    MetadataObject:
+      type: object
+      properties:
+        storeId:
+          $ref: '#/components/schemas/StoreId'
+        applicationId:
+          type: string
+          description: The plain-text Application ID, provided at partner onboarding, also available on Developer Portal.
+          example: ad4ff59d-04c0-4c7d-8ca3-e3a673f8443d
+        resourceId:
+          type: string
+          description: Identifier of the resource that this event refers to, if needed.
+          example: resource-id-if-needed
+        payload:
+          type: object
+          description: Object containing details of the given event, if needed.
+        resourceHref:
+          type: string
+          description: The full endpoint to fetch the details of the resource, if needed.
+          example: resource-href-id-if-needed
+      description: Information about the event.
+    PictureRequirement:
+      type:
+      - object
+      - 'null'
+      properties:
+        enabled:
+          type: boolean
+          description: Marks the picture requirement as required.
+          example: true
+      description: Enables and configure the picture requirement.
   responses:
     2XX:
       description: Return any 2XX status to indicate that the data was received successfully

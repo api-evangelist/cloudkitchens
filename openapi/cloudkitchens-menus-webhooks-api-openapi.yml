@@ -136,34 +136,6 @@ webhooks:
       description: Staging server url
 components:
   schemas:
-    PriceOverride:
-      required:
-      - price
-      - rules
-      type: object
-      properties:
-        price:
-          $ref: '#/components/schemas/Money'
-        rules:
-          type: array
-          minItems: 1
-          description: Override rules for when this price override should be applied.
-          items:
-            $ref: '#/components/schemas/OverrideRule_3PD'
-      description: Price override for an item
-    ItemSelector:
-      required:
-      - id
-      type: object
-      properties:
-        id:
-          type: string
-          description: Identifier of the item.
-          example: 06ef2722-cbf2-11ec-9d64-0242ac120002
-        isModifier:
-          type: boolean
-          description: True, if the item is used as a modifier.
-      description: Used to select a specific item.
     MenuData:
       required:
       - categories
@@ -357,6 +329,21 @@ components:
               fileName: c75d9460-5d48-423d-8d01-f825fd5b1672.jpeg
               url: https://example.com/photos/c75d9460-5d48-423d-8d01-f825fd5b1672.jpeg
       description: MenuData contains all menu entities, and their relations.
+    ExposedThirdPartyInfo:
+      required:
+      - externalId
+      - externalServiceSlug
+      type: object
+      properties:
+        externalId:
+          type: string
+          description: 'The identifier that exists in the third party system. '
+          example: da0e4e94-5670-4175-897a-3b7dde45bed5
+        externalServiceSlug:
+          type: string
+          description: The slug of the third party service.
+          example: tasty-bbq
+      description: Information about a third party service that is exposed to the another service. Usually, this is used to expose an POS ID to an OFO.
     AdditionalCharge:
       required:
       - chargeType
@@ -375,6 +362,77 @@ components:
         unitPriceAndCount:
           $ref: '#/components/schemas/UnitPriceAndCount'
       description: Additional charge to apply. Exactly one of either flatCharge or percentageCharge should be provided.
+    SkuBarcode:
+      type: object
+      properties:
+        barcodeType:
+          type: string
+          description: The type of the barcode.
+          enum:
+          - UPC
+          - GTIN
+          - ASIN
+          - INTERNAL
+        value:
+          type: string
+          description: The value of the barcode.
+          example: 049000028904 (UPC)
+      description: A barcode for the product which may be common types like UPC, GTIN, ASIN or an internal type.
+    ItemSelector:
+      required:
+      - id
+      type: object
+      properties:
+        id:
+          type: string
+          description: Identifier of the item.
+          example: 06ef2722-cbf2-11ec-9d64-0242ac120002
+        isModifier:
+          type: boolean
+          description: True, if the item is used as a modifier.
+      description: Used to select a specific item.
+    UnitPriceAndCount:
+      required:
+      - unitPrice
+      - count
+      type: object
+      properties:
+        unitPrice:
+          $ref: '#/components/schemas/Money'
+        count:
+          minimum: 1
+          type: integer
+          description: The count for the additional charge.
+          example: 3
+      description: Unit price and count for additional charges.
+      example: 3 x $25.21
+    Photo:
+      title: All photos for the store, indexed by ID
+      required:
+      - contentType
+      - fileName
+      - id
+      - url
+      type: object
+      properties:
+        url:
+          type: string
+          description: URL of the photo.
+          example: https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_272x92dp.png
+        fileName:
+          type: string
+          description: File name
+          example: image.jpg
+        id:
+          type: string
+          description: Identifier of the Photo.
+          example: e9174f75-a293-4908-bba7-9db69871ad81
+        contentType:
+          type: string
+          description: 'The media type of the file. Deprecated: Use the media type served from the photo URL instead.'
+          example: image/jpeg, image/png
+          deprecated: true
+      description: All data required to represent a Photo for an entity in menus.
     DietaryClassification:
       type: object
       properties:
@@ -392,56 +450,49 @@ components:
           - PALEO
           - KETO
       description: Dietary classification information.
-    DefaultModifierSelectionData:
+    ItemStatus:
       required:
-      - defaultModifierSelections
+      - saleStatus
       type: object
       properties:
-        defaultModifierSelections:
-          type: array
-          description: The default modifier selections for this modifier group.
-          items:
-            $ref: '#/components/schemas/DefaultModifierSelection'
-      description: The default modifiers selections for a modifier group.
-    Category:
+        saleStatus:
+          type: string
+          description: The sale status of the item.
+          example: TEMPORARILY_NOT_FOR_SALE
+          enum:
+          - FOR_SALE
+          - INDEFINITELY_NOT_FOR_SALE
+          - TEMPORARILY_NOT_FOR_SALE
+        suspendedUntil:
+          type:
+          - string
+          - 'null'
+          description: 'ISO-8601 timestamp representing the time the saleStatus value is supposed to change to FOR_SALE. Set only when current saleStatus value is TEMPORARILY_NOT_FOR_SALE. E.g.: 2020-11-23T21:33:51Z, 2007-12-03T10:15:30+01:00'
+          format: date-time
+          example: '2007-12-03T10:15:30+01:00'
+      description: Represents whether an Item is for sale, indefinitely not for sale, or not for sale until a specific time.
+    OverrideRule_3PD:
       required:
-      - id
-      - name
+      - type
       type: object
       properties:
-        id:
+        type:
           type: string
-          description: The identifier that exists in the third party system. During a menu publish event, uuidV4 ids will be generated for new entities that do not yet exist in the internal menu.
-          example: b01485b0-034a-47c5-8a0a-0eeca08bf994
-        name:
-          type: string
-          description: Name of Category.
-          example: Drinks
-        description:
-          type: string
-          description: Description of Category.
-          example: All drink items served up nice and fresh!
-        itemIds:
-          type: array
-          default: []
-          description: All items in the category.
-          items:
-            type: string
-          example:
-          - fa4f0192-4c4e-4455-9db8-61d428c34969
-        photoIds:
-          type: array
-          description: A list of Photo references associated with the Category.
-          default: []
-          items:
-            type: string
-        exposedThirdPartyInfos:
-          type: array
-          default: []
-          description: Additional information about the menu that should be exposed to third party
-          items:
-            $ref: '#/components/schemas/ExposedThirdPartyInfo'
-      description: Categories contain a list of Item references.
+      description: Specification for rules to apply overrides (e.g. PriceOverride).
+      discriminator:
+        propertyName: type
+        mapping:
+          PATH: '#/components/schemas/EntityPathOverrideRule'
+          FULFILLMENT_MODE: '#/components/schemas/FulfillmentModeOverrideRule'
+          SERVICE: '#/components/schemas/ServiceOverrideRule'
+    MenuPublishEvent:
+      required:
+      - menuData
+      type: object
+      properties:
+        menuData:
+          $ref: '#/components/schemas/MenuData'
+      description: Event data containing the upserted MenuData.
     StorageRequirement:
       type: object
       properties:
@@ -455,6 +506,99 @@ components:
           - ROOM_TEMPERATURE
           - AVOID_SUNLIGHT
       description: Storage requirements for the product.
+    StoreId:
+      type: string
+      description: The unique identifier of the store in the partner application. This ID, along with the `Application ID`, will be used to match the correct store when performing operations. It cannot be longer than 255 characters and must only contain printable ASCII characters. During on-boarding, this ID will be similar to `onboarding:905bb725-b141-4a9b-832a-1f254f772c94` (where the UUID is the Internal Store ID). During off-boarding, this field will be filled with the last known Store ID, or with an empty string, in case none is found. In that case, please fall back to the provided `internalStoreId` (a.k.a. Sku-Sku ID).
+      example: partner-store-unique-identifier
+    ItemTax:
+      required:
+      - percentageValue
+      - isValueAddedTax
+      type: object
+      properties:
+        percentageValue:
+          $ref: '#/components/schemas/PercentageValue'
+          description: Specify the percentage value of the tax.
+        isValueAddedTax:
+          type: boolean
+          description: Whether this tax is a value-added tax.
+      description: The tax configuration.
+    BulkUpdateItemStatus:
+      required:
+      - updates
+      type: object
+      properties:
+        updates:
+          type: array
+          minItems: 1
+          description: List of item status updates.
+          items:
+            $ref: '#/components/schemas/UpdateItemStatusEntry'
+      description: Event data containing list of item status updates.
+    MenuItem_3PD:
+      title: All Items for the store, indexed by ID
+      required:
+      - id
+      - name
+      - photoIds
+      - price
+      - priceOverrides
+      - status
+      type: object
+      properties:
+        id:
+          type: string
+          minLength: 1
+          description: The identifier that exists in the third party system. During a menu publish event, uuidV4 ids will be generated for new entities that do not yet exist in the internal menu.
+          example: da0e4e94-5670-4175-897a-3b7dde45bed5
+        name:
+          type: string
+          description: Name of this Item
+          example: Bagel
+        photoIds:
+          type: array
+          description: A list of Photo references associated with the Item.
+          items:
+            type: string
+        price:
+          $ref: '#/components/schemas/Money'
+        priceOverrides:
+          type: array
+          description: Specify price overrides.
+          items:
+            $ref: '#/components/schemas/PriceOverride'
+        status:
+          $ref: '#/components/schemas/ItemStatus'
+        description:
+          type: string
+          description: Description of this Item
+          example: Delicious bagel!
+        modifierGroupIds:
+          type: array
+          default: []
+          description: Identifiers of each ModifierGroup within this Item.
+          items:
+            type: string
+            example: 7152ee6e-e941-45c1-9008-2e306b479114
+        skuDetails:
+          $ref: '#/components/schemas/SkuDetails'
+        additionalCharges:
+          type:
+          - array
+          - 'null'
+          description: Additional charges to apply for this item. Additional charges will be applied for every instance of this item within an order.
+          items:
+            $ref: '#/components/schemas/AdditionalCharge'
+        tax:
+          $ref: '#/components/schemas/ItemTax'
+          description: The tax configuration for the menu item.
+        exposedThirdPartyInfos:
+          type: array
+          default: []
+          description: Additional information about the menu that should be exposed to third party
+          items:
+            $ref: '#/components/schemas/ExposedThirdPartyInfo'
+      description: Items are sold on the Menu. Modifiers to items are items themselves and their relationship is defined by ModifierGroup.
     SkuDetails:
       type: object
       properties:
@@ -575,69 +719,18 @@ components:
           items:
             $ref: '#/components/schemas/ExposedThirdPartyInfo'
       description: A Menu for a store.
-    MenuPublishEvent:
-      required:
-      - menuData
+    EnergyKcal:
       type: object
       properties:
-        menuData:
-          $ref: '#/components/schemas/MenuData'
-      description: Event data containing the upserted MenuData.
-    ItemStatus:
-      required:
-      - saleStatus
-      type: object
-      properties:
-        saleStatus:
-          type: string
-          description: The sale status of the item.
-          example: TEMPORARILY_NOT_FOR_SALE
-          enum:
-          - FOR_SALE
-          - INDEFINITELY_NOT_FOR_SALE
-          - TEMPORARILY_NOT_FOR_SALE
-        suspendedUntil:
-          type:
-          - string
-          - 'null'
-          description: 'ISO-8601 timestamp representing the time the saleStatus value is supposed to change to FOR_SALE. Set only when current saleStatus value is TEMPORARILY_NOT_FOR_SALE. E.g.: 2020-11-23T21:33:51Z, 2007-12-03T10:15:30+01:00'
-          format: date-time
-          example: '2007-12-03T10:15:30+01:00'
-      description: Represents whether an Item is for sale, indefinitely not for sale, or not for sale until a specific time.
-    UpdateItemStatusEntry:
-      required:
-      - selector
-      - status
-      type: object
-      properties:
-        selector:
-          $ref: '#/components/schemas/ItemSelector'
-        status:
-          $ref: '#/components/schemas/ItemStatus'
-      description: Update the status of an Item to the provided value.
-    HoursData:
-      required:
-      - regularHours
-      - specialHours
-      - timeZone
-      type: object
-      properties:
-        timeZone:
-          type: string
-          description: TimeZone of all times under it. (https://www.joda.org/joda-time/timezones.html)
-          format: timezone-id
-          example: America/Los_Angeles
-        regularHours:
-          type: array
-          description: List of regular hours configuration.
-          items:
-            $ref: '#/components/schemas/RegularHours'
-        specialHours:
-          type: array
-          description: List of special hours configuration, for occasions like Christmas, Thanksgiving, or any other holidays.
-          items:
-            $ref: '#/components/schemas/SpecialHours'
-      description: Represents hours configuration with regular hours and special hours.
+        low:
+          type: number
+          description: The minimum calorie value for an item.
+          example: 1
+        high:
+          type: number
+          description: The maximum calorie value for an item.
+          example: 100
+      description: The calorie range of the item. If only one calorie value is known, set both low and high to that value.
     Money:
       required:
       - amount
@@ -657,138 +750,63 @@ components:
           example: 25.21
       description: Money amount.
       example: 25.21
-    EnergyKcal:
+    AllergenClassification:
       type: object
       properties:
-        low:
-          type: number
-          description: The minimum calorie value for an item.
-          example: 1
-        high:
-          type: number
-          description: The maximum calorie value for an item.
-          example: 100
-      description: The calorie range of the item. If only one calorie value is known, set both low and high to that value.
-    Photo:
-      title: All photos for the store, indexed by ID
+        tag:
+          type: string
+          description: The type of allergen classification.
+          enum:
+          - GLUTEN
+          - DAIRY
+          - WHEAT
+          - RYE
+          - BARLEY
+          - OAT
+          - SPELT
+          - KAMUT
+          - CRUSTACEAN
+          - MOLLUSK
+          - EGG
+          - FISH
+          - PEANUT
+          - SOYBEAN
+          - NUT
+          - ALMOND
+          - HAZELNUT
+          - WALNUT
+          - CASHEW
+          - PECAN
+          - BRAZIL_NUT
+          - PISTACHIO
+          - MACADAMIA_NUT
+          - QUEENSLAND_NUT
+          - LUPIN
+          - CELERY
+          - MUSTARD
+          - SESAME_SEED
+          - SULFITE
+          - CAFFEINE
+          - PHENYLALANINE
+        containsAllergen:
+          type: boolean
+          description: Indication of whether or not the product contains this allergen. If the status of the allergen is unknown, a classification should not be provided for this product.
+      description: Allergen classification information.
+    PriceOverride:
       required:
-      - contentType
-      - fileName
-      - id
-      - url
-      type: object
-      properties:
-        url:
-          type: string
-          description: URL of the photo.
-          example: https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_272x92dp.png
-        fileName:
-          type: string
-          description: File name
-          example: image.jpg
-        id:
-          type: string
-          description: Identifier of the Photo.
-          example: e9174f75-a293-4908-bba7-9db69871ad81
-        contentType:
-          type: string
-          description: 'The media type of the file. Deprecated: Use the media type served from the photo URL instead.'
-          example: image/jpeg, image/png
-          deprecated: true
-      description: All data required to represent a Photo for an entity in menus.
-    MenuItem_3PD:
-      title: All Items for the store, indexed by ID
-      required:
-      - id
-      - name
-      - photoIds
       - price
-      - priceOverrides
-      - status
+      - rules
       type: object
       properties:
-        id:
-          type: string
-          minLength: 1
-          description: The identifier that exists in the third party system. During a menu publish event, uuidV4 ids will be generated for new entities that do not yet exist in the internal menu.
-          example: da0e4e94-5670-4175-897a-3b7dde45bed5
-        name:
-          type: string
-          description: Name of this Item
-          example: Bagel
-        photoIds:
-          type: array
-          description: A list of Photo references associated with the Item.
-          items:
-            type: string
         price:
           $ref: '#/components/schemas/Money'
-        priceOverrides:
+        rules:
           type: array
-          description: Specify price overrides.
+          minItems: 1
+          description: Override rules for when this price override should be applied.
           items:
-            $ref: '#/components/schemas/PriceOverride'
-        status:
-          $ref: '#/components/schemas/ItemStatus'
-        description:
-          type: string
-          description: Description of this Item
-          example: Delicious bagel!
-        modifierGroupIds:
-          type: array
-          default: []
-          description: Identifiers of each ModifierGroup within this Item.
-          items:
-            type: string
-            example: 7152ee6e-e941-45c1-9008-2e306b479114
-        skuDetails:
-          $ref: '#/components/schemas/SkuDetails'
-        additionalCharges:
-          type:
-          - array
-          - 'null'
-          description: Additional charges to apply for this item. Additional charges will be applied for every instance of this item within an order.
-          items:
-            $ref: '#/components/schemas/AdditionalCharge'
-        tax:
-          $ref: '#/components/schemas/ItemTax'
-          description: The tax configuration for the menu item.
-        exposedThirdPartyInfos:
-          type: array
-          default: []
-          description: Additional information about the menu that should be exposed to third party
-          items:
-            $ref: '#/components/schemas/ExposedThirdPartyInfo'
-      description: Items are sold on the Menu. Modifiers to items are items themselves and their relationship is defined by ModifierGroup.
-    StoreId:
-      type: string
-      description: The unique identifier of the store in the partner application. This ID, along with the `Application ID`, will be used to match the correct store when performing operations. It cannot be longer than 255 characters and must only contain printable ASCII characters. During on-boarding, this ID will be similar to `onboarding:905bb725-b141-4a9b-832a-1f254f772c94` (where the UUID is the Internal Store ID). During off-boarding, this field will be filled with the last known Store ID, or with an empty string, in case none is found. In that case, please fall back to the provided `internalStoreId` (a.k.a. Sku-Sku ID).
-      example: partner-store-unique-identifier
-    SpecialHours:
-      required:
-      - date
-      - timeRanges
-      - type
-      type: object
-      properties:
-        date:
-          type: string
-          description: Date the special hour configuration applies.
-          format: date
-          example: '2021-10-01'
-        timeRanges:
-          type: array
-          minItems: 0
-          description: Hours range applied to configured date. For open days, the timeRanges field is required. For closed days, the timeRanges field is ignored.
-          items:
-            $ref: '#/components/schemas/TimeRange'
-        type:
-          type: string
-          description: Store state that should be applied during the configured special hour. If this field is set to CLOSED, the timeRanges field is ignored.
-          enum:
-          - OPEN
-          - CLOSED
-      description: Describes the configuration of special store hours.
+            $ref: '#/components/schemas/OverrideRule_3PD'
+      description: Price override for an item
     UpsertHoursEvent:
       required:
       - menuHoursData
@@ -820,56 +838,17 @@ components:
                   end: '22:00'
                 type: CLOSED
       description: Event data containing all Menu Hours.
-    MetadataObject:
-      type: object
-      properties:
-        storeId:
-          $ref: '#/components/schemas/StoreId'
-        applicationId:
-          type: string
-          description: The plain-text Application ID, provided at partner onboarding, also available on Developer Portal.
-          example: ad4ff59d-04c0-4c7d-8ca3-e3a673f8443d
-        resourceId:
-          type: string
-          description: Identifier of the resource that this event refers to, if needed.
-          example: resource-id-if-needed
-        payload:
-          type: object
-          description: Object containing details of the given event, if needed.
-        resourceHref:
-          type: string
-          description: The full endpoint to fetch the details of the resource, if needed.
-          example: resource-href-id-if-needed
-      description: Information about the event.
-    ExposedThirdPartyInfo:
+    UpdateItemStatusEntry:
       required:
-      - externalId
-      - externalServiceSlug
+      - selector
+      - status
       type: object
       properties:
-        externalId:
-          type: string
-          description: 'The identifier that exists in the third party system. '
-          example: da0e4e94-5670-4175-897a-3b7dde45bed5
-        externalServiceSlug:
-          type: string
-          description: The slug of the third party service.
-          example: tasty-bbq
-      description: Information about a third party service that is exposed to the another service. Usually, this is used to expose an POS ID to an OFO.
-    OverrideRule_3PD:
-      required:
-      - type
-      type: object
-      properties:
-        type:
-          type: string
-      description: Specification for rules to apply overrides (e.g. PriceOverride).
-      discriminator:
-        propertyName: type
-        mapping:
-          PATH: '#/components/schemas/EntityPathOverrideRule'
-          FULFILLMENT_MODE: '#/components/schemas/FulfillmentModeOverrideRule'
-          SERVICE: '#/components/schemas/ServiceOverrideRule'
+        selector:
+          $ref: '#/components/schemas/ItemSelector'
+        status:
+          $ref: '#/components/schemas/ItemStatus'
+      description: Update the status of an Item to the provided value.
     EventNotification:
       type: object
       properties:
@@ -888,6 +867,141 @@ components:
         metadata:
           $ref: '#/components/schemas/MetadataObject'
       description: Notification message sent on relevant events.
+    ModifierGroup:
+      title: All ModifierGroups for the Store, indexed by ID
+      required:
+      - id
+      - name
+      type: object
+      properties:
+        id:
+          type: string
+          description: The identifier that exists in the third party system. During a menu publish event, uuidV4 ids will be generated for new entities that do not yet exist in the internal menu.
+          example: da0e4e94-5670-4175-897a-3b7dde45bed5
+        name:
+          type: string
+          description: Name of ModifierGroup.
+          example: Choose your type of bagel
+        minimumSelections:
+          minimum: 0
+          type: integer
+          description: Minimum number of selections customers can make in this ModifierGroup. 0 means no min limits.
+          format: int32
+        maximumSelections:
+          minimum: 0
+          type: integer
+          description: Maximum number of selections customers can make in this ModifierGroup. 0 means no max limits.
+          format: int32
+        maxPerModifierSelectionQuantity:
+          minimum: 0
+          default: 1
+          type: integer
+          description: Maximum number of selections customers can make for each modifier item in this ModifierGroup. 0 means there is no limit to how many times they can select a single modifier item. If not specified, a value of 1 will be used as the default value.
+          format: int32
+        defaultModifierSelectionData:
+          $ref: '#/components/schemas/DefaultModifierSelectionData'
+        itemIds:
+          type: array
+          default: []
+          description: Identifiers of each Item within this ModifierGroup.
+          items:
+            type: string
+        description:
+          type: string
+          description: The description for this modifier group.
+          example: Choose any of these delicious types of bagels
+        type:
+          type: string
+          description: 'Experimental: The type of this modifier group, for informative purposes. It can be one of the following values: `DEFAULT`, `UPSELL`, `INGREDIENT_REMOVAL`, `INGREDIENT_ADD`, `PREPARE_INSTRUCTIONS`, `SIZE_MODIFICATION`, `PACKAGING_INSTRUCTION` and `CONDIMENT`.'
+          example: DEFAULT
+        exposedThirdPartyInfos:
+          type: array
+          default: []
+          description: Additional information about the menu that should be exposed to third party
+          items:
+            $ref: '#/components/schemas/ExposedThirdPartyInfo'
+      description: Items are sold on the menu. Modifiers to items are items themselves and their relationship is defined by ModifierGroup.
+    NullEvent:
+      type:
+      - object
+      - 'null'
+      description: Empty event payload.
+    TimeRange:
+      required:
+      - end
+      - start
+      type: object
+      properties:
+        start:
+          type: string
+          description: Start time of the range in 24 hour format.
+          example: 08:00
+        end:
+          type: string
+          description: End time of the range in 24 hour format.
+          example: '22:00'
+      description: Time range in a given date.
+    DefaultModifierSelectionData:
+      required:
+      - defaultModifierSelections
+      type: object
+      properties:
+        defaultModifierSelections:
+          type: array
+          description: The default modifier selections for this modifier group.
+          items:
+            $ref: '#/components/schemas/DefaultModifierSelection'
+      description: The default modifiers selections for a modifier group.
+    DefaultModifierSelection:
+      required:
+      - itemId
+      - selectionQuantity
+      type: object
+      properties:
+        itemId:
+          type: string
+          description: The id of the modifier item that this default selection pertains to. This id must be present in the item ids of the modifier group.
+          example: da0e4e94-5670-4175-897a-3b7dde45bed5
+        selectionQuantity:
+          minimum: 0
+          type: integer
+          description: The default quantity of the modifier item to be selected.
+          format: int32
+      description: A default modifier selection consists of a reference to the modifier and the default selected quantity of that modifier.
+    NutritionalInfo:
+      type: object
+      properties:
+        energyKcal:
+          $ref: '#/components/schemas/EnergyKcal'
+        nutritionContent:
+          $ref: '#/components/schemas/NutritionContent'
+      description: The nutritional information of an item.
+    RegularHours:
+      required:
+      - days
+      - timeRanges
+      type: object
+      properties:
+        days:
+          type: array
+          description: The day of the week this configuration applies.
+          items:
+            type: string
+            description: Day of the week.
+            enum:
+            - MONDAY
+            - TUESDAY
+            - WEDNESDAY
+            - THURSDAY
+            - FRIDAY
+            - SATURDAY
+            - SUNDAY
+        timeRanges:
+          type: array
+          description: Hours range applied to the provided day of the week
+          items:
+            $ref: '#/components/schemas/TimeRange'
+      description: Describes the configuration of regular hours.
     NutritionContent:
       type: object
       properties:
@@ -980,142 +1094,6 @@ components:
           description: The energy in kcal per serving size.
           example: 991.3
       description: The nutrition content of the item.
-    PercentageValue:
-      required:
-      - decimalValue
-      type: object
-      properties:
-        decimalValue:
-          minimum: 0
-          type: number
-          description: Percentage value in decimal format.
-          example: 0.513
-      description: Percentage value in decimal format.
-      example: A decimalValue of 0.513 will equate to 51.3%
-    ItemTax:
-      required:
-      - percentageValue
-      - isValueAddedTax
-      type: object
-      properties:
-        percentageValue:
-          $ref: '#/components/schemas/PercentageValue'
-          description: Specify the percentage value of the tax.
-        isValueAddedTax:
-          type: boolean
-          description: Whether this tax is a value-added tax.
-      description: The tax configuration.
-    UnitPriceAndCount:
-      required:
-      - unitPrice
-      - count
-      type: object
-      properties:
-        unitPrice:
-          $ref: '#/components/schemas/Money'
-        count:
-          minimum: 1
-          type: integer
-          description: The count for the additional charge.
-          example: 3
-      description: Unit price and count for additional charges.
-      example: 3 x $25.21
-    ModifierGroup:
-      title: All ModifierGroups for the Store, indexed by ID
-      required:
-      - id
-      - name
-      type: object
-      properties:
-        id:
-          type: string
-          description: The identifier that exists in the third party system. During a menu publish event, uuidV4 ids will be generated for new entities that do not yet exist in the internal menu.
-          example: da0e4e94-5670-4175-897a-3b7dde45bed5
-        name:
-          type: string
-          description: Name of ModifierGroup.
-          example: Choose your type of bagel
-        minimumSelections:
-          minimum: 0
-          type: integer
-          description: Minimum number of selections customers can make in this ModifierGroup. 0 means no min limits.
-          format: int32
-        maximumSelections:
-          minimum: 0
-          type: integer
-          description: Maximum number of selections customers can make in this ModifierGroup. 0 means no max limits.
-          format: int32
-        maxPerModifierSelectionQuantity:
-          minimum: 0
-          default: 1
-          type: integer
-          description: Maximum number of selections customers can make for each modifier item in this ModifierGroup. 0 means there is no limit to how many times they can select a single modifier item. If not specified, a value of 1 will be used as the default value.
-          format: int32
-        defaultModifierSelectionData:
-          $ref: '#/components/schemas/DefaultModifierSelectionData'
-        itemIds:
-          type: array
-          default: []
-          description: Identifiers of each Item within this ModifierGroup.
-          items:
-            type: string
-        description:
-          type: string
-          description: The description for this modifier group.
-          example: Choose any of these delicious types of bagels
-        type:
-          type: string
-          description: 'Experimental: The type of this modifier group, for informative purposes. It can be one of the following values: `DEFAULT`, `UPSELL`, `INGREDIENT_REMOVAL`, `INGREDIENT_ADD`, `PREPARE_INSTRUCTIONS`, `SIZE_MODIFICATION`, `PACKAGING_INSTRUCTION` and `CONDIMENT`.'
-          example: DEFAULT
-        exposedThirdPartyInfos:
-          type: array
-          default: []
-          description: Additional information about the menu that should be exposed to third party
-          items:
-            $ref: '#/components/schemas/ExposedThirdPartyInfo'
-      description: Items are sold on the menu. Modifiers to items are items themselves and their relationship is defined by ModifierGroup.
-    AllergenClassification:
-      type: object
-      properties:
-        tag:
-          type: string
-          description: The type of allergen classification.
-          enum:
-          - GLUTEN
-          - DAIRY
-          - WHEAT
-          - RYE
-          - BARLEY
-          - OAT
-          - SPELT
-          - KAMUT
-          - CRUSTACEAN
-          - MOLLUSK
-          - EGG
-          - FISH
-          - PEANUT
-          - SOYBEAN
-          - NUT
-          - ALMOND
-          - HAZELNUT
-          - WALNUT
-          - CASHEW
-          - PECAN
-          - BRAZIL_NUT
-          - PISTACHIO
-          - MACADAMIA_NUT
-          - QUEENSLAND_NUT
-          - LUPIN
-          - CELERY
-          - MUSTARD
-          - SESAME_SEED
-          - SULFITE
-          - CAFFEINE
-          - PHENYLALANINE
-        containsAllergen:
-          type: boolean
-          description: Indication of whether or not the product contains this allergen. If the status of the allergen is unknown, a classification should not be provided for this product.
-      description: Allergen classification information.
     Servings:
       type: object
       properties:
@@ -1128,104 +1106,126 @@ components:
           description: The maximum value of servings.
           example: 2
       description: The number of people an item serves. If only one serving value is known, set both min and max to that value.
-    DefaultModifierSelection:
+    Category:
       required:
-      - itemId
-      - selectionQuantity
+      - id
+      - name
       type: object
       properties:
-        itemId:
+        id:
           type: string
-          description: The id of the modifier item that this default selection pertains to. This id must be present in the item ids of the modifier group.
-          example: da0e4e94-5670-4175-897a-3b7dde45bed5
-        selectionQuantity:
-          minimum: 0
-          type: integer
-          description: The default quantity of the modifier item to be selected.
-          format: int32
-      description: A default modifier selection consists of a reference to the modifier and the default selected quantity of that modifier.
-    NullEvent:
-      type:
-      - object
-      - 'null'
-      description: Empty event payload.
-    RegularHours:
-      required:
-      - days
-      - timeRanges
-      type: object
-      properties:
-        days:
+          description: The identifier that exists in the third party system. During a menu publish event, uuidV4 ids will be generated for new entities that do not yet exist in the internal menu.
+          example: b01485b0-034a-47c5-8a0a-0eeca08bf994
+        name:
+          type: string
+          description: Name of Category.
+          example: Drinks
+        description:
+          type: string
+          description: Description of Category.
+          example: All drink items served up nice and fresh!
+        itemIds:
           type: array
-          description: The day of the week this configuration applies.
+          default: []
+          description: All items in the category.
           items:
             type: string
-            description: Day of the week.
-            enum:
-            - MONDAY
-            - TUESDAY
-            - WEDNESDAY
-            - THURSDAY
-            - FRIDAY
-            - SATURDAY
-            - SUNDAY
+          example:
+          - fa4f0192-4c4e-4455-9db8-61d428c34969
+        photoIds:
+          type: array
+          description: A list of Photo references associated with the Category.
+          default: []
+          items:
+            type: string
+        exposedThirdPartyInfos:
+          type: array
+          default: []
+          description: Additional information about the menu that should be exposed to third party
+          items:
+            $ref: '#/components/schemas/ExposedThirdPartyInfo'
+      description: Categories contain a list of Item references.
+    SpecialHours:
+      required:
+      - date
+      - timeRanges
+      - type
+      type: object
+      properties:
+        date:
+          type: string
+          description: Date the special hour configuration applies.
+          format: date
+          example: '2021-10-01'
         timeRanges:
           type: array
-          description: Hours range applied to the provided day of the week
+          minItems: 0
+          description: Hours range applied to configured date. For open days, the timeRanges field is required. For closed days, the timeRanges field is ignored.
           items:
             $ref: '#/components/schemas/TimeRange'
-      description: Describes the configuration of regular hours.
-    SkuBarcode:
-      type: object
-      properties:
-        barcodeType:
+        type:
           type: string
-          description: The type of the barcode.
+          description: Store state that should be applied during the configured special hour. If this field is set to CLOSED, the timeRanges field is ignored.
           enum:
-          - UPC
-          - GTIN
-          - ASIN
-          - INTERNAL
-        value:
-          type: string
-          description: The value of the barcode.
-          example: 049000028904 (UPC)
-      description: A barcode for the product which may be common types like UPC, GTIN, ASIN or an internal type.
-    BulkUpdateItemStatus:
+          - OPEN
+          - CLOSED
+      description: Describes the configuration of special store hours.
+    PercentageValue:
       required:
-      - updates
+      - decimalValue
       type: object
       properties:
-        updates:
+        decimalValue:
+          minimum: 0
+          type: number
+          description: Percentage value in decimal format.
+          example: 0.513
+      description: Percentage value in decimal format.
+      example: A decimalValue of 0.513 will equate to 51.3%
+    HoursData:
+      required:
+      - regularHours
+      - specialHours
+      - timeZone
+      type: object
+      properties:
+        timeZone:
+          type: string
+          description: TimeZone of all times under it. (https://www.joda.org/joda-time/timezones.html)
+          format: timezone-id
+          example: America/Los_Angeles
+        regularHours:
           type: array
-          minItems: 1
-          description: List of item status updates.
+          description: List of regular hours configuration.
           items:
-            $ref: '#/components/schemas/UpdateItemStatusEntry'
-      description: Event data containing list of item status updates.
-    NutritionalInfo:
+            $ref: '#/components/schemas/RegularHours'
+        specialHours:
+          type: array
+          description: List of special hours configuration, for occasions like Christmas, Thanksgiving, or any other holidays.
+          items:
+            $ref: '#/components/schemas/SpecialHours'
+      description: Represents hours configuration with regular hours and special hours.
+    MetadataObject:
       type: object
       properties:
-        energyKcal:
-          $ref: '#/components/schemas/EnergyKcal'
-        nutritionContent:
-          $ref: '#/components/schemas/NutritionContent'
-      description: The nutritional information of an item.
-    TimeRange:
-      required:
-      - end
-      - start
-      type: object
-      properties:
-        start:
+        storeId:
+          $ref: '#/components/schemas/StoreId'
+        applicationId:
           type: string
-          description: Start time of the range in 24 hour format.
-          example: 08:00
-        end:
+          description: The plain-text Application ID, provided at partner onboarding, also available on Developer Portal.
+          example: ad4ff59d-04c0-4c7d-8ca3-e3a673f8443d
+        resourceId:
           type: string
-          description: End time of the range in 24 hour format.
-          example: '22:00'
-      description: Time range in a given date.
+          description: Identifier of the resource that this event refers to, if needed.
+          example: resource-id-if-needed
+        payload:
+          type: object
+          description: Object containing details of the given event, if needed.
+        resourceHref:
+          type: string
+          description: The full endpoint to fetch the details of the resource, if needed.
+          example: resource-href-id-if-needed
+      description: Information about the event.
   responses:
     2XX:
       description: Return any 2XX status to indicate that the data was received successfully
