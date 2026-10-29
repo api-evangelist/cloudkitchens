@@ -64,62 +64,161 @@
 > Full detail: **[Where this data comes from](https://apievangelist.com/about/where-our-data-comes-from)**
 <!-- API-EVANGELIST-PROVENANCE:END -->
 
-CloudKitchens, operated by City Storage Systems, builds and runs delivery-only "ghost kitchen"
-facilities and the restaurant technology stack that runs them, across roughly 30 countries.
+CloudKitchens, operated by City Storage Systems, builds and runs delivery-only "ghost kitchen" facilities and the restaurant technology stack that runs them, with sites across roughly 30 countries. For integration partners it publishes the CloudKitchens Public API — an OpenAPI 3.0.1 contract of 80 operations and 27 webhook events, secured with OAuth 2.0 across 29 scopes and two flows (client credentials and authorization code), backed by an OpenID Connect identity provider at iam.cloudkitchens.com. The API spans order injection and fulfillment, menu upsert and publishing, storefront pause/resume, delivery dispatch callbacks, finance and payout reporting, inventory, reviews, loyalty, and organization/brand/store pairing. Access is partner-gated rather than self-serve: applications, webhook endpoints, and stores are onboarded manually by a CloudKitchens Account Representative, who issues the Application ID and Client Secret for the production and staging environments and provisions the partner-specific API base URL.
 
-For integration partners it publishes the **CloudKitchens Public API** — an OpenAPI 3.0.1 contract of
-**80 operations** and **27 webhook events**, secured with OAuth 2.0 across **29 scopes** and two
-flows, backed by an OpenID Connect identity provider at `iam.cloudkitchens.com`. The API spans order
-injection and fulfillment, menu upsert and publishing, storefront pause/resume, delivery dispatch
-callbacks, finance and payout reporting, inventory, reviews, loyalty, and organization/brand/store
-pairing.
+**Areas:** Restaurant · Ghost Kitchens · Food Delivery · Order Management · Menu Management · Storefront · Delivery · Reporting · Loyalty · Real Estate
 
-Access is partner-gated rather than self-serve: applications, webhook endpoints and stores are
-onboarded manually by a CloudKitchens Account Representative, who issues the Application ID and
-Client Secret for production and staging and provisions the partner-specific API base URL.
+## CloudKitchens on APIs.io
 
-## Developer surface
+Everything profiled for CloudKitchens is published on APIs.io rather than in this repository. Start at the provider page — **[apis.io/providers/cloudkitchens/](https://apis.io/providers/cloudkitchens/)** — or go straight to one of the APIs or properties below.
 
-- Developer Portal — https://developer.cloudkitchens.com/
-- Developer Documentation — https://developer-guides.cloudkitchens.com/docs/
-- API Reference — https://developer-guides.cloudkitchens.com/api-reference/
-- Support — https://support.cloudkitchens.com/
-- Website — https://www.cloudkitchens.com/
+### APIs (27)
 
-## Artifacts
+- [CloudKitchens Account Pairing Endpoints API](https://apis.io/apis/cloudkitchens/cloudkitchens-account-pairing-endpoints-api/) — Endpoints to manage store onboarding and status
+- [CloudKitchens Account Pairing Webhooks API](https://apis.io/apis/cloudkitchens/cloudkitchens-account-pairing-webhooks-api/) — Webhooks to manage store onboarding and status
+- [CloudKitchens Auth Endpoints API](https://apis.io/apis/cloudkitchens/cloudkitchens-auth-endpoints-api/) — Endpoints to handle token management.
+- [CloudKitchens Callback Endpoints API](https://apis.io/apis/cloudkitchens/cloudkitchens-callback-endpoints-api/) — Endpoints for callback management.
+- [CloudKitchens Delivery Endpoints API](https://apis.io/apis/cloudkitchens/cloudkitchens-delivery-endpoints-api/) — Endpoints to manage delivery.
+- [CloudKitchens Delivery Webhooks API](https://apis.io/apis/cloudkitchens/cloudkitchens-delivery-webhooks-api/) — Webhooks from the delivery domain.
+- [CloudKitchens Direct Orders Endpoints API](https://apis.io/apis/cloudkitchens/cloudkitchens-direct-orders-endpoints-api/) — Endpoints to get orders directly.
+- [CloudKitchens Finance Endpoints API](https://apis.io/apis/cloudkitchens/cloudkitchens-finance-endpoints-api/) — Endpoints to handle financial data.
+- [CloudKitchens Inventory Endpoints API](https://apis.io/apis/cloudkitchens/cloudkitchens-inventory-endpoints-api/) — Endpoints to interact with product inventory.
+- [CloudKitchens Manager Loyalty Endpoints API](https://apis.io/apis/cloudkitchens/cloudkitchens-manager-loyalty-endpoints-api/) — Endpoints to manage loyalty.
+- [CloudKitchens Manager Menu Endpoints API](https://apis.io/apis/cloudkitchens/cloudkitchens-manager-menu-endpoints-api/) — Endpoints for applications managing menus related data and operations.
+- [CloudKitchens Manager Order Endpoints API](https://apis.io/apis/cloudkitchens/cloudkitchens-manager-order-endpoints-api/) — Endpoints for applications that act on the merchant/store side of an order rather than as the ordering marketplace — typically Point-of-Sale (POS) systems,…
+- [CloudKitchens Manager Orders Webhooks API](https://apis.io/apis/cloudkitchens/cloudkitchens-manager-orders-webhooks-api/) — Webhooks delivered to merchant-side applications (POS, BI, and reporting integrations) so they can react to changes in an order as it progresses through its…
+- [CloudKitchens Manager Storefront Endpoints API](https://apis.io/apis/cloudkitchens/cloudkitchens-manager-storefront-endpoints-api/) — Endpoints for applications managing storefront related data and operations.
+- [CloudKitchens Menus Endpoints API](https://apis.io/apis/cloudkitchens/cloudkitchens-menus-endpoints-api/) — Endpoints to manage menus.
+- [CloudKitchens Menus Webhooks API](https://apis.io/apis/cloudkitchens/cloudkitchens-menus-webhooks-api/) — Webhooks from menus domain.
+- [CloudKitchens Orders Endpoints API](https://apis.io/apis/cloudkitchens/cloudkitchens-orders-endpoints-api/) — Endpoints used by ordering marketplaces and other order sources to send orders to a store and keep them up to date. This domain lets an order source submit…
+- [CloudKitchens Orders Webhooks API](https://apis.io/apis/cloudkitchens/cloudkitchens-orders-webhooks-api/) — Webhooks from orders domains.
+- [CloudKitchens Organization Endpoints API](https://apis.io/apis/cloudkitchens/cloudkitchens-organization-endpoints-api/) — Endpoints to interact with with organizations/brands/stores and with integration connections.
+- [CloudKitchens Ping Endpoints API](https://apis.io/apis/cloudkitchens/cloudkitchens-ping-endpoints-api/) — Endpoints to ping and test system authentication.
+- [CloudKitchens Ping Webhooks API](https://apis.io/apis/cloudkitchens/cloudkitchens-ping-webhooks-api/) — Webhooks to ping and test the system integration.
+- [CloudKitchens Reports Endpoints API](https://apis.io/apis/cloudkitchens/cloudkitchens-reports-endpoints-api/) — Endpoints to reports generation operations
+- [CloudKitchens Reports Webhooks API](https://apis.io/apis/cloudkitchens/cloudkitchens-reports-webhooks-api/) — Webhooks from the reports generation operations
+- [CloudKitchens Reviews Endpoints API](https://apis.io/apis/cloudkitchens/cloudkitchens-reviews-endpoints-api/) — Endpoints for review operations
+- [CloudKitchens Storefront Endpoints API](https://apis.io/apis/cloudkitchens/cloudkitchens-storefront-endpoints-api/) — Endpoints to manage storefront state
+- [CloudKitchens Storefront Webhooks API](https://apis.io/apis/cloudkitchens/cloudkitchens-storefront-webhooks-api/) — Webhooks from storefront domain.
+- [CloudKitchens Market Intel Endpoints API](https://apis.io/apis/cloudkitchens/cloudkitchens-market-intel-endpoints-api/) — The Market Intel Endpoints API from CloudKitchens — 1 operation(s) for market intel endpoints.
 
-| Artifact | Path |
+### Published properties
+
+Each property below is a page on APIs.io carrying the machine-readable artifact and what it says.
+
+#### AsyncAPI (1)
+
+Event-driven and webhook contracts.
+
+- [Cloudkitchens Webhooks](https://apis.io/asyncapis/cloudkitchens/cloudkitchens-webhooks/)
+
+#### MCP servers (1)
+
+Model Context Protocol servers that expose the API to agents.
+
+- [cloudkitchens-mcp.yml](https://apis.io/servers/cloudkitchens/cloudkitchens-mcp-yml/)
+
+#### Agentic access (1)
+
+Which operations an agent can call, which act, and which need a human in the loop.
+
+- [Cloudkitchens Agentic Access](https://apis.io/agentic-access/cloudkitchens/cloudkitchens-agentic-access/)
+
+#### Collections (1)
+
+Postman and Open Collection request collections.
+
+- [Public API](https://apis.io/collections/cloudkitchens/open-cloudkitchens-public-api/)
+
+#### Overlays (1)
+
+OpenAPI overlays, including conversational phrasing for each operation.
+
+- [Cloudkitchens Public Api Overlay](https://apis.io/overlays/cloudkitchens/cloudkitchens-public-api-overlay/)
+
+#### Security (2)
+
+Authentication, trust centre, and vulnerability disclosure.
+
+- [Cloudkitchens Authentication](https://apis.io/security/cloudkitchens/cloudkitchens-authentication/)
+- [Cloudkitchens Domain Security](https://apis.io/security/cloudkitchens/cloudkitchens-domain-security/)
+
+#### OAuth scopes (1)
+
+The permissions the API asks for.
+
+- [Cloudkitchens Scopes](https://apis.io/scopes/cloudkitchens/cloudkitchens-scopes/)
+
+#### Rate limits (1)
+
+Published request limits.
+
+- [Cloudkitchens Rate Limits](https://apis.io/rate-limits/cloudkitchens/cloudkitchens-rate-limits/)
+
+## Where to find this API
+
+Links to the company's own pages. This repository publishes no copy of their specifications — the canonical document is theirs and lives at the URLs below.
+
+- [Website](https://www.cloudkitchens.com/)
+- [Documentation](https://developer-guides.cloudkitchens.com/docs/)
+- [Getting started](https://developer-guides.cloudkitchens.com/docs/onboard-application/)
+- [API reference](https://developer-guides.cloudkitchens.com/api-reference/)
+- [Support](https://support.cloudkitchens.com/)
+- [Blog](https://cloudkitchens.com/blog)
+- [Terms of service](https://cloudkitchens.com/terms-of-service/)
+- [Privacy policy](https://cloudkitchens.com/privacy-policy)
+
+## API Evangelist rating
+
+**Kin Score 47.0** — developing · rubric 0.25.0 · scored 2026-10-23
+
+| Facet | Score |
 |---|---|
-| OpenAPI 3.0.1 (harvested verbatim) | `openapi/cloudkitchens-public-api-openapi.yml` |
-| API Evangelist overlay | `overlays/cloudkitchens-public-api-overlay.yaml` |
-| Authentication profile | `authentication/cloudkitchens-authentication.yml` |
-| OAuth scopes (29) | `scopes/cloudkitchens-scopes.yml` |
-| OIDC discovery (verbatim) | `well-known/cloudkitchens-openid-configuration.json` |
-| Well-known probe index | `well-known/cloudkitchens-well-known.yml` |
-| API conventions | `conventions/cloudkitchens-conventions.yml` |
-| Webhook event catalog (27) | `asyncapi/cloudkitchens-webhooks.yml` |
-| Error catalog | `errors/cloudkitchens-problem-types.yml` |
-| Rate limits | `rate-limits/cloudkitchens-rate-limits.yml` |
-| Lifecycle + versioning | `lifecycle/cloudkitchens-lifecycle.yml` |
-| Conformance | `conformance/cloudkitchens-conformance.yml` |
-| Data model | `data-model/cloudkitchens-data-model.yml` |
-| Sandbox / staging | `sandbox/cloudkitchens-sandbox.yml` |
-| Packages (none published) | `packages/cloudkitchens-packages.yml` |
-| MCP candidate (not published by CloudKitchens) | `mcp/cloudkitchens-mcp.yml` |
-| Agentic access contracts | `agentic-access/cloudkitchens-agentic-access.yml` |
-| Agent skills (6) | `skills/_index.yml` |
-| Domain security | `security/cloudkitchens-domain-security.yml` |
-| llms.txt | `llms/cloudkitchens-llms.txt` |
+| Discoverability | 73.2 |
+| Contract quality | 54.1 |
+| Contract governance | 4.5 |
+| Operational transparency | 39.5 |
+| Developer ergonomics | 39.9 |
+| Access clarity | 21.1 |
 
-## Recorded negatives
+**Agent readiness 34.1** — agent-ready
 
-Verified absent, not merely unsearched: no `security.txt`, no A2A agent card, no hosted MCP server,
-no GraphQL surface, no AsyncAPI document, no official SDK/CLI/Postman collection, no status page, no
-public changelog, no trust center or published certifications, no idempotency contract, and no
-self-serve signup or published pricing for the Public API.
+| Agent-readiness dimension | Result |
+|---|---|
+| Spec Presence | yes |
+| Agentic Access | derived (partial credit) |
+| Reversibility Documented | documented (partial credit) |
+| MCP Server | — |
+| Auth Clarity | served (partial credit) |
+| Idempotency | — |
+| Error Semantics | derived (partial credit) |
+| OpenAPI Examples | — |
+| Rate Limit Signal | documented (partial credit) |
+| Event Surface Described | derived (partial credit) |
+| Agent Skills | derived (partial credit) |
+| Well Known Catalog | — |
+| Consent Identity | — |
+| Agent Card | — |
+| Dry Run Mode | — |
+| Delegated Identity | documented (partial credit) |
+| Protected Resource Metadata | — |
+| Dynamic Client Registration | — |
+| Agentic Commerce | — |
+| Pagination Ratio | paginated |
+| Operation Distinctiveness | distinct |
 
-## Related
+**Regulatory alignment 34.3** — Horizontal (data, software, accessibility, platform)
 
-Otter (`all/otter/`) is the sibling restaurant-OS product under the same City Storage Systems parent.
-The Public API captured here is served from CloudKitchens' own host
-(`developer-guides.cloudkitchens.com`) and is the CloudKitchens-branded instance of that contract.
+The rubric is published at [github.com/api-evangelist/kin-score](https://github.com/api-evangelist/kin-score). The per-check breakdown behind these numbers — which checks were earned, partial or missed — along with score history and how this provider compares to its peers, is available at [apis.io/providers/cloudkitchens/](https://apis.io/providers/cloudkitchens/).
+
+## How this profile is made
+
+API Evangelist profiles a company's public API surface the way a developer would find it: the website, developer portal and documentation, the specifications it publishes, its public repositories, and its pricing, status and changelog pages. From that it derives the properties above — contracts split per API, workflows, schemas, collections, governance rules, plans and rate limits — and scores them against the published [Kin Score rubric](https://github.com/api-evangelist/kin-score).
+
+The artifacts are published on [APIs.io](https://apis.io), not in this repository. This repository is the public record for CloudKitchens: the place to say something is wrong, missing or out of date, and to ask for a re-score or a removal.
+
+## Open an issue
+
+- **Something about this listing** — a wrong description, a missing API, a stale artifact or a question about the rating: [open an issue on this repository](https://github.com/api-evangelist/cloudkitchens/issues/new).
+- **A new API, or one that is not in the catalog yet** — [submit it on APIs.io](https://apis.io/add/).
+- **Anything else** — [the APIs.io inbox](https://github.com/api-search/inbox/issues/new) or [info@apievangelist.com](mailto:info@apievangelist.com).
